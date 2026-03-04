@@ -6,48 +6,20 @@
 #include <thread>
 #include <chrono>
 
-// Definición de la bandera global
+// Bandera global de desinyección (usada por el botón del menú y DllMain)
 std::atomic<bool> g_bUnload = false;
 
-// Punteros globales (simplificados para el ejemplo)
-CGlobalVarsBase* g_pGlobalVars = nullptr;
-C_CSGameEntitySystem* g_pEntitySystem = nullptr;
-IVEngineClient* g_pEngineClient = nullptr;
-ViewMatrix* g_pViewMatrix = nullptr;
+// Punteros globales del SDK
+// NOTA: estos se deben inicializar leyendo la memoria del juego con pattern scanning.
+// Los valores actuales son nullptr -> las features de ESP/Aimbot no funcionarán
+// hasta que implementes la búsqueda de offsets con PatternScan en cada módulo.
+CGlobalVarsBase*      g_pGlobalVars    = nullptr;
+C_CSGameEntitySystem* g_pEntitySystem  = nullptr;
+IVEngineClient*       g_pEngineClient  = nullptr;
+ViewMatrix*           g_pViewMatrix    = nullptr;
 
-// Función de inicialización de la lógica principal
-void main_init()
-{
-    // Aquí se realizarían las inicializaciones del SDK, búsqueda de punteros, etc.
-    // Para este ejemplo, solo simulamos la inicialización.
-    std::cout << "[CS2 Edu-Tool] Inicializando logica principal..." << std::endl;
-
-    // Inicializar ImGui Renderer y Hooks de DirectX 11
-    ImGui_Renderer::Initialize();
-    Hooks::Initialize();
-
-    std::cout << "[CS2 Edu-Tool] Logica principal inicializada." << std::endl;
-
-    // Bucle principal de la herramienta (se ejecutará en el hilo de DllMain)
-    while (!g_bUnload)
-    {
-        // Aquí iría la lógica del cheat (ESP, Aimbot, etc.)
-        // Esto se ejecutará en cada tick o frame, dependiendo de los hooks.
-        // Por ahora, solo un sleep para no consumir CPU innecesariamente.
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-}
-
-// Función de limpieza antes de la desinyección
-void main_shutdown()
-{
-    std::cout << "[CS2 Edu-Tool] Limpiando logica principal..." << std::endl;
-
-    // Restaurar Hooks de DirectX 11
-    Hooks::Shutdown();
-
-    // Apagar ImGui Renderer
-    ImGui_Renderer::Shutdown();
-
-    std::cout << "[CS2 Edu-Tool] Logica principal limpiada." << std::endl;
-}
+// FIX: main_init y main_shutdown eliminados - eran código muerto.
+// DllMain (en DllMain.cpp) llama directamente a Hooks::Initialize()
+// y gestiona el ciclo de vida de la DLL.
+// Si en el futuro quieres inicializar los punteros del SDK, hazlo AQUÍ
+// añadiendo una función init_sdk() y llamándola desde DllMain.cpp.

@@ -1,0 +1,128 @@
+# CS2MENU — Changelog de cambios
+
+## Resumen
+Este documento describe todos los bugs encontrados y correcciones aplicadas al proyecto cs2menu durante la sesión de debugging.
+
+---
+
+## Hooks.cpp
+
+### Bug 1 — CRÍTICO: Hook VMT en SwapChain dummy (causaba crash inmediato)
+**Problema:** Se hookeaba la VTable del SwapChain dummy temporal y luego se destruía con `Release()`. El hook quedaba apuntando a memoria liberada, causando crash en cuanto CS2 llamaba a `Present`.
+
+**Fix:** Se hookea directamente la función `Present` en `dxgi.dll` con un **JMP absoluto de 64 bits** (14 bytes: `FF 25 + dirección de 8 bytes`). Esto funciona sin importar dónde cargue Windows la DLL inyectada en memoria (ASLR). Se guardan los 14 bytes originales para restaurarlos al llamar a la función real y al desinyectar.
+
+### Bug 2 — Includes faltantes
+**Problema:** Faltaban `#include <thread>` y `#include <chrono>` causando errores de compilación con `std::this_thread::sleep_for`.
+
+**Fix:** Añadidos los includes necesarios.
+
+### Bug 3 — JMP relativo de 32 bits en proceso de 64 bits
+**Problema:** El primer intento de hook usaba `0xE9` (JMP relativo de 32 bits). En x64 con ASLR la distancia entre `dxgi.dll` y la DLL inyectada supera los 2GB, por lo que el offset de 32 bits desbordaba → crash al primer frame.
+
+**Fix:** Reemplazado por JMP absoluto de 64 bits (`FF 25 00000000 + [dirección 8 bytes]`) que funciona en cualquier dirección de memoria.
+
+---
+
+## DllMain.cpp
+
+### Bug 4 — CRÍTICO: `Hooks::Initialize()` se llamaba dos veces
+**Problema:** `Hooks::Initialize()` se llamaba desde `DllMain.cpp` Y desde `main_init()` en `main.cpp`. `main_init()` era código muerto que nunca se invocaba, pero creaba confusión y doble inicialización si se conectaba.
+
+**Fix:** Eliminadas `main_init()` y `main_shutdown()` de `main.cpp`. Solo se llama `Hooks::Initialize()` una vez desde el `MainThread`.
+
+### Bug 5 — INSERT no respondía
+**Problema:** Se intentaba detectar INSERT via `WndProc` hook, pero CS2 usa SDL que intercepta los mensajes antes de que lleguen al WndProc de Windows.
+
+**Fix:** INSERT se detecta con `GetAsyncKeyState(VK_INSERT)` con detección de flanco (edge detection) directamente en el hilo principal, igual que funciona END para desinyectar. Esto bypasea SDL completamente.
+
+---
+
+## ImGui_Renderer.cpp
+
+### Bug 6 — Guard contra doble inicialización de ImGui
+**Problema:** Si `hkPresent` se llamaba antes de que ImGui estuviese listo, `Render()` ejecutaba `NewFrame()` sobre un contexto no inicializado → crash.
+
+**Fix:** Añadido flag `bImGuiReady` que previene cualquier renderizado hasta que `InitImGui` haya terminado correctamente.
+
+### Bug 7 — `FindWindowA("SDL_app")` fallaba silenciosamente
+**Problema:** Si el juego aún cargaba, `FindWindowA` devolvía NULL y se usaba `GetForegroundWindow()` que podía ser cualquier ventana → ImGui se inicializaba en la ventana equivocada.
+
+**Fix:** Helper `GetCS2Window()` con bucle de reintentos (6 intentos × 500ms). Busca primero por clase `SDL_app` y luego por título `Counter-Strike 2`.
+
+### Bug 8 — El ratón no respondía en el menú
+**Problema:** CS2 usa SDL3 que captura el ratón a nivel de sistema con `SDL_SetRelativeMouseMode`. Todos los intentos de interceptar el input via WndProc, `GetCursorPos`, hilos dedicados, etc. fallaban porque SDL procesa los eventos antes que Windows.
+
+**Fix:** Se hookea **`SDL_PollEvent`** directamente con un JMP de 64 bits. El hook intercepta los eventos de ratón (`SDL_MOUSEMOTION`, `SDL_MOUSEBUTTONDOWN`, `SDL_MOUSEBUTTONUP`, `SDL_MOUSEWHEEL`) antes de que CS2 los procese, los pasa a ImGui, y pone el tipo del evento a `0` para que el juego no los reciba. Es la única solución que funciona con SDL.
+
+### Bug 9 — `ShutdownImGui()` duplicado
+**Problema:** `ShutdownImGui()` era un duplicado exacto de `Shutdown()`.
+
+**Fix:** Eliminado. `Shutdown()` hace la limpieza completa incluyendo restaurar el hook de `SDL_PollEvent`.
+
+### Bug 10 — Backend Win32 de ImGui incompatible con SDL
+**Problema:** `ImGui_ImplWin32_Init` y `ImGui_ImplWin32_NewFrame` dependen de mensajes de Windows que SDL intercepta. Causaba que ImGui no recibiese ningún input.
+
+**Fix:** Eliminado el backend de Win32 de ImGui. Solo se usa `ImGui_ImplDX11`. El input lo gestiona el hook de `SDL_PollEvent`.
+
+---
+
+## SDK.h
+
+### Bug 11 — Namespace `Offsets` declarado después de las clases que lo usan
+**Problema:** Las clases `C_BaseEntity`, `C_CSPlayerPawn`, etc. referenciaban `Offsets::m_iHealth` etc., pero el namespace `Offsets` estaba declarado al final del archivo → error C2653 del compilador.
+
+**Fix:** Movido el namespace `Offsets` al principio del archivo, antes de todas las clases.
+
+### Bug 12 — Fórmula incorrecta en `GetBaseEntity()`
+**Problema:** `(8 * (index & 0x7FFF) >> 9)` tiene precedencia de operadores incorrecta. Debería ser `(8 * (index >> 9))`.
+
+**Fix:** Corregida la fórmula a `(8ull * (index >> 9))`.
+
+---
+
+## CMakeLists.txt
+
+### Bug 13 — `add_dependencies` al revés
+**Problema:** `add_dependencies(cs2menu cs2menu_launcher)` decía que la DLL depende del launcher, cuando es al revés.
+
+**Fix:** Cambiado a `add_dependencies(cs2menu_launcher cs2menu)`. Añadido target `build_all ALL` para compilar DLL y launcher juntos con un solo Build en CLion.
+
+### Bug 14 — Faltaba `dwmapi.lib`
+**Problema:** `imgui_impl_win32` requiere `dwmapi.lib` en tiempo de enlace. Sin él, el linker fallaba.
+
+**Fix:** Añadido `dwmapi.lib` a `target_link_libraries`.
+
+### Bug 15 — Sin flag `/MD` explícito
+**Problema:** Sin especificar el runtime de C++, podían mezclarse builds con `/MT` y `/MD` causando crashes misteriosos en runtime.
+
+**Fix:** Añadido `/MD` explícito tanto para la DLL como para el launcher.
+
+---
+
+## Launcher.cpp
+
+### Bug 16 — `VirtualFreeEx` antes de que `LoadLibraryA` terminase
+**Problema:** La memoria con la ruta de la DLL se liberaba inmediatamente después de crear el hilo remoto, antes de que `LoadLibraryA` terminase de leerla → inyección fallida o crash de CS2.
+
+**Fix:** Añadido `WaitForSingleObject(remoteThread, 5000)` para esperar a que `LoadLibraryW` termine antes de liberar la memoria.
+
+### Bug 17 — Ruta de DLL con `LoadLibraryA` en vez de `LoadLibraryW`
+**Problema:** Si la ruta contiene espacios o caracteres especiales (como `C:\Users\abelm\Downloads\...`), `LoadLibraryA` fallaba silenciosamente.
+
+**Fix:** Cambiado a `LoadLibraryW` con `std::wstring` para soporte completo de Unicode. Añadida verificación de existencia de la DLL antes de intentar inyectar.
+
+---
+
+## Resumen de archivos modificados
+
+| Archivo | Bugs corregidos |
+|---|---|
+| `Hooks.cpp` | 1, 2, 3 |
+| `DllMain.cpp` | 4, 5 |
+| `ImGui_Renderer.cpp` | 6, 7, 8, 9, 10 |
+| `SDK.h` | 11, 12 |
+| `CMakeLists.txt` | 13, 14, 15 |
+| `Launcher.cpp` | 16, 17 |
+
+**Total: 17 bugs corregidos.**

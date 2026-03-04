@@ -1,49 +1,64 @@
 #include <Windows.h>
+#include <iostream>
 #include <thread>
-#include "main.h"
+#include <chrono>
+#include "Hooks.h"
+#include "ImGui_Renderer.h"
 
-// Función que se ejecutará en un hilo separado
-DWORD WINAPI MainThread(LPVOID lpParam)
+extern bool bShowMenu;
+
+void CreateDebugConsole()
 {
-    // Aquí se inicializará la lógica principal de la herramienta
-    // Por ahora, solo un mensaje de depuración
-    MessageBoxA(NULL, "DLL Inyectada con éxito!", "CS2 Edu-Tool", MB_OK);
+    if (AllocConsole()) {
+        FILE* f;
+        freopen_s(&f, "CONOUT$", "w", stdout);
+        freopen_s(&f, "CONOUT$", "w", stderr);
+        std::cout << "========================================" << std::endl;
+        std::cout << "      CS2MENU DEBUG CONSOLE             " << std::endl;
+        std::cout << "========================================" << std::endl;
+    }
+}
 
-    // Llamar a la función de inicialización de la lógica principal
-    // main_init(); // Esto se implementará en main.cpp
+DWORD WINAPI MainThread(LPVOID lpParameter)
+{
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    CreateDebugConsole();
+    std::cout << "[*] DLL Inyectada. Inicializando..." << std::endl;
 
-    // Bucle principal de la herramienta (si es necesario)
-    while (!g_bUnload)
+    Hooks::Initialize();
+
+    std::cout << "[*] Hook instalado." << std::endl;
+    std::cout << "[*] INSERT = mostrar/ocultar menu" << std::endl;
+    std::cout << "[*] END    = desinyectar" << std::endl;
+
+    bool insertWasDown = false;
+
+    while (!(GetAsyncKeyState(VK_END) & 0x8000))
     {
-        // Lógica de la herramienta aquí
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        bool insertDown = (GetAsyncKeyState(VK_INSERT) & 0x8000) != 0;
+        if (insertDown && !insertWasDown)
+        {
+            bShowMenu = !bShowMenu;
+            std::cout << "[*] Menu " << (bShowMenu ? "abierto" : "cerrado") << std::endl;
+        }
+        insertWasDown = insertDown;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    // Limpieza antes de desinyección
-    // main_shutdown(); // Esto se implementará en main.cpp
-
-    MessageBoxA(NULL, "DLL Desinyectada!", "CS2 Edu-Tool", MB_OK);
-
-    // Liberar la DLL del proceso
-    FreeLibraryAndExitThread(static_cast<HMODULE>(lpParam), 0);
+    std::cout << "[*] Desinyectando..." << std::endl;
+    Hooks::Shutdown();
+    ImGui_Renderer::Shutdown();
+    FreeConsole();
+    FreeLibraryAndExitThread(static_cast<HMODULE>(lpParameter), 0);
     return 0;
 }
 
-// Punto de entrada de la DLL
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-        // Deshabilitar llamadas a DllMain para otros hilos
+    if (dwReason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(hModule);
-        // Crear un nuevo hilo para nuestra lógica principal
-        CreateThread(NULL, 0, MainThread, hModule, 0, NULL);
-        break;
-    case DLL_PROCESS_DETACH:
-        // Señal para que el hilo principal se detenga
-        g_bUnload = true;
-        break;
+        HANDLE h = CreateThread(nullptr, 0, MainThread, hModule, 0, nullptr);
+        if (h) CloseHandle(h);
     }
     return TRUE;
 }
