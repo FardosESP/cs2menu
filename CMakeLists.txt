@@ -36,21 +36,35 @@ if(EXISTS "${MINHOOK_DIR}/include/MinHook.h")
     include_directories("${MINHOOK_DIR}/include")
 endif()
 
-# 4. Crear la DLL
+# 4. Crear la DLL (Excluyendo Launcher.cpp)
+list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/Launcher.cpp")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
-# 5. Configurar inclusiones y librerías
+# 5. Crear el Launcher (Ejecutable)
+add_executable(cs2menu_launcher src/Launcher.cpp)
+
+# 6. Configurar inclusiones y librerías
 target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(cs2menu_launcher PRIVATE src)
 
 if(WIN32)
     add_compile_options(/W4 /wd4201 /wd4100 /wd4189 /wd4127 /wd4324 /wd4458 /wd4505 /wd4826 /wd4668 /wd4706 /wd4714 /wd4710 /wd4738 /wd4746 /wd4774 /wd4800 /wd4820 /wd4996)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    
+    # Librerías para la DLL
     target_link_libraries(${PROJECT_NAME} PRIVATE user32.lib gdi32.lib d3d11.lib dxgi.lib)
+    
+    # Librerías para el Launcher
+    target_link_libraries(cs2menu_launcher PRIVATE user32.lib advapi32.lib)
 endif()
 
-# 6. Salida de la DLL
+# 7. Salida de los binarios
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
+)
+
+set_target_properties(cs2menu_launcher PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
 )
