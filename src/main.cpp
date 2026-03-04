@@ -3,6 +3,8 @@
 #include "Hooks.h"
 #include "ImGui_Renderer.h"
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 // Definición de la bandera global
 std::atomic<bool> g_bUnload = false;
