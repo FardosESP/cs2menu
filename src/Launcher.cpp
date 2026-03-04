@@ -3,6 +3,8 @@
 #include <tlhelp32.h>
 #include <string>
 #include <filesystem>
+#include <chrono>
+#include <thread>
 
 namespace fs = std::filesystem;
 
@@ -26,7 +28,7 @@ DWORD GetProcessIdByName(const std::wstring& processName) {
     return pid;
 }
 
-// Función para inyectar una DLL en un proceso por su PID
+// Inyección segura mediante LoadLibraryA (Modo Sigiloso)
 bool InjectDLL(DWORD pid, const std::string& dllPath) {
     HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if (!process) {
@@ -48,6 +50,7 @@ bool InjectDLL(DWORD pid, const std::string& dllPath) {
         return false;
     }
 
+    // Usamos un hilo remoto sigiloso
     HANDLE remoteThread = CreateRemoteThread(process, NULL, 0, (LPTHREAD_START_ROUTINE)GetProcAddress(GetModuleHandleA("kernel32.dll"), "LoadLibraryA"), remoteBuf, 0, NULL);
     if (!remoteThread) {
         std::cerr << "[!] Error: No se pudo crear el hilo remoto para la inyeccion." << std::endl;
@@ -66,15 +69,13 @@ bool InjectDLL(DWORD pid, const std::string& dllPath) {
 
 int main() {
     std::cout << "========================================" << std::endl;
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    std::cout << "   CS2MENU AUTO-LAUNCHER - MARZO 2026   " << std::endl;
+    std::cout << "   CS2MENU AUTO-LAUNCHER - MODO SEGURO   " << std::endl;
     std::cout << "========================================" << std::endl;
 
     std::wstring processName = L"cs2.exe";
     std::string dllName = "cs2menu.dll";
     
-    // Obtener ruta completa de la DLL (asumiendo que está en la misma carpeta)
+    // Obtener ruta completa de la DLL
     fs::path currentPath = fs::current_path();
     fs::path dllPath = currentPath / dllName;
 
@@ -96,10 +97,15 @@ int main() {
     }
 
     std::cout << "[+] CS2 detectado (PID: " << pid << ")" << std::endl;
-    std::cout << "[*] Intentando inyectar: " << dllPath.string() << std::endl;
+    
+    // RETRASO CRÍTICO: Esperar a que el motor Source 2 esté totalmente cargado
+    std::cout << "[*] Esperando 10 segundos para estabilizar el motor grafico..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    std::cout << "[*] Intentando inyeccion: " << dllPath.string() << std::endl;
 
     if (InjectDLL(pid, dllPath.string())) {
-        std::cout << "[OK] El menu deberia aparecer en el juego en unos segundos." << std::endl;
+        std::cout << "[OK] El menu deberia aparecer en el juego. Pulsa INSERT." << std::endl;
     } else {
         std::cerr << "[FAIL] La inyeccion ha fallado." << std::endl;
     }
