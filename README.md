@@ -1,4 +1,4 @@
-# CS2 Internal Educational Project (DLL) - Neverlose Style
+# CS2 Internal Educational Project (DLL) With launcher
 
 Este proyecto es una plantilla educativa para entender cómo funcionan las herramientas internas (DLLs) en Counter-Strike 2, con un enfoque en la arquitectura de un software como Neverlose. Está diseñado para ser usado **EXCLUSIVAMENTE EN MODO OFFLINE / VS BOTS CON EL PARÁMETRO `-INSECURE`**.
 
