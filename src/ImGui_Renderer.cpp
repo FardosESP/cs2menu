@@ -12,12 +12,20 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 // Puntero a la función original de WndProc
 WNDPROC oWndProc = nullptr;
+bool bShowMenu = true;
 
 // Nuestra función de WndProc hookeada
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    // Si ImGui está manejando el input, no pasamos el mensaje al juego
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+    // Tecla INSERT para mostrar/ocultar el menú
+    if (uMsg == WM_KEYDOWN && wParam == VK_INSERT)
+    {
+        bShowMenu = !bShowMenu;
+        return true;
+    }
+
+    // Si el menú está abierto, ImGui maneja el input
+    if (bShowMenu && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
         return true;
 
     return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
@@ -54,6 +62,9 @@ void ImGui_Renderer::InitImGui(ID3D11Device* pDevice, ID3D11DeviceContext* pDevi
 
 void ImGui_Renderer::Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTargetView* pRenderTargetView)
 {
+    if (!bShowMenu)
+        return;
+
     // Iniciar el nuevo frame de ImGui
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -92,8 +103,18 @@ void ImGui_Renderer::DrawMenu()
 
 void ImGui_Renderer::Shutdown()
 {
+    // Restaurar el WndProc original
+    HWND hWnd = FindWindowA("SDL_app", "Counter-Strike 2");
+    if (!hWnd) hWnd = GetForegroundWindow();
+    if (oWndProc) SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)oWndProc);
+
     // Limpieza de ImGui
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+}
+
+void ImGui_Renderer::ShutdownImGui()
+{
+    Shutdown();
 }
