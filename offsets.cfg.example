@@ -1,0 +1,46 @@
+# CS2 Offsets Configuration File
+# Format: key=value (hex values with 0x prefix)
+# Lines starting with # are comments
+# 
+# Update these offsets from: https://github.com/a2x/cs2-dumper
+# Build: 14138 (2026-03-05)
+
+# Main offsets (client.dll)
+dwEntityList=0x24AE628
+dwLocalPlayerPawn=0x2066DE0
+dwViewMatrix=0x2309420
+dwLocalPlayerController=0x22F1888
+dwViewAngles=0x2318668
+dwGlobalVars=0x2058FC0
+dwGameRules=0x230A160
+dwGameEntitySystem_getHighestEntityIndex=0x20A0
+
+# Entity offsets (C_BaseEntity)
+m_iHealth=0x76C
+m_iMaxHealth=0xB54
+m_iTeamNum=0xD70
+m_pGameSceneNode=0x338
+m_vecAbsOrigin=0xD0
+m_hPlayerPawn=0x90C
+m_iIDEntIndex=0x3EAC
+m_bDormant=0xE8
+
+# Player offsets (C_CSPlayerPawn)
+m_fFlags=0x400
+m_vecVelocity=0x438
+m_angEyeAngles=0x3DD0
+m_vecViewOffset=0xD58
+m_aimPunchAngle=0x16CC
+m_aimPunchCache=0x1728
+m_iShotsFired=0x1414
+m_bSpotted=0x8
+m_bIsScoped=0x26F8
+m_flFlashDuration=0x1470
+
+# Weapon offsets
+m_pClippingWeapon=0x1290
+m_iClip1=0x1564
+m_iClip2=0x1568
+m_nFallbackPaintKit=0x31B8
+m_nFallbackSeed=0x31BC
+m_flFallbackWear=0x31C0

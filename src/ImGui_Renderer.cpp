@@ -1,6 +1,7 @@
 #include "ImGui_Renderer.h"
 #include "main.h"
 #include "SDK.h"
+#include "Features.h"
 
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
@@ -20,10 +21,30 @@ extern bool  g_mouseL;
 extern bool  g_mouseR;
 extern bool  g_mouseM;
 
-// ─── Hook de SDL_PollEvent ────────────────────────────────────────────────────
+// ─── Hook de SDL_PollEvent y SDL_SetRelativeMouseMode ─────────────────────────
 // Esta es la solucion real: interceptar SDL_PollEvent antes de que CS2 lo procese
 typedef int (*SDL_PollEvent_t)(void* event);
 static SDL_PollEvent_t oSDL_PollEvent = nullptr;
+
+// Hook para SDL_SetRelativeMouseMode - necesario para liberar el raton
+typedef int (*SDL_SetRelativeMouseMode_t)(int enabled);
+static SDL_SetRelativeMouseMode_t oSDL_SetRelativeMouseMode = nullptr;
+
+// SDL_GetMouseState para obtener posicion absoluta del raton
+typedef uint32_t (*SDL_GetMouseState_t)(float* x, float* y);
+static SDL_GetMouseState_t pSDL_GetMouseState = nullptr;
+
+// SDL_GetGlobalMouseState para obtener el estado de los botones
+typedef uint32_t (*SDL_GetGlobalMouseState_t)(float* x, float* y);
+static SDL_GetGlobalMouseState_t pSDL_GetGlobalMouseState = nullptr;
+
+// SDL_ShowCursor para mostrar el cursor
+typedef int (*SDL_ShowCursor_t)();
+static SDL_ShowCursor_t pSDL_ShowCursor = nullptr;
+
+// SDL_HideCursor para ocultar el cursor
+typedef int (*SDL_HideCursor_t)();
+static SDL_HideCursor_t pSDL_HideCursor = nullptr;
 
 // Offset del tipo de evento en SDL_Event (igual en SDL2 y SDL3)
 #define SDL_EVENT_TYPE_OFFSET 0
@@ -44,10 +65,14 @@ static int HookedSDL_PollEvent(void* event)
     // Llamar la funcion original
     int result = oSDL_PollEvent(event);
 
-    if (result && event && bShowMenu && bImGuiReady)
-    {
-        uint32_t eventType = *reinterpret_cast<uint32_t*>(event);
+    // Solo procesar si hay un evento valido
+    if (!result || !event) return result;
 
+    uint32_t eventType = *reinterpret_cast<uint32_t*>(event);
+
+    // Si el menu esta visible Y ImGui esta listo, capturar eventos de raton
+    if (bShowMenu && bImGuiReady)
+    {
         ImGuiIO& io = ImGui::GetIO();
 
         // Pasar eventos de raton a ImGui y bloquearlos para CS2
@@ -55,22 +80,28 @@ static int HookedSDL_PollEvent(void* event)
         {
             case SDL_MOUSEMOTION_EVENT:
             {
-                // Coordenadas del raton en SDL_MouseMotionEvent: x=offset 20, y=offset 24
-                int x = *reinterpret_cast<int*>((char*)event + 20);
-                int y = *reinterpret_cast<int*>((char*)event + 24);
-                io.MousePos = {(float)x, (float)y};
-                // Bloquear evento (poner tipo a 0)
+                // En modo relativo, las coordenadas son deltas, no absolutas
+                // Usar SDL_GetMouseState para obtener posicion absoluta
+                if (pSDL_GetMouseState)
+                {
+                    float x = 0, y = 0;
+                    pSDL_GetMouseState(&x, &y);
+                    io.MousePos = {x, y};
+                }
+                
+                // Bloquear evento (poner tipo a 0) para que CS2 no lo reciba
                 *reinterpret_cast<uint32_t*>(event) = 0;
-                break;
+                return result;
             }
             case SDL_MOUSEBUTTONDOWN:
             {
                 uint8_t button = *reinterpret_cast<uint8_t*>((char*)event + 16);
-                if (button == 1) io.MouseDown[0] = true;
-                if (button == 2) io.MouseDown[2] = true;
-                if (button == 3) io.MouseDown[1] = true;
+                if (button == 1) io.MouseDown[0] = true;  // Boton izquierdo
+                if (button == 2) io.MouseDown[2] = true;  // Boton medio
+                if (button == 3) io.MouseDown[1] = true;  // Boton derecho
+                
                 *reinterpret_cast<uint32_t*>(event) = 0;
-                break;
+                return result;
             }
             case SDL_MOUSEBUTTONUP:
             {
@@ -79,14 +110,14 @@ static int HookedSDL_PollEvent(void* event)
                 if (button == 2) io.MouseDown[2] = false;
                 if (button == 3) io.MouseDown[1] = false;
                 *reinterpret_cast<uint32_t*>(event) = 0;
-                break;
+                return result;
             }
             case SDL_MOUSEWHEEL_EVENT:
             {
                 float wheelY = *reinterpret_cast<float*>((char*)event + 20);
                 io.MouseWheel += wheelY;
                 *reinterpret_cast<uint32_t*>(event) = 0;
-                break;
+                return result;
             }
         }
     }
@@ -94,10 +125,21 @@ static int HookedSDL_PollEvent(void* event)
     return result;
 }
 
+static int HookedSDL_SetRelativeMouseMode(int enabled)
+{
+    // Si el menu esta visible, forzar modo absoluto (desactivar modo relativo)
+    if (bShowMenu && bImGuiReady)
+    {
+        return oSDL_SetRelativeMouseMode(0);  // 0 = modo absoluto
+    }
+    return oSDL_SetRelativeMouseMode(enabled);
+}
+
 static void InstallSDLHook()
 {
     if (!g_hSDL) return;
 
+    // Hookear SDL_PollEvent
     g_sdlPollEventAddr = GetProcAddress(g_hSDL, "SDL_PollEvent");
     if (!g_sdlPollEventAddr) return;
 
@@ -120,6 +162,31 @@ static void InstallSDLHook()
     VirtualProtect(g_sdlPollEventAddr, 14, oldProtect, &oldProtect);
 
     OutputDebugStringA("[+] SDL_PollEvent hookeado\n");
+
+    // Obtener punteros a funciones de SDL (sin hookear)
+    pSDL_GetMouseState = (SDL_GetMouseState_t)GetProcAddress(g_hSDL, "SDL_GetMouseState");
+    pSDL_GetGlobalMouseState = (SDL_GetGlobalMouseState_t)GetProcAddress(g_hSDL, "SDL_GetGlobalMouseState");
+    pSDL_ShowCursor = (SDL_ShowCursor_t)GetProcAddress(g_hSDL, "SDL_ShowCursor");
+    pSDL_HideCursor = (SDL_HideCursor_t)GetProcAddress(g_hSDL, "SDL_HideCursor");
+    
+    // Hookear SDL_SetRelativeMouseMode
+    void* sdlSetRelativeAddr = GetProcAddress(g_hSDL, "SDL_SetRelativeMouseMode");
+    if (sdlSetRelativeAddr)
+    {
+        oSDL_SetRelativeMouseMode = (SDL_SetRelativeMouseMode_t)sdlSetRelativeAddr;
+        
+        BYTE jmp64_rel[14] = {
+            0xFF, 0x25, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        *reinterpret_cast<uintptr_t*>(&jmp64_rel[6]) = reinterpret_cast<uintptr_t>(&HookedSDL_SetRelativeMouseMode);
+        
+        VirtualProtect(sdlSetRelativeAddr, 14, PAGE_EXECUTE_READWRITE, &oldProtect);
+        memcpy(sdlSetRelativeAddr, jmp64_rel, 14);
+        VirtualProtect(sdlSetRelativeAddr, 14, oldProtect, &oldProtect);
+        
+        OutputDebugStringA("[+] SDL_SetRelativeMouseMode hookeado\n");
+    }
 }
 
 static void RemoveSDLHook()
@@ -156,23 +223,23 @@ static int CallOriginalSDLPollEvent(void* event)
 
 // ─── Config structs ───────────────────────────────────────────────────────────
 struct ESPConfig {
-    bool enabled=false, boxes=true, boxFilled=false, skeleton=true;
+    bool enabled=true, boxes=true, boxFilled=false, skeleton=true;
     bool health=true, healthBar=true, name=true, distance=true;
-    bool weapon=true, snaplines=false, dormantCheck=true, teamCheck=true;
+    bool weapon=true, snaplines=false, dormantCheck=false, teamCheck=false;
     float boxColor[4]={1,0,0,1}, teamColor[4]={0,.5f,1,1};
     float skeletonColor[4]={1,1,1,.8f}, snaplineColor[4]={1,1,0,1};
-    float maxDistance=500.f, boxThickness=1.5f;
+    float maxDistance=5000.f, boxThickness=1.5f;
 };
 struct AimbotConfig {
-    bool enabled=false, visibleOnly=true, teamCheck=true;
+    bool enabled=false, visibleOnly=false, teamCheck=false;
     bool autoShoot=false, silentAim=false, rcs=false;
-    float fov=5.f, smooth=8.f, rcsX=1.f, rcsY=1.f;
+    float fov=180.f, smooth=2.f, rcsX=1.f, rcsY=1.f;
     int bone=0;
 };
 struct VisualsConfig {
-    bool nightmode=false, noFlash=false, noSmoke=false;
-    bool fullbright=false, crosshair=false, fovChanger=false, thirdPerson=false;
-    float fovValue=90.f, brightness=1.f, crosshairSize=6.f, crosshairGap=2.f;
+    bool nightmode=false, noFlash=true, noSmoke=false;
+    bool fullbright=false, crosshair=true, fovChanger=false, thirdPerson=false;
+    float fovValue=90.f, brightness=1.f, crosshairSize=8.f, crosshairGap=4.f;
     float crosshairColor[4]={0,1,0,1};
 };
 struct MiscConfig {
@@ -186,11 +253,12 @@ struct SkinConfig {
     float floatValue[30]={};
 };
 
-static ESPConfig     cfg_esp;
-static AimbotConfig  cfg_aim;
-static VisualsConfig cfg_vis;
-static MiscConfig    cfg_misc;
-static SkinConfig    cfg_skin;
+// Hacer las configs globales para que Features.cpp pueda acceder
+ESPConfig     cfg_esp;
+AimbotConfig  cfg_aim;
+VisualsConfig cfg_vis;
+MiscConfig    cfg_misc;
+SkinConfig    cfg_skin;
 
 static void ApplyStyle()
 {
@@ -427,7 +495,10 @@ void ImGui_Renderer::InitImGui(ID3D11Device* pDevice, ID3D11DeviceContext* pDevi
     ImGuiIO& io = ImGui::GetIO();
     // No usar ini de ImGui para que no recuerde una posicion fuera de pantalla
     io.IniFilename = nullptr;
+    // Deshabilitar navegacion por teclado para que no interfiera con el juego
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+    // IMPORTANTE: Habilitar captura de raton cuando el menu esta visible
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
     HWND hWnd = GetCS2Window();
     for (int i = 0; i < 6 && !hWnd; i++) { Sleep(500); hWnd = GetCS2Window(); }
@@ -446,6 +517,9 @@ void ImGui_Renderer::InitImGui(ID3D11Device* pDevice, ID3D11DeviceContext* pDevi
 
     // Hookear SDL_PollEvent - LA solucion real para el input
     InstallSDLHook();
+    
+    // Inicializar sistema de features
+    Features::Initialize();
 
     bImGuiReady = true;
     OutputDebugStringA("[+] ImGui + SDL_PollEvent hook listos\n");
@@ -453,7 +527,7 @@ void ImGui_Renderer::InitImGui(ID3D11Device* pDevice, ID3D11DeviceContext* pDevi
 
 void ImGui_Renderer::Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTargetView* pRenderTargetView)
 {
-    if (!bImGuiReady || !bShowMenu) return;
+    if (!bImGuiReady) return;
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -461,50 +535,40 @@ void ImGui_Renderer::Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTar
     if (g_BackBufferWidth > 0 && g_BackBufferHeight > 0)
         io.DisplaySize = {(float)g_BackBufferWidth, (float)g_BackBufferHeight};
 
-    // Actualizar raton usando Win32 cada frame y escalarlo a coordenadas de backbuffer
-    HWND hWnd = GetCS2Window();
-    if (hWnd && io.DisplaySize.x > 0.0f && io.DisplaySize.y > 0.0f)
+    // Actualizar posicion y estado de botones del raton usando SDL
+    if (pSDL_GetMouseState)
     {
-        RECT client{};
-        if (GetClientRect(hWnd, &client))
-        {
-            float clientW = (float)(client.right - client.left);
-            float clientH = (float)(client.bottom - client.top);
-
-            POINT p;
-            if (GetCursorPos(&p))
-            {
-                ScreenToClient(hWnd, &p);
-                float x = (float)p.x;
-                float y = (float)p.y;
-
-                if (clientW > 0.0f && clientH > 0.0f)
-                {
-                    float scaleX = io.DisplaySize.x / clientW;
-                    float scaleY = io.DisplaySize.y / clientH;
-                    x *= scaleX;
-                    y *= scaleY;
-                }
-
-                io.MousePos = {x, y};
-            }
-        }
-
-        io.MouseDown[0] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
-        io.MouseDown[1] = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
-        io.MouseDown[2] = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0;
+        float x = 0, y = 0;
+        uint32_t buttons = pSDL_GetMouseState(&x, &y);
+        io.MousePos = {x, y};
+        
+        // SDL_BUTTON_LMASK = 0x01, SDL_BUTTON_MMASK = 0x04, SDL_BUTTON_RMASK = 0x02
+        io.MouseDown[0] = (buttons & 0x01) != 0;  // Boton izquierdo
+        io.MouseDown[1] = (buttons & 0x02) != 0;  // Boton derecho
+        io.MouseDown[2] = (buttons & 0x04) != 0;  // Boton medio
     }
+
+    // Mostrar cursor cuando el menu esta visible
+    if (bShowMenu && pSDL_ShowCursor)
+        pSDL_ShowCursor();
 
     static DWORD lastTime = GetTickCount();
     DWORD now = GetTickCount();
     io.DeltaTime = max((now - lastTime) / 1000.f, 1.f / 60.f);
     lastTime = now;
 
-    io.MouseDrawCursor = true;
+    io.MouseDrawCursor = bShowMenu;
 
     ImGui_ImplDX11_NewFrame();
     ImGui::NewFrame();
-    DrawMainMenu();
+    
+    // Ejecutar features siempre (incluso con menu cerrado)
+    Features::Update();
+    
+    // Dibujar menu solo si esta visible
+    if (bShowMenu)
+        DrawMainMenu();
+    
     ImGui::Render();
     pDeviceContext->OMSetRenderTargets(1, &pRenderTargetView, NULL);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

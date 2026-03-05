@@ -4,10 +4,13 @@ project(cs2menu CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 1. Archivos fuente de la DLL (excluir Launcher)
+# 1. Archivos fuente de la DLL (excluir Launcher y tests)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "src/*.h")
 list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/Launcher.cpp")
+# Excluir archivos de test
+file(GLOB_RECURSE TEST_FILES "src/*.test.cpp")
+list(REMOVE_ITEM SOURCE_FILES ${TEST_FILES})
 
 # 2. ImGui
 set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui")
@@ -82,6 +85,54 @@ set_target_properties(cs2menu PROPERTIES
 )
 if(TARGET cs2menu_launcher)
     set_target_properties(cs2menu_launcher PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
+    )
+endif()
+
+# 8. Tests (opcional)
+# Test para OffsetManager
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/OffsetManager.test.cpp")
+    add_executable(test_offsetmanager
+            src/OffsetManager.test.cpp
+            src/OffsetManager.cpp
+    )
+    target_include_directories(test_offsetmanager PRIVATE src)
+    if(WIN32)
+        target_compile_options(test_offsetmanager PRIVATE /MD)
+    endif()
+    set_target_properties(test_offsetmanager PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
+    )
+endif()
+
+# Test para MemorySafety
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/MemorySafety.test.cpp")
+    add_executable(test_memorysafety
+            src/MemorySafety.test.cpp
+            src/Memory.cpp
+    )
+    target_include_directories(test_memorysafety PRIVATE src)
+    if(WIN32)
+        target_compile_options(test_memorysafety PRIVATE /MD)
+        target_link_libraries(test_memorysafety PRIVATE psapi.lib)
+    endif()
+    set_target_properties(test_memorysafety PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
+    )
+endif()
+
+
+# Test for Offset Update Notifications
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/OffsetUpdateNotification.test.cpp")
+    add_executable(test_offset_notifications
+            src/OffsetUpdateNotification.test.cpp
+            src/OffsetManager.cpp
+    )
+    target_include_directories(test_offset_notifications PRIVATE src)
+    if(WIN32)
+        target_compile_options(test_offset_notifications PRIVATE /MD)
+    endif()
+    set_target_properties(test_offset_notifications PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
     )
 endif()
