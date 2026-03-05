@@ -39,8 +39,7 @@ static void* g_sdlPollEventAddr = nullptr;
 
 static int HookedSDL_PollEvent(void* event)
 {
-    // Llamar la funcion original
-    int result = oSDL_PollEvent(event);
+    int result = CallOriginalSDLPollEvent(event);
 
     if (result && event && bShowMenu && bImGuiReady)
     {
@@ -48,41 +47,38 @@ static int HookedSDL_PollEvent(void* event)
 
         ImGuiIO& io = ImGui::GetIO();
 
-        // Pasar eventos de raton a ImGui y bloquearlos para CS2
         switch (eventType)
         {
             case SDL_MOUSEMOTION_EVENT:
             {
-                // Coordenadas del raton en SDL_MouseMotionEvent: x=offset 20, y=offset 24
-                int x = *reinterpret_cast<int*>((char*)event + 20);
-                int y = *reinterpret_cast<int*>((char*)event + 24);
-                io.MousePos = {(float)x, (float)y};
-                // Bloquear evento (poner tipo a 0)
+                float x = *reinterpret_cast<float*>((char*)event + 28);
+                float y = *reinterpret_cast<float*>((char*)event + 32);
+                io.AddMousePosEvent(x, y);
                 *reinterpret_cast<uint32_t*>(event) = 0;
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
             {
-                uint8_t button = *reinterpret_cast<uint8_t*>((char*)event + 16);
-                if (button == 1) io.MouseDown[0] = true;
-                if (button == 2) io.MouseDown[2] = true;
-                if (button == 3) io.MouseDown[1] = true;
+                uint8_t button = *reinterpret_cast<uint8_t*>((char*)event + 24);
+                if (button == 1) io.AddMouseButtonEvent(0, true);
+                if (button == 2) io.AddMouseButtonEvent(2, true);
+                if (button == 3) io.AddMouseButtonEvent(1, true);
                 *reinterpret_cast<uint32_t*>(event) = 0;
                 break;
             }
             case SDL_MOUSEBUTTONUP:
             {
-                uint8_t button = *reinterpret_cast<uint8_t*>((char*)event + 16);
-                if (button == 1) io.MouseDown[0] = false;
-                if (button == 2) io.MouseDown[2] = false;
-                if (button == 3) io.MouseDown[1] = false;
+                uint8_t button = *reinterpret_cast<uint8_t*>((char*)event + 24);
+                if (button == 1) io.AddMouseButtonEvent(0, false);
+                if (button == 2) io.AddMouseButtonEvent(2, false);
+                if (button == 3) io.AddMouseButtonEvent(1, false);
                 *reinterpret_cast<uint32_t*>(event) = 0;
                 break;
             }
             case SDL_MOUSEWHEEL_EVENT:
             {
-                float wheelY = *reinterpret_cast<float*>((char*)event + 20);
-                io.MouseWheel += wheelY;
+                float wheelY = *reinterpret_cast<float*>((char*)event + 28);
+                io.AddMouseWheelEvent(0.f, wheelY);
                 *reinterpret_cast<uint32_t*>(event) = 0;
                 break;
             }
@@ -423,10 +419,14 @@ void ImGui_Renderer::InitImGui(ID3D11Device* pDevice, ID3D11DeviceContext* pDevi
 
     ApplyStyle();
     ImGui_ImplDX11_Init(pDevice, pDeviceContext);
+    ImGui_ImplWin32_Init(hWnd);
 
     // Buscar SDL
     g_hSDL = GetModuleHandleA("SDL2.dll");
     if (!g_hSDL) g_hSDL = GetModuleHandleA("SDL3.dll");
+
+    if (!g_hSDL)
+        OutputDebugStringA("[!] SDL2.dll/SDL3.dll no encontrado - el input de raton no funcionara\n");
 
     // Hookear SDL_PollEvent - LA solucion real para el input
     InstallSDLHook();
@@ -454,6 +454,7 @@ void ImGui_Renderer::Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTar
 
     io.MouseDrawCursor = true;
 
+    ImGui_ImplWin32_NewFrame();
     ImGui_ImplDX11_NewFrame();
     ImGui::NewFrame();
     DrawMainMenu();
@@ -468,6 +469,7 @@ void ImGui_Renderer::Shutdown()
 {
     if (!bImGuiReady) return;
     RemoveSDLHook();
+    ImGui_ImplWin32_Shutdown();
     ImGui_ImplDX11_Shutdown();
     ImGui::DestroyContext();
     bImGuiReady = false;
