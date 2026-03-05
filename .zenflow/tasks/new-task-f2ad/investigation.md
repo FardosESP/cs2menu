@@ -158,6 +158,17 @@ etc., and also correctly updates `io.DisplaySize` every frame.
 
 ---
 
+## Implementation Notes
+
+All three fixes applied to `src/ImGui_Renderer.cpp`:
+
+1. **Bug 1** — `HookedSDL_PollEvent` now calls `CallOriginalSDLPollEvent(event)` instead of `oSDL_PollEvent(event)`. This eliminates the infinite recursion.
+2. **Bug 2** — Mouse event offsets updated to SDL3 values (+28/+32 for motion x/y, +24 for button byte, +28 for wheel y). Switched to modern ImGui API: `io.AddMousePosEvent`, `io.AddMouseButtonEvent`, `io.AddMouseWheelEvent`.
+3. **Bug 3** — Added `ImGui_ImplWin32_Init(hWnd)` in `InitImGui`, `ImGui_ImplWin32_NewFrame()` in `Render` (before `ImGui_ImplDX11_NewFrame`), and `ImGui_ImplWin32_Shutdown()` in `Shutdown`.
+4. Added a warning log when neither `SDL2.dll` nor `SDL3.dll` is found.
+
+---
+
 ## Edge Cases and Side Effects
 
 - **SDL DLL name**: the code already checks both `SDL2.dll` and `SDL3.dll`.
