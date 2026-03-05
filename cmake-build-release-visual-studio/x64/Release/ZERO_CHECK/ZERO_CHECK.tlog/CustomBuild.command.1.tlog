@@ -1,6 +1,6 @@
-^C:\USERS\ABELM\DOWNLOADS\CS2MENU\CMAKE-BUILD-RELEASE-VISUAL-STUDIO\CMAKEFILES\45A560C872C69DB57C63A3B0EB7F244A\GENERATE.STAMP.RULE
+^C:\USERS\ABELM\DOCUMENTS\GITHUB\CS2MENU\CMAKE-BUILD-RELEASE-VISUAL-STUDIO\CMAKEFILES\D1B49A722C337630047AE602BF0A846F\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Downloads/cs2menu -BC:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio/cs2menu.sln
+"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Documents/GitHub/cs2menu -BC:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/cs2menu.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

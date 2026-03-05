@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Release/Debug/cs2menu_launcher.exe"
+			"path" : "Release/Release/cs2menu_launcher.exe"
 		},
 		{
-			"path" : "Release/Debug/cs2menu_launcher.pdb"
+			"path" : "Release/Release/cs2menu_launcher.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -79,7 +79,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd"
+					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD"
 				},
 				{
 					"backtrace" : 4,
@@ -90,27 +90,27 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/imgui"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/imgui"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/imgui/backends"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/imgui/backends"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/include"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/src"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/src"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/src/hde"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/src/hde"
 				},
 				{
 					"backtrace" : 7,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/src"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/src"
 				}
 			],
 			"language" : "CXX",
@@ -144,11 +144,11 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd",
+				"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /O2 /Ob2 /DNDEBUG -MD",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "/machine:x64 /debug /INCREMENTAL /subsystem:console",
+				"fragment" : "/machine:x64 /INCREMENTAL:NO /subsystem:console",
 				"role" : "flags"
 			},
 			{

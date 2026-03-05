@@ -11,6 +11,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 bool    bShowMenu       = true;
 static bool bImGuiReady = false;
 static HMODULE g_hSDL   = nullptr;
+extern UINT g_BackBufferWidth;
+extern UINT g_BackBufferHeight;
 
 // Variables del hilo de raton (definidas en DllMain.cpp)
 extern POINT g_mousePos;
@@ -380,15 +382,27 @@ static void TabSkins() {
 static void DrawMainMenu()
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImGui::SetNextWindowSize({550,430},ImGuiCond_Once);
-    ImGui::SetNextWindowPos({io.DisplaySize.x*.5f,io.DisplaySize.y*.5f},ImGuiCond_Once,{.5f,.5f});
-    ImGui::Begin("##cs2menu",nullptr,ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoScrollWithMouse);
+    ImVec2 center = {275.0f, 215.0f};
+    if (io.DisplaySize.x > 0.0f && io.DisplaySize.y > 0.0f)
+        center = {io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f};
+
+    ImGui::SetNextWindowSize({550,430}, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, {.5f, .5f});
+    ImGui::Begin("##cs2menu",nullptr,
+                 ImGuiWindowFlags_NoCollapse|
+                 ImGuiWindowFlags_NoScrollbar|
+                 ImGuiWindowFlags_NoScrollWithMouse|
+                 ImGuiWindowFlags_NoSavedSettings);
     ImDrawList* dl=ImGui::GetWindowDrawList();
     ImVec2 wp=ImGui::GetWindowPos(),ws=ImGui::GetWindowSize();
     dl->AddRectFilled({wp.x,wp.y},{wp.x+ws.x,wp.y+3},IM_COL32(50,120,220,255));
     ImGui::Spacing();
     ImGui::TextColored({.26f,.55f,1,1},"CS2MENU");ImGui::SameLine();
     ImGui::TextDisabled("v2.0   |   INSERT ocultar   |   END salir");
+    ImGui::SameLine();
+    ImGui::TextDisabled("[Mouse %.0f,%.0f L:%s]",
+                        io.MousePos.x, io.MousePos.y,
+                        io.MouseDown[0] ? "ON" : "OFF");
     ImGui::Separator();ImGui::Spacing();
     if(ImGui::BeginTabBar("##tabs")){
         if(ImGui::BeginTabItem("  ESP  "))      {TabESP();    ImGui::EndTabItem();}
@@ -411,6 +425,8 @@ void ImGui_Renderer::InitImGui(ID3D11Device* pDevice, ID3D11DeviceContext* pDevi
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
+    // No usar ini de ImGui para que no recuerde una posicion fuera de pantalla
+    io.IniFilename = nullptr;
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
 
     HWND hWnd = GetCS2Window();
@@ -441,15 +457,47 @@ void ImGui_Renderer::Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTar
 
     ImGuiIO& io = ImGui::GetIO();
 
+    // Usar el tamano REAL del backbuffer para ImGui (coincide con la resolucion de render)
+    if (g_BackBufferWidth > 0 && g_BackBufferHeight > 0)
+        io.DisplaySize = {(float)g_BackBufferWidth, (float)g_BackBufferHeight};
+
+    // Actualizar raton usando Win32 cada frame y escalarlo a coordenadas de backbuffer
     HWND hWnd = GetCS2Window();
-    if (hWnd) {
-        RECT rect; GetClientRect(hWnd, &rect);
-        io.DisplaySize = {(float)(rect.right-rect.left),(float)(rect.bottom-rect.top)};
+    if (hWnd && io.DisplaySize.x > 0.0f && io.DisplaySize.y > 0.0f)
+    {
+        RECT client{};
+        if (GetClientRect(hWnd, &client))
+        {
+            float clientW = (float)(client.right - client.left);
+            float clientH = (float)(client.bottom - client.top);
+
+            POINT p;
+            if (GetCursorPos(&p))
+            {
+                ScreenToClient(hWnd, &p);
+                float x = (float)p.x;
+                float y = (float)p.y;
+
+                if (clientW > 0.0f && clientH > 0.0f)
+                {
+                    float scaleX = io.DisplaySize.x / clientW;
+                    float scaleY = io.DisplaySize.y / clientH;
+                    x *= scaleX;
+                    y *= scaleY;
+                }
+
+                io.MousePos = {x, y};
+            }
+        }
+
+        io.MouseDown[0] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+        io.MouseDown[1] = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
+        io.MouseDown[2] = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0;
     }
 
     static DWORD lastTime = GetTickCount();
     DWORD now = GetTickCount();
-    io.DeltaTime = max((now-lastTime)/1000.f, 1.f/60.f);
+    io.DeltaTime = max((now - lastTime) / 1000.f, 1.f / 60.f);
     lastTime = now;
 
     io.MouseDrawCursor = true;

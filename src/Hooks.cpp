@@ -8,9 +8,11 @@
 
 Hooks::Present_t Hooks::oPresent = nullptr;
 
-ID3D11Device*           g_pd3d11Device         = nullptr;
+ID3D11Device*           g_pd3d11Device          = nullptr;
 ID3D11DeviceContext*    g_pd3d11DeviceContext   = nullptr;
 ID3D11RenderTargetView* g_mainRenderTargetView  = nullptr;
+UINT                    g_BackBufferWidth       = 0;
+UINT                    g_BackBufferHeight      = 0;
 static bool             g_bImGuiInitialized     = false;
 
 // Guardamos los bytes originales de Present para restaurarlos al llamar oPresent
@@ -52,6 +54,12 @@ HRESULT __stdcall Hooks::hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval
             ID3D11Texture2D* pBackBuffer = nullptr;
             if (SUCCEEDED(pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer)))
             {
+                // Guardar tamano real del backbuffer (resolucion de render)
+                D3D11_TEXTURE2D_DESC desc{};
+                pBackBuffer->GetDesc(&desc);
+                g_BackBufferWidth  = desc.Width;
+                g_BackBufferHeight = desc.Height;
+
                 g_pd3d11Device->CreateRenderTargetView(pBackBuffer, NULL, &g_mainRenderTargetView);
                 pBackBuffer->Release();
                 ImGui_Renderer::InitImGui(g_pd3d11Device, g_pd3d11DeviceContext);

@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="C:\Users\abelm\Downloads\cs2menu\cmake-build-release-visual-studio\CMakeFiles\45a560c872c69db57c63a3b0eb7f244a\build_all.rule">
+    <CustomBuild Include="C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\d1b49a722c337630047ae602bf0a846f\build_all.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
-    <CustomBuild Include="C:\Users\abelm\Downloads\cs2menu\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\abelm\Documents\GitHub\cs2menu\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="C:\Users\abelm\Downloads\cs2menu\cmake-build-release-visual-studio\CMakeFiles\build_all" />
+    <None Include="C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\build_all" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{95B33678-0306-3270-B958-E88B6BAA350B}</UniqueIdentifier>
+      <UniqueIdentifier>{C9CF5AE3-3F07-31B7-8744-7709D6D03CAF}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

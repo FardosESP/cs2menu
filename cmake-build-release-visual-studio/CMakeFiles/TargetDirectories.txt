@@ -1,5 +1,5 @@
-C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio/CMakeFiles/cs2menu.dir
-C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio/CMakeFiles/cs2menu_launcher.dir
-C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio/CMakeFiles/build_all.dir
-C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio/CMakeFiles/ALL_BUILD.dir
-C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio/CMakeFiles/ZERO_CHECK.dir
+C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/cs2menu.dir
+C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/cs2menu_launcher.dir
+C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/build_all.dir
+C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/ALL_BUILD.dir
+C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/ZERO_CHECK.dir

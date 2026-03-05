@@ -1,9 +1,9 @@
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" "-DCMAKE_C_COMPILER=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/cl.exe" "-DCMAKE_CXX_COMPILER=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/cl.exe" -G "Visual Studio 17 2022" -S C:\Users\abelm\Downloads\cs2menu -B C:\Users\abelm\Downloads\cs2menu\cmake-build-release-visual-studio
+"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" "-DCMAKE_C_COMPILER=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/cl.exe" "-DCMAKE_CXX_COMPILER=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/cl.exe" -G "Visual Studio 17 2022" -S C:\Users\abelm\Documents\GitHub\cs2menu -B C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio
 -- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
 -- Configuring done (0.0s)
--- Generating done (0.1s)
--- Build files have been written to: C:/Users/abelm/Downloads/cs2menu/cmake-build-release-visual-studio
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio
 
 Cannot get compiler information:
 	Cannot load Visual C++ environment from C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat:
-	command [C:\WINDOWS\system32\cmd.exe, /c, "call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64 -vcvars_ver=14.44.35207 1>&2 && "C:\Program Files\JetBrains\CLion 2025.1\jbr\bin\java" -cp "C:\Program Files\JetBrains\CLion 2025.1\lib\util_rt.jar" com.intellij.util.ReadEnv C:\Users\abelm\AppData\Local\Temp\intellij-cmd-env-data.16263378160409039314.tmp || exit /B %ERRORLEVEL%"], exit code: 0
+	command [C:\WINDOWS\system32\cmd.exe, /c, "call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64 -vcvars_ver=14.44.35207 1>&2 && "C:\Program Files\JetBrains\CLion 2025.1\jbr\bin\java" -cp "C:\Program Files\JetBrains\CLion 2025.1\lib\util_rt.jar" com.intellij.util.ReadEnv C:\Users\abelm\AppData\Local\Temp\intellij-cmd-env-data.9512231655105056375.tmp || exit /B %ERRORLEVEL%"], exit code: 0

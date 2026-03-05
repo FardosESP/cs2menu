@@ -2,13 +2,13 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Release/Release/cs2menu.dll"
+			"path" : "Release/Debug/cs2menu.dll"
 		},
 		{
-			"path" : "Release/cs2menu.lib"
+			"path" : "Debug/cs2menu.lib"
 		},
 		{
-			"path" : "Release/Release/cs2menu.pdb"
+			"path" : "Release/Debug/cs2menu.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -82,7 +82,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd"
 				},
 				{
 					"backtrace" : 3,
@@ -179,27 +179,27 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/imgui"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/imgui"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/imgui/backends"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/imgui/backends"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/include"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/src"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/src"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/src/hde"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/src/hde"
 				},
 				{
 					"backtrace" : 7,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/src"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/src"
 				}
 			],
 			"language" : "CXX",
@@ -230,7 +230,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd"
 				},
 				{
 					"backtrace" : 3,
@@ -330,27 +330,27 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/imgui"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/imgui"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/imgui/backends"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/imgui/backends"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/include"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/src"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/src"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/lib/minhook/src/hde"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/lib/minhook/src/hde"
 				},
 				{
 					"backtrace" : 7,
-					"path" : "C:/Users/abelm/Downloads/cs2menu/src"
+					"path" : "C:/Users/abelm/Documents/GitHub/cs2menu/src"
 				}
 			],
 			"language" : "C",
@@ -376,7 +376,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/machine:x64 /INCREMENTAL:NO",
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
 				"role" : "flags"
 			},
 			{
