@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "OffsetManager.h"
 #include "Aimbot.h"
+#include "OffsetScanner.h"
 #include <iostream>
 #include <cmath>
 
@@ -12,8 +13,10 @@ extern struct ESPConfig {
     bool enabled, boxes, boxFilled, skeleton;
     bool health, healthBar, name, distance;
     bool weapon, snaplines, dormantCheck, teamCheck;
+    bool glow;
     float boxColor[4], teamColor[4];
     float skeletonColor[4], snaplineColor[4];
+    float glowEnemyColor[4], glowTeamColor[4];
     float maxDistance, boxThickness;
 } cfg_esp;
 
@@ -78,6 +81,33 @@ void Features::Initialize()
     
     std::cout << "[+] client.dll base: 0x" << std::hex << g_clientBase << std::dec << std::endl;
     
+    // Verificar información del proceso
+    DWORD pid = GetCurrentProcessId();
+    char processName[MAX_PATH] = {};
+    GetModuleFileNameA(NULL, processName, MAX_PATH);
+    
+    std::cout << "\n╔═══════════════════════════════════════════════════════════╗" << std::endl;
+    std::cout << "║              INFORMACIÓN DEL PROCESO                      ║" << std::endl;
+    std::cout << "╚═══════════════════════════════════════════════════════════╝" << std::endl;
+    std::cout << "[PROCESS] PID: " << pid << std::endl;
+    std::cout << "[PROCESS] Ejecutable: " << processName << std::endl;
+    std::cout << "[PROCESS] client.dll base: 0x" << std::hex << g_clientBase << std::dec << std::endl;
+    
+    // Verificar que client.dll es válido leyendo los primeros bytes (MZ header)
+    // Note: Removed __try/__except due to C++ object unwinding conflicts
+    // If this crashes, it means client.dll base is invalid
+    uint16_t mzHeader = Memory::Read<uint16_t>(g_clientBase);
+    if (mzHeader == 0x5A4D) // "MZ"
+    {
+        std::cout << "[PROCESS] client.dll header válido (MZ signature OK)" << std::endl;
+    }
+    else
+    {
+        std::cout << "[PROCESS] ERROR: client.dll header inválido! (0x" << std::hex << mzHeader << std::dec << ")" << std::endl;
+        std::cout << "[PROCESS] Esto significa que la dirección base es incorrecta" << std::endl;
+    }
+    std::cout << std::endl;
+    
     // Inicializar punteros del SDK usando offsets con validación
     uintptr_t entitySystemAddr = g_clientBase + Offsets::dwEntityList();
     uintptr_t viewMatrixAddr = g_clientBase + Offsets::dwViewMatrix();
@@ -101,6 +131,10 @@ void Features::Initialize()
     std::cout << "[+] EntitySystem: 0x" << std::hex << (uintptr_t)g_pEntitySystem << std::dec << std::endl;
     std::cout << "[+] ViewMatrix: 0x" << std::hex << (uintptr_t)g_pViewMatrix << std::dec << std::endl;
     
+    // Don't run scanner automatically - wait until in-game
+    std::cout << "\n[INFO] Offset scanner disponible - se ejecutara automaticamente cuando entres en partida" << std::endl;
+    std::cout << "[INFO] O presiona F9 para ejecutar el scanner manualmente" << std::endl;
+    
     g_bInitialized = true;
     std::cout << "[+] Features inicializadas correctamente" << std::endl;
     std::cout << "[INFO] El cheat buscara jugadores automaticamente cuando entres en partida" << std::endl;
@@ -110,89 +144,25 @@ void Features::Update()
 {
     if (!g_bInitialized || !g_clientBase) return;
     
-    // Debug: verificar que Update se llama
-    static int updateCount = 0;
-    updateCount++;
-    if (updateCount % 300 == 0)
+    // Check for F9 key to manually run scanner
+    static bool f9WasPressed = false;
+    bool f9IsPressed = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
+    if (f9IsPressed && !f9WasPressed)
     {
-        std::cout << "[Features] Update llamado " << updateCount << " veces" << std::endl;
+        std::cout << "\n[*] F9 presionado - Ejecutando scanner de offsets..." << std::endl;
+        OffsetScanner::ScanAndPrintOffsets();
     }
+    f9WasPressed = f9IsPressed;
     
     // Obtener jugador local de forma segura
+    static bool wasInGame = false;
+    static bool scannerRanInGame = false;
+    
     __try
     {
         // MÉTODO SIMPLE: Leer LocalPlayer directamente desde dwLocalPlayerPawn
         uintptr_t localPawnAddr = g_clientBase + Offsets::dwLocalPlayerPawn();
         uintptr_t localPawn = Memory::Read<uintptr_t>(localPawnAddr);
-        
-        // Mensaje de debug solo la primera vez
-        static bool firstCheck = true;
-        if (firstCheck)
-        {
-            std::cout << "\n[DEBUG] LocalPawnAddr: 0x" << std::hex << localPawnAddr << std::dec << std::endl;
-            std::cout << "[DEBUG] LocalPawn: 0x" << std::hex << localPawn << std::dec << std::endl;
-            
-            if (localPawn != 0)
-            {
-                // Escanear memoria AMPLIAMENTE para encontrar health (1-100) y team (2 o 3)
-                std::cout << "\n[SCAN] Buscando offsets correctos (rango amplio 0x0-0x1000)..." << std::endl;
-                
-                int healthCandidates = 0;
-                int teamCandidates = 0;
-                
-                for (int offset = 0x0; offset <= 0x1000; offset += 4)
-                {
-                    __try
-                    {
-                        int value = Memory::Read<int>(localPawn + offset);
-                        
-                        // Buscar health (1-100)
-                        if (value > 0 && value <= 100)
-                        {
-                            std::cout << "[CANDIDATE] Health en 0x" << std::hex << offset << std::dec 
-                                      << " = " << value << std::endl;
-                            healthCandidates++;
-                            if (healthCandidates >= 5) break; // Limitar output
-                        }
-                        
-                        // Buscar team (2 o 3)
-                        if (value == 2 || value == 3)
-                        {
-                            std::cout << "[CANDIDATE] Team en 0x" << std::hex << offset << std::dec 
-                                      << " = " << value << std::endl;
-                            teamCandidates++;
-                        }
-                    }
-                    __except(EXCEPTION_EXECUTE_HANDLER)
-                    {
-                        continue;
-                    }
-                }
-                
-                if (healthCandidates == 0 && teamCandidates == 0)
-                {
-                    std::cout << "\n[ERROR] No se encontraron valores validos!" << std::endl;
-                    std::cout << "[INFO] Posibles causas:" << std::endl;
-                    std::cout << "  1. No estas en partida activa (estas en menu/lobby)" << std::endl;
-                    std::cout << "  2. El puntero LocalPawn es incorrecto" << std::endl;
-                    std::cout << "  3. Los offsets de cs2-dumper son para otra version de CS2" << std::endl;
-                    std::cout << "\n[TIP] Asegurate de estar JUGANDO (no en pausa, no en menu)" << std::endl;
-                }
-                
-                // Mostrar valores con offsets actuales
-                int health = Memory::Read<int>(localPawn + Offsets::m_iHealth());
-                int team = Memory::Read<int>(localPawn + Offsets::m_iTeamNum());
-                std::cout << "\n[DEBUG] Con offsets actuales (0x" << std::hex << Offsets::m_iHealth() 
-                          << ", 0x" << Offsets::m_iTeamNum() << std::dec << "):" << std::endl;
-                std::cout << "[DEBUG] Health: " << health << ", Team: " << team << std::endl;
-            }
-            else
-            {
-                std::cout << "[WARNING] LocalPawn es NULL - no estas en partida?" << std::endl;
-            }
-            
-            firstCheck = false;
-        }
         
         // Validar y asignar LocalPlayer
         if (localPawn != 0)
@@ -201,15 +171,43 @@ void Features::Update()
             if (health > 0 && health <= 200)
             {
                 g_pLocalPlayer = (C_CSPlayerPawn*)localPawn;
+                
+                // Detectar cuando entramos en partida por primera vez
+                if (!wasInGame)
+                {
+                    std::cout << "\n╔═══════════════════════════════════════════════════════════╗" << std::endl;
+                    std::cout << "║              ENTRASTE EN PARTIDA - ACTIVANDO ESP          ║" << std::endl;
+                    std::cout << "╚═══════════════════════════════════════════════════════════╝" << std::endl;
+                    std::cout << "[INFO] LocalPlayer detectado - Health: " << health << std::endl;
+                    wasInGame = true;
+                    
+                    // Ejecutar scanner automáticamente la primera vez que entramos en partida
+                    if (!scannerRanInGame)
+                    {
+                        std::cout << "[*] Ejecutando scanner de offsets automaticamente..." << std::endl;
+                        OffsetScanner::ScanAndPrintOffsets();
+                        scannerRanInGame = true;
+                    }
+                }
             }
             else
             {
                 g_pLocalPlayer = nullptr;
+                if (wasInGame)
+                {
+                    std::cout << "[INFO] Saliste de la partida (Health invalido)" << std::endl;
+                    wasInGame = false;
+                }
             }
         }
         else
         {
             g_pLocalPlayer = nullptr;
+            if (wasInGame)
+            {
+                std::cout << "[INFO] Saliste de la partida (LocalPawn NULL)" << std::endl;
+                wasInGame = false;
+            }
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -228,17 +226,6 @@ void Features::Update()
         
         ApplyVisuals();
         RunMisc();
-    }
-    else
-    {
-        // Debug: mostrar por qué no se ejecutan las features
-        static int noPlayerCount = 0;
-        noPlayerCount++;
-        if (noPlayerCount % 300 == 0) // Cada ~5 segundos (asumiendo 60 FPS)
-        {
-            std::cout << "[DEBUG] LocalPlayer es NULL - no se ejecutan features" << std::endl;
-            std::cout << "[TIP] Asegurate de estar en partida activa y vivo" << std::endl;
-        }
     }
     
     // Crosshair custom se dibuja siempre
@@ -304,47 +291,91 @@ void Features::DrawBox(const Vector3& head, const Vector3& feet, bool filled, fl
 
 void Features::DrawSkeleton(C_CSPlayerPawn* pawn, float color[4])
 {
-    // Placeholder - necesita offsets de bones
+    if (!pawn) return;
+    
+    // CS2 bone IDs (approximate - may need adjustment based on actual game data)
+    // These are common bone indices for Source 2 player models
+    const int HEAD = 6;
+    const int NECK = 5;
+    const int SPINE_3 = 4;
+    const int SPINE_2 = 3;
+    const int SPINE_1 = 2;
+    const int PELVIS = 0;
+    
+    const int LEFT_SHOULDER = 8;
+    const int LEFT_ELBOW = 9;
+    const int LEFT_HAND = 10;
+    
+    const int RIGHT_SHOULDER = 13;
+    const int RIGHT_ELBOW = 14;
+    const int RIGHT_HAND = 15;
+    
+    const int LEFT_HIP = 22;
+    const int LEFT_KNEE = 23;
+    const int LEFT_FOOT = 24;
+    
+    const int RIGHT_HIP = 25;
+    const int RIGHT_KNEE = 26;
+    const int RIGHT_FOOT = 27;
+    
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+    if (!drawList) return;
+    
+    ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color[0], color[1], color[2], color[3]));
+    float thickness = cfg_esp.boxThickness;
+    
+    // Helper struct to hold bone pairs
+    struct BonePair { int bone1; int bone2; };
+    
+    // Define all bone connections
+    BonePair bones[] = {
+        // Spine
+        {PELVIS, SPINE_1}, {SPINE_1, SPINE_2}, {SPINE_2, SPINE_3}, {SPINE_3, NECK}, {NECK, HEAD},
+        // Left arm
+        {SPINE_3, LEFT_SHOULDER}, {LEFT_SHOULDER, LEFT_ELBOW}, {LEFT_ELBOW, LEFT_HAND},
+        // Right arm
+        {SPINE_3, RIGHT_SHOULDER}, {RIGHT_SHOULDER, RIGHT_ELBOW}, {RIGHT_ELBOW, RIGHT_HAND},
+        // Left leg
+        {PELVIS, LEFT_HIP}, {LEFT_HIP, LEFT_KNEE}, {LEFT_KNEE, LEFT_FOOT},
+        // Right leg
+        {PELVIS, RIGHT_HIP}, {RIGHT_HIP, RIGHT_KNEE}, {RIGHT_KNEE, RIGHT_FOOT}
+    };
+    
+    // Draw all bone connections
+    for (int i = 0; i < sizeof(bones) / sizeof(BonePair); i++)
+    {
+        Vector3 pos1 = pawn->GetBonePosition(bones[i].bone1);
+        Vector3 pos2 = pawn->GetBonePosition(bones[i].bone2);
+        
+        // Skip if positions are invalid
+        if ((pos1.x == 0.0f && pos1.y == 0.0f && pos1.z == 0.0f) ||
+            (pos2.x == 0.0f && pos2.y == 0.0f && pos2.z == 0.0f))
+            continue;
+        
+        Vector3 screen1, screen2;
+        if (WorldToScreen(pos1, screen1) && WorldToScreen(pos2, screen2))
+        {
+            drawList->AddLine(
+                ImVec2(screen1.x, screen1.y),
+                ImVec2(screen2.x, screen2.y),
+                col,
+                thickness
+            );
+        }
+    }
 }
 
 void Features::RenderESP()
 {
-    // Debug: verificar que se llama
-    static int callCount = 0;
-    callCount++;
-    if (callCount % 300 == 0)
-    {
-        std::cout << "[ESP] RenderESP llamado " << callCount << " veces" << std::endl;
-    }
-    
     // Validate critical pointers before proceeding
     if (!g_pEntitySystem || !g_pViewMatrix || !g_pLocalPlayer)
-    {
-        static int nullCount = 0;
-        nullCount++;
-        if (nullCount % 300 == 0)
-        {
-            std::cout << "[ESP] Punteros NULL - EntitySystem: " << (g_pEntitySystem ? "OK" : "NULL")
-                      << ", ViewMatrix: " << (g_pViewMatrix ? "OK" : "NULL")
-                      << ", LocalPlayer: " << (g_pLocalPlayer ? "OK" : "NULL") << std::endl;
-        }
         return;
-    }
-    
-    // Additional pointer validation using safe checks
-    if (!Memory::IsValidPointer((uintptr_t)g_pEntitySystem) ||
-        !Memory::IsValidPointer((uintptr_t)g_pViewMatrix))
-    {
-        return;
-    }
     
     // Validate that the local player is valid
     __try
     {
         if (!g_pLocalPlayer->IsValid() || g_pLocalPlayer->GetHealth() <= 0)
-        {
             return;
-        }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
@@ -352,20 +383,32 @@ void Features::RenderESP()
     }
     
     int localTeam = 0;
-    Vector3 localPos = {};
+    Vector3 localPos = {0, 0, 0};  // Inicializar con valores por defecto
     
     // Safely read local player data
     __try
     {
         localTeam = g_pLocalPlayer->GetTeamNum();
+        
+        // Intentar obtener posición, pero continuar si falla
         if (!g_pLocalPlayer->GetOriginSafe(localPos))
         {
-            return;
+            // Si falla, usar posición por defecto y continuar de todos modos
+            localPos = {0, 0, 0};
+            
+            static int originFailCount = 0;
+            originFailCount++;
+            if (originFailCount % 300 == 0)
+            {
+                std::cout << "[ESP] GetOriginSafe() falla, pero continuando sin filtro de distancia" << std::endl;
+            }
+            // NO RETORNAR - continuar sin distancia
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        return;
+        localTeam = 2;  // Valor por defecto
+        localPos = {0, 0, 0};
     }
     
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -386,31 +429,40 @@ void Features::RenderESP()
         maxEntities = 64;
     }
     
-    int validEntities = 0;
+    int validControllers = 0;
+    int validPawns = 0;
     int drawnEntities = 0;
     
-    // Iterate through player entities (1-64)
+    // Iterate through player CONTROLLERS (1-64)
+    // In CS2, we must iterate controllers first, then get their pawns
     for (int i = 1; i <= 64 && i <= maxEntities; i++)
     {
         __try
         {
-            // Safely get entity with null check
-            C_BaseEntity* entity = g_pEntitySystem->GetBaseEntity(i);
-            if (!entity) continue;
+            // Step 1: Get controller entity
+            C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
+            if (!controller) continue;
             
-            // Validate entity pointer
-            if (!Memory::IsValidPointer((uintptr_t)entity)) continue;
+            // Validate controller pointer
+            if (!Memory::IsValidPointer((uintptr_t)controller)) continue;
             
-            // Use safe validation method
-            if (!entity->IsValid()) continue;
+            validControllers++;
             
-            validEntities++;
+            // Step 2: Get pawn from controller using handle decoding
+            C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
+            if (!pawn) continue;
+            
+            // Validate pawn pointer
+            if (!Memory::IsValidPointer((uintptr_t)pawn)) continue;
+            
+            // Use safe validation method on pawn
+            if (!pawn->IsValid()) continue;
+            
+            validPawns++;
             
             // Validate health range
-            int health = entity->GetHealth();
+            int health = pawn->GetHealth();
             if (health <= 0 || health > 200) continue;
-            
-            C_CSPlayerPawn* pawn = (C_CSPlayerPawn*)entity;
             
             // Skip local player
             if (pawn == g_pLocalPlayer) continue;
@@ -424,20 +476,32 @@ void Features::RenderESP()
             
             // Safely get entity origin
             Vector3 origin = {};
-            if (!pawn->GetOriginSafe(origin)) continue;
+            bool hasOrigin = pawn->GetOriginSafe(origin);
+            
+            // Si no tenemos origin, SKIP este jugador
+            if (!hasOrigin)
+                continue;
             
             // Distance check
-            float dx = origin.x - localPos.x;
-            float dy = origin.y - localPos.y;
-            float dz = origin.z - localPos.z;
-            float distance = sqrtf(dx*dx + dy*dy + dz*dz);
-            
-            if (distance > cfg_esp.maxDistance) continue;
+            float distance = 0.0f;
+            if (localPos.x != 0 || localPos.y != 0 || localPos.z != 0)
+            {
+                float dx = origin.x - localPos.x;
+                float dy = origin.y - localPos.y;
+                float dz = origin.z - localPos.z;
+                distance = sqrtf(dx*dx + dy*dy + dz*dz);
+                
+                if (distance > cfg_esp.maxDistance) continue;
+            }
+            else
+            {
+                // Si no tenemos posición local, no filtrar por distancia
+                distance = 0.0f;
+            }
             
             // Calculate screen positions
             Vector3 headPos = origin;
             headPos.z += 75.0f;
-            
             Vector3 feetPos = origin;
             
             Vector3 screenHead, screenFeet;
@@ -572,6 +636,41 @@ void Features::RenderESP()
                     ImVec2(barPos.x + barSize.x, barPos.y + barSize.y * healthPercent), 
                     healthColor);
             }
+            
+            // Skeleton ESP
+            if (cfg_esp.skeleton)
+            {
+                DrawSkeleton(pawn, cfg_esp.skeletonColor);
+            }
+            
+            // Glow ESP
+            if (cfg_esp.glow)
+            {
+                __try
+                {
+                    // Convert float colors to Color struct (0-255)
+                    Color enemyGlowColor = {
+                        (uint8_t)(cfg_esp.glowEnemyColor[0] * 255),
+                        (uint8_t)(cfg_esp.glowEnemyColor[1] * 255),
+                        (uint8_t)(cfg_esp.glowEnemyColor[2] * 255),
+                        (uint8_t)(cfg_esp.glowEnemyColor[3] * 255)
+                    };
+                    
+                    Color teamGlowColor = {
+                        (uint8_t)(cfg_esp.glowTeamColor[0] * 255),
+                        (uint8_t)(cfg_esp.glowTeamColor[1] * 255),
+                        (uint8_t)(cfg_esp.glowTeamColor[2] * 255),
+                        (uint8_t)(cfg_esp.glowTeamColor[3] * 255)
+                    };
+                    
+                    // Apply team-based glow
+                    pawn->SetGlowTeamBased(localTeam, enemyGlowColor, teamGlowColor);
+                }
+                __except(EXCEPTION_EXECUTE_HANDLER)
+                {
+                    // Silently continue if glow fails
+                }
+            }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
@@ -580,23 +679,17 @@ void Features::RenderESP()
         }
     }
     
-    static bool espDebugPrinted = false;
-    if (!espDebugPrinted)
-    {
-        std::cout << "[ESP] Entidades válidas encontradas: " << validEntities << std::endl;
-        std::cout << "[ESP] Entidades dibujadas: " << drawnEntities << std::endl;
-        espDebugPrinted = true;
-    }
+    // Report findings only when entities are found
+    static int lastControllerCount = 0;
+    static int lastPawnCount = 0;
+    static int lastDrawnCount = 0;
     
-    // Debug periódico cada 5 segundos
-    static int frameCount = 0;
-    frameCount++;
-    if (frameCount % 300 == 0) // ~5 segundos a 60 FPS
+    if (validControllers != lastControllerCount || validPawns != lastPawnCount || drawnEntities != lastDrawnCount)
     {
-        std::cout << "[ESP] Estado actual - Validas: " << validEntities << ", Dibujadas: " << drawnEntities << std::endl;
-        std::cout << "[ESP] Config - Enabled: " << cfg_esp.enabled 
-                  << ", Boxes: " << cfg_esp.boxes 
-                  << ", MaxDist: " << cfg_esp.maxDistance << std::endl;
+        std::cout << "[ESP] Controllers: " << validControllers << ", Pawns: " << validPawns << ", Dibujados: " << drawnEntities << std::endl;
+        lastControllerCount = validControllers;
+        lastPawnCount = validPawns;
+        lastDrawnCount = drawnEntities;
     }
 }
 
@@ -747,19 +840,30 @@ void Features::BunnyHop()
     
     __try
     {
-        // Verificar si el jugador está en el suelo
-        bool onGround = g_pLocalPlayer->IsOnGround();
-        
-        // Si está en el suelo y se mantiene presionada la barra espaciadora, saltar
-        if (onGround)
+        // Check if space bar is being held
+        if (GetAsyncKeyState(VK_SPACE) & 0x8000)
         {
-            // Aquí necesitaríamos inyectar el comando de salto
-            // Por ahora es un placeholder - requiere hooking de comandos
+            // Check if player is on the ground
+            int flags = g_pLocalPlayer->GetFlags();
+            bool onGround = (flags & Offsets::FL_ONGROUND) != 0;
+            
+            if (onGround)
+            {
+                // Force jump by setting the jump flag
+                uintptr_t buttonAddr = g_clientBase + Offsets::dwForceJump();
+                
+                // Write jump command (65537 = jump pressed, 256 = jump released)
+                Memory::Write<int>(buttonAddr, 65537);
+                
+                // Small delay then release
+                Sleep(1);
+                Memory::Write<int>(buttonAddr, 256);
+            }
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        // Ignorar errores
+        // Ignore errors
     }
 }
 
@@ -776,26 +880,34 @@ void Features::RadarHack()
         int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
         if (maxEntities <= 0 || maxEntities > 8192) maxEntities = 64;
         
-        // Iterar sobre todos los jugadores
+        // Iterar sobre todos los jugadores (Controllers)
         for (int i = 1; i <= 64 && i <= maxEntities; i++)
         {
-            C_BaseEntity* entity = g_pEntitySystem->GetBaseEntity(i);
-            if (!entity) continue;
+            // Get controller
+            C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
+            if (!controller) continue;
             
-            // Validate entity pointer
-            if (!Memory::IsValidPointer((uintptr_t)entity)) continue;
+            // Validate controller pointer
+            if (!Memory::IsValidPointer((uintptr_t)controller)) continue;
+            
+            // Get pawn from controller
+            C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
+            if (!pawn) continue;
+            
+            // Validate pawn pointer
+            if (!Memory::IsValidPointer((uintptr_t)pawn)) continue;
             
             // Use safe validation
-            if (!entity->IsValid()) continue;
+            if (!pawn->IsValid()) continue;
             
             // Validar que es un jugador válido
-            int health = entity->GetHealth();
+            int health = pawn->GetHealth();
             if (health <= 0 || health > 200) continue;
             
             // Marcar como spotted (visible en el radar)
-            if (!entity->IsSpotted())
+            if (!pawn->IsSpotted())
             {
-                entity->SetSpotted(true);
+                pawn->SetSpotted(true);
             }
         }
     }
@@ -819,6 +931,7 @@ void Features::DrawCustomCrosshair()
     ));
     
     ImDrawList* dl = ImGui::GetBackgroundDrawList();
+    if (!dl) return;
     
     // Líneas horizontales y verticales
     dl->AddLine(ImVec2(cx - sz - gap, cy), ImVec2(cx - gap, cy), col, 2.0f);

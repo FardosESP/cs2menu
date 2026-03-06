@@ -11,6 +11,11 @@ struct Vector3
     float x, y, z;
 };
 
+struct Color
+{
+    uint8_t r, g, b, a;
+};
+
 struct ViewMatrix
 {
     float matrix[16];
@@ -31,12 +36,13 @@ namespace Offsets
         constexpr uintptr_t dwGlobalVars            = 0x2058FC0;
         constexpr uintptr_t dwGameRules             = 0x230A160;
         constexpr uintptr_t dwGameEntitySystem_getHighestEntityIndex = 0x20A0;
+        constexpr uintptr_t dwForceJump             = 0x230A1E0;
         
         constexpr uintptr_t m_iHealth        = 0x76C;
         constexpr uintptr_t m_iMaxHealth     = 0xB54;
         constexpr uintptr_t m_iTeamNum       = 0xD70;
-        constexpr uintptr_t m_pGameSceneNode = 0x338;
-        constexpr uintptr_t m_vecAbsOrigin   = 0xD0;
+        constexpr uintptr_t m_pGameSceneNode = 0x598;  // Updated from scanner
+        constexpr uintptr_t m_vecAbsOrigin   = 0xC4;   // Updated from scanner (offset within GameSceneNode)
         constexpr uintptr_t m_hPlayerPawn    = 0x90C;
         constexpr uintptr_t m_iIDEntIndex    = 0x3EAC;
         constexpr uintptr_t m_bDormant       = 0xE8;
@@ -44,7 +50,7 @@ namespace Offsets
         constexpr uintptr_t m_fFlags         = 0x400;
         constexpr uintptr_t m_vecVelocity    = 0x438;
         constexpr uintptr_t m_angEyeAngles   = 0x3DD0;
-        constexpr uintptr_t m_vecViewOffset  = 0xD58;
+        constexpr uintptr_t m_vecViewOffset  = 0x790;  // Updated from scanner
         constexpr uintptr_t m_aimPunchAngle  = 0x16CC;
         constexpr uintptr_t m_aimPunchCache  = 0x1728;
         constexpr uintptr_t m_iShotsFired    = 0x1414;
@@ -58,12 +64,32 @@ namespace Offsets
         // Weapon offsets
         constexpr uintptr_t m_hActiveWeapon = 0x12F8;
         
+        // Model and bone offsets
+        constexpr uintptr_t m_modelState = 0x160; // 352 in decimal
+        constexpr uintptr_t m_boneArray = 0x80;   // Offset within CModelState
+        
         constexpr uintptr_t m_pClippingWeapon = 0x1290;
         constexpr uintptr_t m_iClip1          = 0x1564;
         constexpr uintptr_t m_iClip2          = 0x1568;
         constexpr uintptr_t m_nFallbackPaintKit = 0x31B8;
         constexpr uintptr_t m_nFallbackSeed     = 0x31BC;
         constexpr uintptr_t m_flFallbackWear    = 0x31C0;
+        
+        // Glow offsets (from C_BaseModelEntity)
+        constexpr uintptr_t m_Glow = 0xCC0; // CGlowProperty
+        
+        // CGlowProperty offsets
+        constexpr uintptr_t m_fGlowColor = 0x8;           // Vector (RGB)
+        constexpr uintptr_t m_iGlowType = 0x30;           // int32
+        constexpr uintptr_t m_iGlowTeam = 0x34;           // int32
+        constexpr uintptr_t m_nGlowRange = 0x38;          // int32
+        constexpr uintptr_t m_nGlowRangeMin = 0x3C;       // int32
+        constexpr uintptr_t m_glowColorOverride = 0x40;   // Color (RGBA)
+        constexpr uintptr_t m_bFlashing = 0x44;           // bool
+        constexpr uintptr_t m_flGlowTime = 0x48;          // float32
+        constexpr uintptr_t m_flGlowStartTime = 0x4C;     // float32
+        constexpr uintptr_t m_bEligibleForScreenHighlight = 0x50; // bool
+        constexpr uintptr_t m_bGlowing = 0x51;            // bool
     }
     
     // Dynamic offset getters - use OffsetManager with fallback values
@@ -75,6 +101,7 @@ namespace Offsets
     inline uintptr_t dwGlobalVars()            { return OffsetManager::Instance().GetOffset("dwGlobalVars", Fallback::dwGlobalVars); }
     inline uintptr_t dwGameRules()             { return OffsetManager::Instance().GetOffset("dwGameRules", Fallback::dwGameRules); }
     inline uintptr_t dwGameEntitySystem_getHighestEntityIndex() { return OffsetManager::Instance().GetOffset("dwGameEntitySystem_getHighestEntityIndex", Fallback::dwGameEntitySystem_getHighestEntityIndex); }
+    inline uintptr_t dwForceJump()             { return OffsetManager::Instance().GetOffset("dwForceJump", Fallback::dwForceJump); }
     
     inline uintptr_t m_iHealth()        { return OffsetManager::Instance().GetOffset("m_iHealth", Fallback::m_iHealth); }
     inline uintptr_t m_iMaxHealth()     { return OffsetManager::Instance().GetOffset("m_iMaxHealth", Fallback::m_iMaxHealth); }
@@ -99,12 +126,29 @@ namespace Offsets
     inline uintptr_t m_iszPlayerName() { return OffsetManager::Instance().GetOffset("m_iszPlayerName", Fallback::m_iszPlayerName); }
     inline uintptr_t m_hActiveWeapon() { return OffsetManager::Instance().GetOffset("m_hActiveWeapon", Fallback::m_hActiveWeapon); }
     
+    inline uintptr_t m_modelState() { return OffsetManager::Instance().GetOffset("m_modelState", Fallback::m_modelState); }
+    inline uintptr_t m_boneArray() { return OffsetManager::Instance().GetOffset("m_boneArray", Fallback::m_boneArray); }
+    
     inline uintptr_t m_pClippingWeapon() { return OffsetManager::Instance().GetOffset("m_pClippingWeapon", Fallback::m_pClippingWeapon); }
     inline uintptr_t m_iClip1()          { return OffsetManager::Instance().GetOffset("m_iClip1", Fallback::m_iClip1); }
     inline uintptr_t m_iClip2()          { return OffsetManager::Instance().GetOffset("m_iClip2", Fallback::m_iClip2); }
     inline uintptr_t m_nFallbackPaintKit() { return OffsetManager::Instance().GetOffset("m_nFallbackPaintKit", Fallback::m_nFallbackPaintKit); }
     inline uintptr_t m_nFallbackSeed()     { return OffsetManager::Instance().GetOffset("m_nFallbackSeed", Fallback::m_nFallbackSeed); }
     inline uintptr_t m_flFallbackWear()    { return OffsetManager::Instance().GetOffset("m_flFallbackWear", Fallback::m_flFallbackWear); }
+    
+    // Glow offsets
+    inline uintptr_t m_Glow() { return OffsetManager::Instance().GetOffset("m_Glow", Fallback::m_Glow); }
+    inline uintptr_t m_fGlowColor() { return OffsetManager::Instance().GetOffset("m_fGlowColor", Fallback::m_fGlowColor); }
+    inline uintptr_t m_iGlowType() { return OffsetManager::Instance().GetOffset("m_iGlowType", Fallback::m_iGlowType); }
+    inline uintptr_t m_iGlowTeam() { return OffsetManager::Instance().GetOffset("m_iGlowTeam", Fallback::m_iGlowTeam); }
+    inline uintptr_t m_nGlowRange() { return OffsetManager::Instance().GetOffset("m_nGlowRange", Fallback::m_nGlowRange); }
+    inline uintptr_t m_nGlowRangeMin() { return OffsetManager::Instance().GetOffset("m_nGlowRangeMin", Fallback::m_nGlowRangeMin); }
+    inline uintptr_t m_glowColorOverride() { return OffsetManager::Instance().GetOffset("m_glowColorOverride", Fallback::m_glowColorOverride); }
+    inline uintptr_t m_bFlashing() { return OffsetManager::Instance().GetOffset("m_bFlashing", Fallback::m_bFlashing); }
+    inline uintptr_t m_flGlowTime() { return OffsetManager::Instance().GetOffset("m_flGlowTime", Fallback::m_flGlowTime); }
+    inline uintptr_t m_flGlowStartTime() { return OffsetManager::Instance().GetOffset("m_flGlowStartTime", Fallback::m_flGlowStartTime); }
+    inline uintptr_t m_bEligibleForScreenHighlight() { return OffsetManager::Instance().GetOffset("m_bEligibleForScreenHighlight", Fallback::m_bEligibleForScreenHighlight); }
+    inline uintptr_t m_bGlowing() { return OffsetManager::Instance().GetOffset("m_bGlowing", Fallback::m_bGlowing); }
     
     // Flags
     constexpr int FL_ONGROUND = (1 << 0);
@@ -125,9 +169,9 @@ public:
             int health = GetHealth();
             int team = GetTeamNum();
             
-            // Basic sanity checks
-            if (health < 0 || health > 500) return false;
-            if (team < 0 || team > 3) return false;
+            // Basic sanity checks - más permisivo
+            if (health < 0 || health > 1000) return false;  // Aumentado a 1000
+            if (team < 0 || team > 10) return false;  // Aumentado a 10
             
             return true;
         }
@@ -214,6 +258,80 @@ public:
             return 0;
         }
     }
+    
+    // Get bone position by bone ID
+    Vector3 GetBonePosition(int boneId)
+    {
+        // Get game scene node
+        uintptr_t sceneNode = *(uintptr_t*)((uintptr_t)this + Offsets::m_pGameSceneNode());
+        if (!sceneNode) return {};
+        
+        // Get model state from scene node
+        uintptr_t modelState = sceneNode + Offsets::m_modelState();
+        if (!modelState) return {};
+        
+        // Get bone array from model state
+        uintptr_t boneArray = *(uintptr_t*)(modelState + Offsets::m_boneArray());
+        if (!boneArray) return {};
+        
+        // Each bone is a 3x4 matrix (32 bytes)
+        // Position is stored in the last column (indices 3, 7, 11)
+        uintptr_t boneMatrix = boneArray + (boneId * 32);
+        
+        Vector3 bonePos;
+        bonePos.x = *(float*)(boneMatrix + 12); // matrix[0][3]
+        bonePos.y = *(float*)(boneMatrix + 28); // matrix[1][3]
+        bonePos.z = *(float*)(boneMatrix + 44); // matrix[2][3]
+        
+        return bonePos;
+    }
+    
+    // Glow methods
+    void SetGlow(bool enabled, Color color, int glowType = 3, int range = 0, int rangeMin = 0)
+    {
+        __try
+        {
+            // Get glow property address
+            uintptr_t glowProperty = (uintptr_t)this + Offsets::m_Glow();
+            if (!glowProperty) return;
+            
+            // Set glow enabled
+            *(bool*)(glowProperty + Offsets::m_bGlowing()) = enabled;
+            
+            if (enabled)
+            {
+                // Set glow type (3 = full glow)
+                *(int*)(glowProperty + Offsets::m_iGlowType()) = glowType;
+                
+                // Set glow color (RGB as Vector3)
+                Vector3* glowColor = (Vector3*)(glowProperty + Offsets::m_fGlowColor());
+                glowColor->x = color.r / 255.0f;
+                glowColor->y = color.g / 255.0f;
+                glowColor->z = color.b / 255.0f;
+                
+                // Set glow color override (RGBA)
+                *(Color*)(glowProperty + Offsets::m_glowColorOverride()) = color;
+                
+                // Set glow range
+                *(int*)(glowProperty + Offsets::m_nGlowRange()) = range;
+                *(int*)(glowProperty + Offsets::m_nGlowRangeMin()) = rangeMin;
+                
+                // Enable screen highlight
+                *(bool*)(glowProperty + Offsets::m_bEligibleForScreenHighlight()) = true;
+            }
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            // Silently fail
+        }
+    }
+    
+    void SetGlowTeamBased(int localTeam, Color enemyColor, Color teamColor)
+    {
+        int entityTeam = GetTeamNum();
+        Color glowColor = (entityTeam == localTeam) ? teamColor : enemyColor;
+        SetGlow(true, glowColor);
+    }
 };
 
 // --- C_CSPlayerController ---
@@ -260,25 +378,105 @@ public:
         return *(int*)((uintptr_t)this + Offsets::dwGameEntitySystem_getHighestEntityIndex());
     }
     
-    // Obtener entidad por índice (método correcto para CS2)
+    // Decode entity handle to get actual pointer
+    // CS2 uses handles instead of direct pointers
+    // Handle format: [chunk_index:15][index_in_chunk:9][serial:8]
+    C_BaseEntity* DecodeHandle(uint32_t handle)
+    {
+        if (handle == 0 || handle == 0xFFFFFFFF) return nullptr;
+        
+        __try
+        {
+            uintptr_t entitySystem = (uintptr_t)this;
+            
+            // Read the entity list pointer at +0x10
+            uintptr_t entityListArray = *(uintptr_t*)(entitySystem + 0x10);
+            if (!entityListArray || entityListArray < 0x1000) return nullptr;
+            
+            // Extract chunk index and index within chunk from handle
+            // Handle bits: [15 bits chunk][9 bits index][8 bits serial]
+            int chunkIndex = (handle & 0x7FFF) >> 9;  // Bits 9-23
+            int indexInChunk = handle & 0x1FF;         // Bits 0-8
+            
+            // Read chunk pointer from entity list array
+            // Array starts at +16 bytes (0x10), each pointer is 8 bytes
+            uintptr_t chunkPtr = *(uintptr_t*)(entityListArray + 0x10 + (chunkIndex * 8));
+            if (!chunkPtr || chunkPtr < 0x1000) return nullptr;
+            
+            // Read entity pointer from chunk
+            // Each entity entry is 120 bytes (0x78)
+            uintptr_t entityPtr = *(uintptr_t*)(chunkPtr + (indexInChunk * 0x78));
+            if (!entityPtr || entityPtr < 0x1000) return nullptr;
+            
+            return (C_BaseEntity*)entityPtr;
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            return nullptr;
+        }
+    }
+    
+    // Get entity by index (for Controllers - indices 1-64)
+    // This returns CCSPlayerController, NOT the pawn
     C_BaseEntity* GetBaseEntity(int index)
     {
         if (index < 0 || index > 8192) return nullptr;
         
-        // Fórmula correcta para CS2 (con precedencia de operadores correcta):
-        // list_entry = EntityList + (8 * ((index & 0x7FFF) >> 9)) + 16
-        // entity = list_entry + (120 * (index & 0x1FF))
+        __try
+        {
+            // CGameEntitySystem structure in CS2:
+            // +0x00: vtable
+            // +0x10: m_pEntityList (pointer to entity list array)
+            // The entity list array contains chunk pointers
+            
+            uintptr_t entitySystem = (uintptr_t)this;
+            
+            // Read the entity list pointer at +0x10
+            // This is the actual array of chunk pointers
+            uintptr_t entityListArray = *(uintptr_t*)(entitySystem + 0x10);
+            if (!entityListArray || entityListArray < 0x1000) return nullptr;
+            
+            // Calculate chunk index (each chunk holds 512 entities)
+            int chunkIndex = index >> 9;      // Divide by 512
+            int indexInChunk = index & 0x1FF; // Modulo 512
+            
+            // Read chunk pointer from entity list array
+            // Array starts at +16 bytes (0x10), each pointer is 8 bytes
+            uintptr_t chunkPtr = *(uintptr_t*)(entityListArray + 0x10 + (chunkIndex * 8));
+            if (!chunkPtr || chunkPtr < 0x1000) return nullptr;
+            
+            // Read entity pointer from chunk
+            // Each entity entry is 120 bytes (0x78)
+            uintptr_t entityPtr = *(uintptr_t*)(chunkPtr + (indexInChunk * 0x78));
+            if (!entityPtr || entityPtr < 0x1000) return nullptr;
+            
+            return (C_BaseEntity*)entityPtr;
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            return nullptr;
+        }
+    }
+    
+    // Get player pawn from controller (CORRECT METHOD for CS2)
+    // Controllers and Pawns are separate - must decode handle
+    C_CSPlayerPawn* GetPlayerPawn(C_BaseEntity* controller)
+    {
+        if (!controller) return nullptr;
         
-        uintptr_t entityList = (uintptr_t)this;
-        
-        int listIndex = (index & 0x7FFF) >> 9;
-        uintptr_t listEntry = *(uintptr_t*)(entityList + (8 * listIndex) + 16);
-        if (!listEntry) return nullptr;
-        
-        uintptr_t entityPtr = *(uintptr_t*)(listEntry + (120 * (index & 0x1FF)));
-        if (!entityPtr) return nullptr;
-        
-        return (C_BaseEntity*)entityPtr;
+        __try
+        {
+            // Read pawn handle from controller
+            uint32_t pawnHandle = *(uint32_t*)((uintptr_t)controller + Offsets::m_hPlayerPawn());
+            if (pawnHandle == 0 || pawnHandle == 0xFFFFFFFF) return nullptr;
+            
+            // Decode handle to get actual pawn pointer
+            return (C_CSPlayerPawn*)DecodeHandle(pawnHandle);
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            return nullptr;
+        }
     }
 };
 
