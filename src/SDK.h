@@ -25,12 +25,12 @@ struct ViewMatrix
 // Dynamic offsets loaded from OffsetManager
 namespace Offsets
 {
-    // Hardcoded fallback values (Build 14138 - 2026-03-05)
+    // Hardcoded fallback values (Build Feb 24, 2026)
     namespace Fallback
     {
-        constexpr uintptr_t dwEntityList            = 0x24AE628;
-        constexpr uintptr_t dwLocalPlayerPawn       = 0x2066DE0;
-        constexpr uintptr_t dwViewMatrix            = 0x2309420;
+        constexpr uintptr_t dwEntityList            = 0x21CD670;  // 35422320 decimal
+        constexpr uintptr_t dwLocalPlayerPawn       = 0x2066DF0;  // 33970928 decimal  
+        constexpr uintptr_t dwViewMatrix            = 0x2309460;  // 36749024 decimal
         constexpr uintptr_t dwLocalPlayerController = 0x22F1888;
         constexpr uintptr_t dwViewAngles            = 0x2318668;
         constexpr uintptr_t dwGlobalVars            = 0x2058FC0;
