@@ -5,11 +5,9 @@
 
 void Aimbot::Update(C_CSPlayerPawn* localPlayer, C_CSGameEntitySystem* entitySystem, uintptr_t clientBase)
 {
-    if (!localPlayer || !entitySystem || !clientBase)
-        return;
-    
-    // This will be called from Features::RunAimbot()
-    // Implementation will be added based on config
+    // This is called from Features::RunAimbot() which handles the config
+    // Implementation moved to Features.cpp for better integration
+    // Keeping this as a placeholder for future refactoring
 }
 
 C_CSPlayerPawn* Aimbot::GetBestTarget(C_CSPlayerPawn* localPlayer, C_CSGameEntitySystem* entitySystem,
@@ -26,8 +24,9 @@ C_CSPlayerPawn* Aimbot::GetBestTarget(C_CSPlayerPawn* localPlayer, C_CSGameEntit
         int localTeam = localPlayer->GetTeamNum();
         Vector3 localEyePos = localPlayer->GetEyePosition();
         
-        // Get current view angles (placeholder - needs actual implementation)
-        Vector3 viewAngles = {}; // TODO: Read from dwViewAngles
+        // Get current view angles from game
+        uintptr_t viewAnglesAddr = Memory::GetModuleBase("client.dll") + Offsets::dwViewAngles();
+        Vector3 viewAngles = Memory::Read<Vector3>(viewAnglesAddr);
         
         int maxEntities = entitySystem->GetHighestEntityIndex();
         if (maxEntities <= 0 || maxEntities > 8192)
