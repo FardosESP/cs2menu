@@ -468,43 +468,34 @@ void OffsetScanner::ScanEntityList(uintptr_t entityListAddr)
     
     std::vector<TestResult> results;
     
-    // Method 1: NEW CHUNK-BASED METHOD (Source 2 correct way)
+    // Method 1: CORRECT METHOD from UnknownCheats (working code)
     {
         int validCount = 0;
         uintptr_t firstAddr = 0;
         
-        // Read entity list array pointer at +0x10
-        uintptr_t entityListArray = 0;
-        if (SafeRead(entityListAddr + 0x10, entityListArray) && entityListArray > 0x1000)
+        for (int i = 1; i <= 64 && validCount < 5; i++)
         {
-            for (int i = 1; i <= 64 && validCount < 5; i++)
+            // Formula: entityList + 8 * ((i & 0x7FFF) >> 9) + 16
+            uintptr_t listEntry = 0;
+            if (!SafeRead(entityListAddr + 8 * ((i & 0x7FFF) >> 9) + 16, listEntry) || listEntry < 0x1000)
+                continue;
+            
+            // Formula: listEntry + 120 * (i & 0x1FF)
+            uintptr_t entityPtr = 0;
+            if (!SafeRead(listEntry + 120 * (i & 0x1FF), entityPtr) || entityPtr < 0x1000)
+                continue;
+            
+            // Validate entity
+            int health = 0, team = 0;
+            if (SafeRead(entityPtr + Offsets::m_iHealth(), health) &&
+                SafeRead(entityPtr + Offsets::m_iTeamNum(), team) &&
+                health > 0 && health <= 100 && (team == 2 || team == 3))
             {
-                // Calculate chunk index and offset
-                int chunkIndex = i >> 9;        // i / 512
-                int indexInChunk = i & 0x1FF;   // i % 512
-                
-                // Read chunk pointer from array (+0x10 offset in array)
-                uintptr_t chunkPtr = 0;
-                if (!SafeRead(entityListArray + 0x10 + (chunkIndex * 8), chunkPtr) || chunkPtr < 0x1000)
-                    continue;
-                
-                // Read entity from chunk (stride 0x78)
-                uintptr_t entityPtr = 0;
-                if (!SafeRead(chunkPtr + (indexInChunk * 0x78), entityPtr) || entityPtr < 0x1000)
-                    continue;
-                
-                // Validate entity
-                int health = 0, team = 0;
-                if (SafeRead(entityPtr + Offsets::m_iHealth(), health) &&
-                    SafeRead(entityPtr + Offsets::m_iTeamNum(), team) &&
-                    health > 0 && health <= 100 && (team == 2 || team == 3))
-                {
-                    if (validCount == 0) firstAddr = entityPtr;
-                    validCount++;
-                }
+                if (validCount == 0) firstAddr = entityPtr;
+                validCount++;
             }
         }
-        results.push_back({"NEW: Chunk-based (array+0x10, stride 0x78)", validCount, firstAddr});
+        results.push_back({"CORRECT: UnknownCheats method", validCount, firstAddr});
     }
     
     // Method 2: Try with different array start offsets

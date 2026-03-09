@@ -1,239 +1,196 @@
-# CS2 Menu - Internal Cheat for Counter-Strike 2
+# CS2MENU - Premium Edition
 
-A feature-rich internal cheat for Counter-Strike 2 with ESP, Aimbot, and various visual/misc enhancements.
+**Build 14138.3** | Counter-Strike 2 External Cheat
+
+---
+
+## 🎯 Features
+
+### Visual ESP
+- **Box ESP** - Cajas 2D/3D alrededor de jugadores
+- **Health Bar** - Barra de vida con colores (verde/amarillo/rojo)
+- **Skeleton ESP** - Esqueleto de jugadores
+- **Name ESP** - Nombres de jugadores
+- **Distance ESP** - Distancia en metros
+- **Weapon ESP** - Arma equipada
+- **Snaplines** - Líneas desde el centro de la pantalla
+- **Team Check** - Filtrar compañeros de equipo
+- **Glow ESP** - Resplandor alrededor de jugadores
+
+### Aimbot
+- **FOV Circle** - Círculo de campo de visión
+- **Smooth Aim** - Suavizado de movimiento
+- **Visible Only** - Solo apuntar a enemigos visibles
+- **Team Check** - No apuntar a compañeros
+- **Bone Selection** - Selección de hueso (cabeza, pecho, etc.)
+- **Auto Shoot** - Disparo automático
+- **RCS** - Control de retroceso
+
+### Misc
+- **Radar Hack** - Mostrar enemigos en radar
+- **Bhop** - Salto automático
+- **No Flash** - Eliminar ceguera de flashbangs
+
+---
+
+## � Instalación Rápida
+
+### Requisitos
+- Windows 10/11 (64-bit)
+- Visual Studio 2019+ o CMake 3.15+
+- Counter-Strike 2 (Build 14138 o superior)
+
+### Compilación
+
+```bash
+# 1. Clonar repositorio
+git clone <repo-url>
+cd cs2menu
+
+# 2. Compilar (Release)
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+
+# 3. Los archivos estarán en:
+# - build/Release/Release/cs2menu.dll
+# - build/Release/Release/cs2menu_launcher.exe
+# - build/Release/Release/offsets.json
+```
+
+### Uso
+
+1. **Abrir CS2** y entrar en una partida
+2. **Ejecutar Launcher** como Administrador
+3. El launcher esperará a que CS2 cargue completamente
+4. **Inyección automática** cuando el juego esté listo
+5. **INSERT** para abrir/cerrar menú
+6. **F9** para escanear offsets (si es necesario)
+7. **END** para desinyectar
+
+---
+
+## ⚙️ Configuración
+
+### offsets.json
+
+El archivo `offsets.json` contiene los offsets de memoria para el build actual de CS2. Se actualiza automáticamente con cada update del juego.
+
+```json
+{
+  "client.dll": {
+    "dwLocalPlayerPawn": 33970960,
+    "dwEntityList": 38453920,
+    "dwViewMatrix": 36749024,
+    ...
+  }
+}
+```
+
+### Actualizar Offsets
+
+Si CS2 se actualiza y el cheat deja de funcionar:
+
+1. Presiona **F9** en el juego para escanear offsets
+2. O descarga offsets actualizados de [cs2-dumper](https://github.com/a2x/cs2-dumper)
+3. Copia los valores a `offsets.json` (formato decimal)
+
+---
+
+## 🎮 Controles
+
+| Tecla | Acción |
+|-------|--------|
+| **INSERT** | Abrir/Cerrar menú |
+| **F9** | Escanear offsets |
+| **END** | Desinyectar cheat |
+
+---
+
+## 📋 Troubleshooting
+
+### LocalPlayerPawn is NULL
+- Asegúrate de estar **spawneado** (vivo, no muerto)
+- Espera 2-3 segundos después de spawnear
+- Presiona **F9** para escanear offsets
+- Verifica que `offsets.json` existe en la carpeta del DLL
+
+### ESP no muestra jugadores
+- Verifica que estás en una partida con otros jugadores
+- Presiona **F9** para actualizar offsets
+- Revisa que `dwEntityList` está actualizado
+
+### Launcher falla al inyectar
+- Ejecuta como **Administrador**
+- Espera a que CS2 cargue completamente (menú principal)
+- Verifica que `cs2menu.dll` está en la misma carpeta
+
+Ver [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para más detalles.
+
+---
+
+## 📝 Changelog
+
+Ver [CHANGELOG.md](CHANGELOG.md) para historial completo de cambios.
+
+### Última Versión (Build 14138.3)
+
+**Fixes Aplicados:**
+- ✅ Offsets actualizados a Mar 5, 2026
+- ✅ Sistema de timing dinámico en Launcher
+- ✅ Validación post-inyección
+- ✅ Presentación profesional de consola
+- ✅ Eliminados delays hardcoded
+- ✅ Verificación de módulos del juego
+
+---
 
 ## ⚠️ Disclaimer
 
-This project is for **educational purposes only**. Using cheats in online games violates the game's Terms of Service and can result in permanent bans. Use at your own risk.
+Este proyecto es solo para **fines educativos**. El uso de cheats en juegos online puede resultar en:
+- Ban permanente de tu cuenta
+- Ban de hardware (HWID)
+- Violación de términos de servicio
 
-## ✨ Features
+**Usa bajo tu propio riesgo.** Los desarrolladores no se hacen responsables de ningún ban o consecuencia.
 
-### ESP (Wallhack)
-- ✅ Player boxes (2D)
-- ✅ Health display
-- ✅ Health bars
-- ✅ Player names
-- ✅ Weapon display
-- ✅ Distance indicator
-- ✅ Snaplines
-- ✅ Team/enemy filtering
-- ✅ Dormant entity filtering
-- 🚧 Skeleton ESP (in progress)
-- 🚧 Glow effect (in progress)
+---
 
-### Aimbot
-- ✅ FOV-based target selection
-- ✅ Smooth aim
-- ✅ Angle normalization
-- ✅ Silent aim option
-- ✅ Team check
-- ✅ Visibility check
-- 🚧 Auto-shoot (in progress)
-- 🚧 Triggerbot (in progress)
-- 🚧 RCS (Recoil Control System) (in progress)
+## 📚 Documentación Adicional
 
-### Visuals
-- ✅ Custom crosshair
-- ✅ No flash
-- ✅ FOV changer
-- 🚧 No smoke (in progress)
-- 🚧 Nightmode (in progress)
+- [COMPILATION_AND_INJECTION_GUIDE.md](COMPILATION_AND_INJECTION_GUIDE.md) - Guía detallada de compilación
+- [GUIA_RAPIDA_USO.md](GUIA_RAPIDA_USO.md) - Guía rápida en español
+- [FEATURES_TODO.md](FEATURES_TODO.md) - Features pendientes
+- [docs/archive/](docs/archive/) - Documentación histórica
 
-### Misc
-- ✅ Radar hack
-- 🚧 Bunny hop (in progress)
-- 🚧 Auto strafe (in progress)
+---
 
-### System Features
-- ✅ Dynamic offset loading (OffsetManager)
-- ✅ JSON/Config file support for offsets
-- ✅ Automatic fallback offsets
-- ✅ Memory safety with exception handling
-- ✅ Comprehensive logging
-- ✅ ImGui-based menu
-- ✅ SDL3 mouse/keyboard input handling
+## 🔧 Desarrollo
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Windows 10/11 (64-bit)
-- Visual Studio 2022 with C++ development tools
-- CMake 3.15 or higher
-- Counter-Strike 2 installed
-
-### Building
-
-1. Clone the repository:
-```bash
-git clone https://github.com/FardosESP/cs2menu.git
-cd cs2menu
-```
-
-2. Run the automated build script:
-```bash
-python setup_and_build.py
-```
-
-Or build manually:
-```bash
-mkdir build
-cd build
-cmake .. -G "Visual Studio 17 2022" -A x64
-cmake --build . --config Release
-```
-
-3. The compiled files will be in `build/Release/Release/`:
-   - `cs2menu.dll` - The cheat DLL
-   - `cs2menu_launcher.exe` - Automatic injector
-
-### Usage
-
-#### Method 1: Using the Launcher (Recommended)
-1. Start Counter-Strike 2
-2. Run `cs2menu_launcher.exe` as Administrator
-3. The DLL will be automatically injected
-
-#### Method 2: Manual Injection
-1. Start Counter-Strike 2
-2. Use any DLL injector to inject `cs2menu.dll` into `cs2.exe`
-
-#### Controls
-- `INSERT` - Toggle menu visibility
-- `END` - Unload cheat
-
-## 📖 Documentation
-
-- [Features TODO](FEATURES_TODO.md) - Complete list of planned features
-- [Troubleshooting Guide](TROUBLESHOOTING.md) - Common issues and solutions
-- [Offset Manager README](OFFSET_MANAGER_README.md) - How to update offsets
-- [How to Update Offsets](COMO_ACTUALIZAR_OFFSETS.md) - Step-by-step offset update guide
-- [Tests README](src/TESTS_README.md) - Information about unit tests
-
-## 🔧 Configuration
-
-### Updating Offsets
-
-The cheat uses dynamic offset loading. To update offsets:
-
-1. Download the latest offsets from [cs2-dumper](https://github.com/a2x/cs2-dumper)
-2. Place `offsets.json` in the same directory as the DLL
-3. Restart CS2 and reinject the cheat
-
-Alternatively, create an `offsets.cfg` file:
-```
-dwEntityList=0x24AE628
-dwLocalPlayerPawn=0x2066DE0
-dwViewMatrix=0x2309420
-m_iHealth=0x76C
-m_iTeamNum=0xD70
-```
-
-### Menu Configuration
-
-All features can be configured through the in-game menu (press `INSERT`):
-
-- **ESP Tab**: Configure wallhack settings
-- **Aimbot Tab**: Configure aimbot settings
-- **Visuals Tab**: Configure visual enhancements
-- **Misc Tab**: Configure miscellaneous features
-- **Skins Tab**: Skin changer (coming soon)
-
-## 🏗️ Project Structure
+### Estructura del Proyecto
 
 ```
 cs2menu/
-├── src/                    # Source code
-│   ├── Aimbot.cpp/h       # Aimbot implementation
-│   ├── Features.cpp/h     # Main features (ESP, etc.)
-│   ├── OffsetManager.cpp/h # Dynamic offset management
-│   ├── Memory.cpp/h       # Memory reading/writing utilities
-│   ├── SDK.h              # Game structures and offsets
-│   ├── Hooks.cpp/h        # DirectX and SDL hooks
-│   ├── ImGui_Renderer.cpp/h # Menu rendering
+├── src/
+│   ├── DllMain.cpp          # Entry point
+│   ├── Features.cpp         # ESP, Radar, etc.
+│   ├── Aimbot.cpp          # Aimbot logic
+│   ├── SDK.h               # Game SDK
+│   ├── OffsetManager.cpp   # Offset management
+│   ├── Launcher.cpp        # Injector
 │   └── ...
-├── lib/                   # External libraries
-│   ├── imgui/            # ImGui library
-│   └── minhook/          # MinHook library
-├── docs/                  # Documentation
-├── CMakeLists.txt        # CMake configuration
-└── setup_and_build.py    # Automated build script
+├── offsets.json            # Memory offsets
+├── CMakeLists.txt          # Build configuration
+└── README.md               # This file
 ```
 
-## 🧪 Testing
+### Contribuir
 
-The project includes unit tests for critical components:
+1. Fork el repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-feature`)
+3. Commit tus cambios (`git commit -am 'Añadir nueva feature'`)
+4. Push a la rama (`git push origin feature/nueva-feature`)
+5. Crea un Pull Request
 
-```bash
-# Build and run tests
-cmake --build build --config Release --target test_offsetmanager
-./build/Release/Release/test_offsetmanager.exe
-```
+---
 
-## 🐛 Troubleshooting
-
-### ESP not showing players
-1. Make sure ESP is enabled in the menu
-2. Disable "Team Check" and "Dormant Check"
-3. Increase "Max Distance" to 5000
-4. Verify you're in an active match (not in menu)
-
-### Aimbot not working
-1. Increase FOV to 180
-2. Reduce Smooth to 1.0
-3. Disable "Visible Only" and "Team Check"
-4. Make sure you're aiming near an enemy
-
-### Features not working at all
-1. Check the debug console for errors
-2. Verify you're in an active match (not spectating or dead)
-3. Update offsets from cs2-dumper
-4. See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed diagnostics
-
-## 📝 Current Status
-
-**Build**: 14138 (2026-03-05)
-
-**Working**:
-- ✅ DLL injection and hooking
-- ✅ ImGui menu with SDL3 input
-- ✅ LocalPlayer detection
-- ✅ Basic ESP (boxes, health, distance)
-- ✅ Player names and weapon display
-- ✅ Aimbot core system
-- ✅ Custom crosshair
-- ✅ No flash
-- ✅ Radar hack
-
-**In Progress**:
-- 🚧 EntityList iteration (needs offset verification)
-- 🚧 Skeleton ESP
-- 🚧 Triggerbot
-- 🚧 Bunny hop
-- 🚧 Skin changer
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📜 License
-
-This project is provided as-is for educational purposes. No warranty or support is provided.
-
-## 🔗 Links
-
-- [cs2-dumper](https://github.com/a2x/cs2-dumper) - Offset dumper for CS2
-- [ImGui](https://github.com/ocornut/imgui) - GUI library
-- [MinHook](https://github.com/TsudaKageyu/minhook) - Hooking library
-
-## ⚠️ Legal Notice
-
-This software is provided for educational and research purposes only. The developers are not responsible for any misuse or damage caused by this software. Using cheats in online games is against the Terms of Service and may result in permanent bans.
-
-**USE AT YOUR OWN RISK**
+**CS2MENU Premium Edition** - Build 14138.3 (Mar 2026)

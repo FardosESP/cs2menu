@@ -1,0 +1,77 @@
+void Features::Update()
+{
+    if (!g_bInitialized || !g_clientBase) return;
+    
+    // Obtener jugador local de forma segura
+    __try
+    {
+        // MÉTODO SIMPLE: Leer LocalPlayer directamente desde dwLocalPlayerPawn
+        uintptr_t localPawnAddr = g_clientBase + Offsets::dwLocalPlayerPawn;
+        uintptr_t localPawn = Memory::Read<uintptr_t>(localPawnAddr);
+        
+        // Mensaje de debug solo la primera vez
+        static bool firstCheck = true;
+        if (firstCheck)
+        {
+            std::cout << "\n[DEBUG] LocalPawnAddr: 0x" << std::hex << localPawnAddr << std::dec << std::endl;
+            std::cout << "[DEBUG] LocalPawn: 0x" << std::hex << localPawn << std::dec << std::endl;
+            
+            if (localPawn != 0)
+            {
+                int health = Memory::Read<int>(localPawn + Offsets::m_iHealth);
+                int team = Memory::Read<int>(localPawn + Offsets::m_iTeamNum);
+                std::cout << "[DEBUG] Health: " << health << ", Team: " << team << std::endl;
+                
+                if (health > 0 && health <= 200)
+                {
+                    std::cout << "[+] LocalPlayer encontrado!" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "[WARNING] LocalPawn es NULL - no estas en partida?" << std::endl;
+            }
+            
+            firstCheck = false;
+        }
+        
+        // Validar y asignar LocalPlayer
+        if (localPawn != 0)
+        {
+            int health = Memory::Read<int>(localPawn + Offsets::m_iHealth);
+            if (health > 0 && health <= 200)
+            {
+                g_pLocalPlayer = (C_CSPlayerPawn*)localPawn;
+            }
+            else
+            {
+                g_pLocalPlayer = nullptr;
+            }
+        }
+        else
+        {
+            g_pLocalPlayer = nullptr;
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        g_pLocalPlayer = nullptr;
+    }
+    
+    // Ejecutar features solo si tenemos jugador local válido
+    if (g_pLocalPlayer)
+    {
+        if (cfg_esp.enabled)
+            RenderESP();
+        
+        if (cfg_aim.enabled)
+            RunAimbot();
+        
+        ApplyVisuals();
+        RunMisc();
+    }
+    
+    // Crosshair custom se dibuja siempre
+    if (cfg_vis.crosshair)
+        DrawCustomCrosshair();
+}

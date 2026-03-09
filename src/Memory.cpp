@@ -31,9 +31,12 @@ uintptr_t Memory::FindPattern(const char* moduleName, const char* pattern, const
 
 uintptr_t Memory::FindPattern(uintptr_t start, size_t size, const char* pattern, const char* mask)
 {
-    size_t patternLen = strlen(mask);
+    if (!pattern || !mask) return 0;
     
-    for (size_t i = 0; i < size - patternLen; i++)
+    size_t patternLen = strlen(mask);
+    if (patternLen == 0 || patternLen > size) return 0;
+    
+    for (size_t i = 0; i <= size - patternLen; i++)
     {
         bool found = true;
         for (size_t j = 0; j < patternLen; j++)

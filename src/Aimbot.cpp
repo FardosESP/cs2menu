@@ -33,8 +33,9 @@ C_CSPlayerPawn* Aimbot::GetBestTarget(C_CSPlayerPawn* localPlayer, C_CSGameEntit
         if (maxEntities <= 0 || maxEntities > 8192)
             maxEntities = 64;
         
-        // Iterate through all players
-        for (int i = 1; i <= 64 && i <= maxEntities; i++)
+        // Iterate through all players (increased limit to 2048 for CS2 chunk system)
+        int scanLimit = (maxEntities > 2048) ? 2048 : maxEntities;
+        for (int i = 1; i <= scanLimit; i++)
         {
             C_BaseEntity* entity = entitySystem->GetBaseEntity(i);
             if (!entity) continue;
@@ -43,7 +44,7 @@ C_CSPlayerPawn* Aimbot::GetBestTarget(C_CSPlayerPawn* localPlayer, C_CSGameEntit
             if (!entity->IsValid()) continue;
             
             int health = entity->GetHealth();
-            if (health <= 0 || health > 200) continue;
+            if (health <= 0 || health > 100) continue;
             
             C_CSPlayerPawn* target = (C_CSPlayerPawn*)entity;
             
@@ -95,8 +96,8 @@ Vector3 Aimbot::CalculateAngle(const Vector3& from, const Vector3& to)
     float hyp = sqrtf(delta.x * delta.x + delta.y * delta.y);
     
     Vector3 angles;
-    angles.x = atanf(delta.z / hyp) * (180.0f / M_PI);
-    angles.y = atanf(delta.y / delta.x) * (180.0f / M_PI);
+    angles.x = atan2f(-delta.z, hyp) * (180.0f / M_PI);
+    angles.y = atan2f(delta.y, delta.x) * (180.0f / M_PI);
     angles.z = 0.0f;
     
     if (delta.x >= 0.0f)
@@ -159,21 +160,39 @@ Vector3 Aimbot::SmoothAim(const Vector3& currentAngles, const Vector3& targetAng
 
 bool Aimbot::IsVisible(C_CSPlayerPawn* localPlayer, C_CSPlayerPawn* target, const Vector3& targetPos)
 {
-    // Placeholder - proper visibility check requires ray tracing
-    // For now, just return true
-    // TODO: Implement proper ray tracing using game's trace functions
-    return true;
+    if (!target) return false;
+    
+    __try
+    {
+        // Use spotted flag as approximation
+        // In CS2, spotted = visible on radar = likely visible
+        return target->IsSpotted();
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+    
+    // TODO: Implement proper ray tracing for perfect accuracy
+    // Requires access to game's trace functions
 }
 
 Vector3 Aimbot::GetBonePosition(C_CSPlayerPawn* pawn, int boneId)
 {
-    // Placeholder - requires bone matrix offsets
-    // For now, return eye position
     if (!pawn) return {};
     
     __try
     {
-        return pawn->GetEyePosition();
+        // Use the pawn's GetBonePosition method
+        Vector3 bonePos = pawn->GetBonePosition(boneId);
+        
+        // If bone position is invalid (all zeros), fallback to eye position
+        if (bonePos.x == 0.0f && bonePos.y == 0.0f && bonePos.z == 0.0f)
+        {
+            return pawn->GetEyePosition();
+        }
+        
+        return bonePos;
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {

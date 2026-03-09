@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4CE132F5-7020-366B-9101-350C73B7DCDE}</ProjectGuid>
+    <ProjectGuid>{CAF0610D-E2CF-38A1-B1A5-31EA5C43C6FC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\Release\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\Release\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cs2menu.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cs2menu</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\Release\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\Release\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cs2menu.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cs2menu</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\Release\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\Release\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">cs2menu.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">cs2menu</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\Release\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\Release\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">cs2menu.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">cs2menu</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.dll</TargetExt>
@@ -87,20 +87,23 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4201;4100;4189;4127;4324;4458;4505;4826;4668;4706;4714;4710;4738;4746;4774;4800;4820;4996</DisableSpecificWarnings>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";cs2menu_EXPORTS</PreprocessorDefinitions>
@@ -109,10 +112,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";cs2menu_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -123,11 +126,15 @@
       <AdditionalDependencies>user32.lib;gdi32.lib;d3d11.lib;dxgi.lib;psapi.lib;dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/Debug/cs2menu.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/Release/Debug/cs2menu.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/Debug/cs2menu.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/Release/Debug/cs2menu.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -135,19 +142,22 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DisableSpecificWarnings>4201;4100;4189;4127;4324;4458;4505;4826;4668;4706;4714;4710;4738;4746;4774;4800;4820;4996</DisableSpecificWarnings>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";cs2menu_EXPORTS</PreprocessorDefinitions>
@@ -158,10 +168,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";cs2menu_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -172,11 +182,15 @@
       <AdditionalDependencies>user32.lib;gdi32.lib;d3d11.lib;dxgi.lib;psapi.lib;dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/Release/cs2menu.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/Release/Release/cs2menu.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/Release/cs2menu.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/Release/Release/cs2menu.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -184,19 +198,22 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DisableSpecificWarnings>4201;4100;4189;4127;4324;4458;4505;4826;4668;4706;4714;4710;4738;4746;4774;4800;4820;4996</DisableSpecificWarnings>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel";cs2menu_EXPORTS</PreprocessorDefinitions>
@@ -207,10 +224,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\";cs2menu_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -221,11 +238,15 @@
       <AdditionalDependencies>user32.lib;gdi32.lib;d3d11.lib;dxgi.lib;psapi.lib;dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/MinSizeRel/cs2menu.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/Release/MinSizeRel/cs2menu.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/MinSizeRel/cs2menu.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/Release/MinSizeRel/cs2menu.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -233,20 +254,23 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4201;4100;4189;4127;4324;4458;4505;4826;4668;4706;4714;4710;4738;4746;4774;4800;4820;4996</DisableSpecificWarnings>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="RelWithDebInfo";cs2menu_EXPORTS</PreprocessorDefinitions>
@@ -255,10 +279,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\";cs2menu_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui;C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\include;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src;C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Documents\GitHub\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\include;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -269,22 +293,26 @@
       <AdditionalDependencies>user32.lib;gdi32.lib;d3d11.lib;dxgi.lib;psapi.lib;dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/RelWithDebInfo/cs2menu.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/Release/RelWithDebInfo/cs2menu.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/RelWithDebInfo/cs2menu.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/Release/RelWithDebInfo/cs2menu.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\abelm\Documents\GitHub\cs2menu\CMakeLists.txt">
+    <CustomBuild Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/abelm/Documents/GitHub/cs2menu/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Documents/GitHub/cs2menu -BC:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
+C:\mingw64\bin\cmake.exe -SC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu -BC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -292,12 +320,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCXXCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeRCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCXXCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeRCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/abelm/Documents/GitHub/cs2menu/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Documents/GitHub/cs2menu -BC:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
+C:\mingw64\bin\cmake.exe -SC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu -BC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -305,12 +333,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCXXCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeRCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCXXCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeRCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/abelm/Documents/GitHub/cs2menu/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Documents/GitHub/cs2menu -BC:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
+C:\mingw64\bin\cmake.exe -SC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu -BC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -318,12 +346,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCXXCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeRCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCXXCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeRCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/abelm/Documents/GitHub/cs2menu/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Documents/GitHub/cs2menu -BC:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
+C:\mingw64\bin\cmake.exe -SC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu -BC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -331,62 +359,72 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeCXXCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeRCCompiler.cmake;C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\3.31.6\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeCXXCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeRCCompiler.cmake;C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\4.1.0\CMakeSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\mingw64\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\DllMain.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\Hooks.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\ImGui_Renderer.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\main.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\imgui.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\imgui_draw.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\imgui_tables.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\imgui_demo.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends\imgui_impl_dx11.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\imgui\backends\imgui_impl_win32.cpp" />
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\buffer.c">
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Aimbot.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\DllMain.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Features.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Hooks.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\ImGui_Renderer.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Memory.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\OffsetManager.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\OffsetUpdater.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\main.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\imgui.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\imgui_tables.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\imgui_demo.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\buffer.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hook.c">
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hook.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\trampoline.c">
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\trampoline.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde\hde32.c">
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde\hde32.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="C:\Users\abelm\Documents\GitHub\cs2menu\lib\minhook\src\hde\hde64.c">
+    <ClCompile Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\lib\minhook\src\hde\hde64.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClInclude Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\Hooks.h" />
-    <ClInclude Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\ImGui_Renderer.h" />
-    <ClInclude Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\SDK.h" />
-    <ClInclude Include="C:\Users\abelm\Documents\GitHub\cs2menu\src\main.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Aimbot.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Features.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Hooks.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\ImGui_Renderer.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Memory.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\OffsetManager.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\OffsetUpdater.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\SDK.h" />
+    <ClInclude Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\main.h" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="C:\Users\abelm\Documents\GitHub\cs2menu\cmake-build-release-visual-studio\ZERO_CHECK.vcxproj">
-      <Project>{11AB5F6F-33BB-3D6C-ACDC-2BCEBDC27DCC}</Project>
+    <ProjectReference Include="C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\cmake-build-release-visual-studio\ZERO_CHECK.vcxproj">
+      <Project>{DBE1301F-8F15-3F19-89BD-7210ED072C9E}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

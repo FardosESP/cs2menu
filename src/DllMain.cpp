@@ -13,23 +13,93 @@ void CreateDebugConsole()
         FILE* f;
         freopen_s(&f, "CONOUT$", "w", stdout);
         freopen_s(&f, "CONOUT$", "w", stderr);
-        std::cout << "========================================" << std::endl;
-        std::cout << "      CS2MENU DEBUG CONSOLE             " << std::endl;
-        std::cout << "========================================" << std::endl;
+        
+        // Set console to support ASCII box drawing
+        SetConsoleOutputCP(CP_UTF8);
+        
+        // Set console title
+        SetConsoleTitleA("CS2MENU v1.0 - Premium Edition");
+        
+        // Professional header with ASCII box drawing
+        std::cout << "\n";
+        std::cout << "  +===========================================================+\n";
+        std::cout << "  |                                                           |\n";
+        std::cout << "  |              CS2MENU - PREMIUM EDITION                    |\n";
+        std::cout << "  |                   Build 14138.3                           |\n";
+        std::cout << "  |                                                           |\n";
+        std::cout << "  +===========================================================+\n";
+        std::cout << "\n";
     }
 }
 
 DWORD WINAPI MainThread(LPVOID lpParameter)
 {
-    std::this_thread::sleep_for(std::chrono::seconds(3));
     CreateDebugConsole();
-    std::cout << "[*] DLL Inyectada. Inicializando..." << std::endl;
+    std::cout << "  [→] Inicializando sistema..." << std::endl;
+    
+    // Wait for game modules to load (dynamic check, no hardcoded delay)
+    std::cout << "  [→] Esperando modulos del juego..." << std::endl;
+    int attempts = 0;
+    while (attempts < 30)  // Max 30 seconds
+    {
+        HMODULE client = GetModuleHandleA("client.dll");
+        HMODULE engine = GetModuleHandleA("engine2.dll");
+        
+        if (client && engine)
+        {
+            std::cout << "  [✓] Modulos cargados (client.dll + engine2.dll)" << std::endl;
+            break;
+        }
+        
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        attempts++;
+    }
+    
+    if (attempts >= 30)
+    {
+        std::cout << "  [✗] ERROR: Timeout esperando modulos del juego" << std::endl;
+        std::cout << "  [!] La inyeccion fue demasiado temprana" << std::endl;
+        std::cout << "  [!] Presiona END para salir" << std::endl;
+        
+        while (!(GetAsyncKeyState(VK_END) & 0x8000))
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        
+        FreeConsole();
+        FreeLibraryAndExitThread(static_cast<HMODULE>(lpParameter), 0);
+        return 1;
+    }
 
-    Hooks::Initialize();
+    // Initialize hooks
+    try
+    {
+        Hooks::Initialize();
+        std::cout << "  [✓] Hooks instalados correctamente" << std::endl;
+    }
+    catch (...)
+    {
+        std::cout << "  [✗] ERROR: Fallo al instalar hooks" << std::endl;
+        std::cout << "  [!] Presiona END para salir" << std::endl;
+        
+        while (!(GetAsyncKeyState(VK_END) & 0x8000))
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        
+        FreeConsole();
+        FreeLibraryAndExitThread(static_cast<HMODULE>(lpParameter), 0);
+        return 1;
+    }
 
-    std::cout << "[*] Hook instalado." << std::endl;
-    std::cout << "[*] INSERT = mostrar/ocultar menu" << std::endl;
-    std::cout << "[*] END    = desinyectar" << std::endl;
+    std::cout << "\n  +===========================================================+\n";
+    std::cout << "  |                    CONTROLES                              |\n";
+    std::cout << "  +===========================================================+\n";
+    std::cout << "  |  INSERT  ->  Abrir/Cerrar Menu                            |\n";
+    std::cout << "  |  F9      ->  Escanear Offsets (Manual)                    |\n";
+    std::cout << "  |  END     ->  Desinyectar Cheat                            |\n";
+    std::cout << "  +===========================================================+\n";
+    std::cout << "\n";
 
     bool insertWasDown = false;
 
@@ -39,15 +109,25 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
         if (insertDown && !insertWasDown)
         {
             bShowMenu = !bShowMenu;
-            std::cout << "[*] Menu " << (bShowMenu ? "abierto" : "cerrado") << std::endl;
+            std::cout << "  [" << (bShowMenu ? "✓" : "○") << "] Menu " 
+                      << (bShowMenu ? "abierto" : "cerrado") << std::endl;
         }
         insertWasDown = insertDown;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    std::cout << "[*] Desinyectando..." << std::endl;
-    Hooks::Shutdown();
-    ImGui_Renderer::Shutdown();
+    std::cout << "\n  [→] Desinyectando..." << std::endl;
+    
+    try
+    {
+        Hooks::Shutdown();
+        ImGui_Renderer::Shutdown();
+    }
+    catch (...)
+    {
+        std::cout << "[-] ERROR durante shutdown (ignorando)." << std::endl;
+    }
+    
     FreeConsole();
     FreeLibraryAndExitThread(static_cast<HMODULE>(lpParameter), 0);
     return 0;
@@ -55,10 +135,17 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 
 BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-    if (dwReason == DLL_PROCESS_ATTACH) {
+    if (dwReason == DLL_PROCESS_ATTACH)
+    {
         DisableThreadLibraryCalls(hModule);
         HANDLE h = CreateThread(nullptr, 0, MainThread, hModule, 0, nullptr);
-        if (h) CloseHandle(h);
+        if (!h)
+        {
+            // Failed to create thread - log error
+            OutputDebugStringA("[CS2MENU] ERROR: Failed to create main thread\n");
+            return FALSE;
+        }
+        CloseHandle(h);
     }
     return TRUE;
 }

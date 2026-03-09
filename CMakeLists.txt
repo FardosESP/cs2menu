@@ -59,6 +59,14 @@ if(WIN32)
     target_link_libraries(cs2menu PRIVATE
             user32.lib gdi32.lib d3d11.lib dxgi.lib psapi.lib dwmapi.lib
     )
+    
+    # Post-build: Copy offsets.json to output directory
+    add_custom_command(TARGET cs2menu POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/offsets.json"
+            "$<TARGET_FILE_DIR:cs2menu>/offsets.json"
+        COMMENT "Copying offsets.json to output directory"
+    )
 endif()
 
 # 5. Launcher

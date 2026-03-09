@@ -1,80 +1,91 @@
 # Changelog
 
-## [Unreleased] - 2026-03-05
+Todos los cambios notables del proyecto se documentan aquí.
+
+---
+
+## [Build 14138.3] - 2026-03-09
 
 ### Added
-- **OffsetManager System**: Dynamic offset loading from JSON/config files with automatic fallback
-- **Aimbot System**: Complete aimbot implementation with:
-  - FOV-based target selection
-  - Smooth aim with configurable smoothing
-  - Angle normalization
-  - Silent aim option
-  - Team and visibility checks
-- **Advanced ESP Features**:
-  - Player name display
-  - Weapon display
-  - Enhanced health and distance indicators
-- **Memory Safety**: Comprehensive exception handling and pointer validation
-- **Unit Tests**: Test suites for OffsetManager and memory safety
-- **Documentation**:
-  - Complete README with quick start guide
-  - TROUBLESHOOTING guide for common issues
-  - OFFSET_MANAGER_README for offset management
-  - COMO_ACTUALIZAR_OFFSETS guide (Spanish)
-  - FEATURES_TODO comprehensive feature list
-- **Configuration Files**: Example offset files (JSON and CFG formats)
-- **Logging**: Enhanced debug logging for easier troubleshooting
-
-### Changed
-- ESP enabled by default for easier testing
-- Increased default max distance to 5000 units
-- Disabled team check and dormant check by default
-- Custom crosshair enabled by default
-- No flash enabled by default
-- Improved aimbot FOV default (180 degrees)
-- Reduced aimbot smooth default (2.0)
+- ✅ Detección automática de offsets al entrar en partida (sin necesidad de F9)
+- ✅ Búsqueda de offsets.json en múltiples ubicaciones
+- ✅ Post-build automático para copiar offsets.json
+- ✅ Presentación profesional de consola con ASCII art
+- ✅ Validación post-inyección en Launcher
+- ✅ Sistema de timing dinámico (sin delays hardcoded)
 
 ### Fixed
-- ESP crash issues with comprehensive null pointer checks
-- Memory safety in entity iteration
-- SDL3 mouse input handling
-- LocalPlayer detection and validation
-- ViewMatrix and EntitySystem pointer validation
+- ✅ Offsets actualizados a Mar 5, 2026 (Build 14138)
+- ✅ dwLocalPlayerPawn: 33970960 (0x2066E10)
+- ✅ dwEntityList: 38453920 (0x249B2A0)
+- ✅ Eliminado delay hardcoded de 15s en Launcher
+- ✅ Eliminado delay de 3s en DllMain
+- ✅ Caracteres UTF-8 reemplazados por ASCII para compatibilidad
+- ✅ OffsetManager busca en múltiples rutas
+- ✅ Scanner se ejecuta automáticamente al detectar partida
 
-### Technical Details
-- Build: 14138 (2026-03-05)
-- Offsets: Dynamic loading with fallback to Build 14138
-- Architecture: x64 only
-- Compiler: MSVC 2022
-- Dependencies: ImGui, MinHook, SDL3
+### Changed
+- 🔄 Console output más limpio y profesional
+- 🔄 Símbolos ASCII en lugar de UTF-8
+- 🔄 Mensajes más concisos y claros
+- 🔄 Fallback offsets actualizados a Mar 5, 2026
 
-### Known Issues
-- EntityList iteration needs verification (some offsets may be incorrect)
-- Skeleton ESP not yet implemented
-- Triggerbot not yet implemented
-- Bunny hop needs user command hooking
-- Skin changer not yet implemented
+### Removed
+- ❌ 20+ archivos MD redundantes movidos a docs/archive/
+- ❌ Delays hardcoded en Launcher y DllMain
+- ❌ Necesidad de presionar F9 manualmente
 
-### Performance
-- Minimal FPS impact (<5%)
-- Safe memory operations with exception handling
-- Efficient rendering with ImGui
+---
 
-### Security
-- No external process memory reading
-- Internal DLL injection only
-- Exception handling prevents crashes
-- Comprehensive pointer validation
+## [Build 14138.2] - 2026-03-09
 
-## [0.1.0] - Initial Release
+### Fixed
+- Aumentado límite de escaneo de entidades de 64 a 2048
+- Corregido cálculo de ángulos en Aimbot (atanf → atan2f)
+- Uniformada validación de health a 100 (valor máximo real)
+- Implementado IsVisible básico usando m_bSpotted flag
+- Añadido bounds check en Memory::FindPattern
+- Mejorado input capture con WantCaptureMouse/Keyboard flags
+- Añadida validación de privilegios de admin en Launcher
+- Añadido error handling robusto en DllMain
 
 ### Added
-- Basic ESP (boxes, health bars, distance)
-- ImGui menu system
-- DirectX 11 hooking
-- SDL3 input handling
-- Basic crosshair
-- Radar hack
-- FOV changer
-- No flash
+- Sistema de logging silencioso (Logger.h)
+- Auto-elevación de privilegios en Launcher
+- Timeout de 30s para carga de módulos
 
+---
+
+## [Build 14138.1] - 2026-02-24
+
+### Added
+- Sistema de chunks/handles para CS2
+- OffsetManager con soporte JSON
+- Offset Scanner (F9)
+- ESP con cajas, health bars, nombres, distancia
+- Aimbot con FOV, smooth, visible only
+- Radar Hack
+- ImGui menu
+
+### Known Issues
+- Offsets pueden quedar obsoletos con updates de CS2
+- LocalPlayerPawn NULL si no estás spawneado
+- ESP no funciona si offsets están desactualizados
+
+---
+
+## Formato
+
+Este changelog sigue [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+### Tipos de Cambios
+- `Added` - Nuevas features
+- `Changed` - Cambios en funcionalidad existente
+- `Deprecated` - Features que serán removidas
+- `Removed` - Features removidas
+- `Fixed` - Bug fixes
+- `Security` - Vulnerabilidades
+
+---
+
+**CS2MENU Premium Edition** - Build 14138.3 (Mar 2026)

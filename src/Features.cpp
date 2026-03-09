@@ -46,28 +46,27 @@ static bool g_bInitialized = false;
 
 void Features::Initialize()
 {
-    std::cout << "[*] Inicializando Features..." << std::endl;
+    std::cout << "  [→] Inicializando sistema de features..." << std::endl;
     
     // Initialize OffsetManager first
-    std::cout << "[*] Inicializando OffsetManager..." << std::endl;
     if (!OffsetManager::Instance().Initialize())
     {
-        std::cout << "[-] Error al inicializar OffsetManager" << std::endl;
+        std::cout << "  [✗] Error al inicializar OffsetManager" << std::endl;
     }
     else
     {
-        std::cout << "[+] OffsetManager inicializado: " << OffsetManager::Instance().GetOffsetCount() 
+        std::cout << "  [✓] OffsetManager: " << OffsetManager::Instance().GetOffsetCount() 
                   << " offsets cargados" << std::endl;
-        std::cout << "[+] Version del juego: " << OffsetManager::Instance().GetGameVersion() << std::endl;
+        std::cout << "  [i] Version: " << OffsetManager::Instance().GetGameVersion() << std::endl;
         
         // Validate offsets
         if (OffsetManager::Instance().ValidateOffsets())
         {
-            std::cout << "[+] Validacion de offsets exitosa" << std::endl;
+            std::cout << "  [✓] Validacion de offsets exitosa" << std::endl;
         }
         else
         {
-            std::cout << "[!] Advertencia: Algunos offsets pueden ser invalidos" << std::endl;
+            std::cout << "  [!] Advertencia: Algunos offsets pueden ser invalidos" << std::endl;
         }
     }
     
@@ -75,23 +74,23 @@ void Features::Initialize()
     g_clientBase = Memory::GetModuleBase("client.dll");
     if (!g_clientBase)
     {
-        std::cout << "[-] No se pudo obtener client.dll" << std::endl;
+        std::cout << "  [✗] No se pudo obtener client.dll" << std::endl;
         return;
     }
     
-    std::cout << "[+] client.dll base: 0x" << std::hex << g_clientBase << std::dec << std::endl;
+    std::cout << "  [✓] client.dll base: 0x" << std::hex << g_clientBase << std::dec << std::endl;
     
     // Verificar información del proceso
     DWORD pid = GetCurrentProcessId();
     char processName[MAX_PATH] = {};
     GetModuleFileNameA(NULL, processName, MAX_PATH);
     
-    std::cout << "\n╔═══════════════════════════════════════════════════════════╗" << std::endl;
-    std::cout << "║              INFORMACIÓN DEL PROCESO                      ║" << std::endl;
-    std::cout << "╚═══════════════════════════════════════════════════════════╝" << std::endl;
-    std::cout << "[PROCESS] PID: " << pid << std::endl;
-    std::cout << "[PROCESS] Ejecutable: " << processName << std::endl;
-    std::cout << "[PROCESS] client.dll base: 0x" << std::hex << g_clientBase << std::dec << std::endl;
+    std::cout << "\n  +===========================================================+\n";
+    std::cout << "  |              INFORMACION DEL PROCESO                      |\n";
+    std::cout << "  +===========================================================+\n";
+    std::cout << "  [i] PID: " << pid << std::endl;
+    std::cout << "  [i] Ejecutable: " << processName << std::endl;
+    std::cout << "  [i] client.dll: 0x" << std::hex << g_clientBase << std::dec << std::endl;
     
     // Verificar que client.dll es válido leyendo los primeros bytes (MZ header)
     // Note: Removed __try/__except due to C++ object unwinding conflicts
@@ -99,12 +98,12 @@ void Features::Initialize()
     uint16_t mzHeader = Memory::Read<uint16_t>(g_clientBase);
     if (mzHeader == 0x5A4D) // "MZ"
     {
-        std::cout << "[PROCESS] client.dll header válido (MZ signature OK)" << std::endl;
+        std::cout << "  [✓] client.dll header valido (MZ signature)" << std::endl;
     }
     else
     {
-        std::cout << "[PROCESS] ERROR: client.dll header inválido! (0x" << std::hex << mzHeader << std::dec << ")" << std::endl;
-        std::cout << "[PROCESS] Esto significa que la dirección base es incorrecta" << std::endl;
+        std::cout << "  [✗] ERROR: client.dll header invalido! (0x" << std::hex << mzHeader << std::dec << ")" << std::endl;
+        std::cout << "  [!] La direccion base es incorrecta" << std::endl;
     }
     std::cout << std::endl;
     
@@ -128,16 +127,18 @@ void Features::Initialize()
     g_pEntitySystem = (C_CSGameEntitySystem*)entitySystemAddr;
     g_pViewMatrix = (ViewMatrix*)viewMatrixAddr;
     
-    std::cout << "[+] EntitySystem: 0x" << std::hex << (uintptr_t)g_pEntitySystem << std::dec << std::endl;
-    std::cout << "[+] ViewMatrix: 0x" << std::hex << (uintptr_t)g_pViewMatrix << std::dec << std::endl;
+    std::cout << "  [✓] EntitySystem: 0x" << std::hex << (uintptr_t)g_pEntitySystem << std::dec << std::endl;
+    std::cout << "  [✓] ViewMatrix: 0x" << std::hex << (uintptr_t)g_pViewMatrix << std::dec << std::endl;
     
     // Don't run scanner automatically - wait until in-game
-    std::cout << "\n[INFO] Offset scanner disponible - se ejecutara automaticamente cuando entres en partida" << std::endl;
-    std::cout << "[INFO] O presiona F9 para ejecutar el scanner manualmente" << std::endl;
+    std::cout << "\n  +===========================================================+\n";
+    std::cout << "  |                  SISTEMA LISTO                            |\n";
+    std::cout << "  +===========================================================+\n";
+    std::cout << "  [i] Deteccion automatica: ACTIVADA" << std::endl;
+    std::cout << "  [i] Escaneo manual: Presiona F9 si es necesario" << std::endl;
     
     g_bInitialized = true;
-    std::cout << "[+] Features inicializadas correctamente" << std::endl;
-    std::cout << "[INFO] El cheat buscara jugadores automaticamente cuando entres en partida" << std::endl;
+    std::cout << "  [OK] Todas las features inicializadas\n" << std::endl;
 }
 
 void Features::Update()
@@ -175,10 +176,10 @@ void Features::Update()
                 // Detectar cuando entramos en partida por primera vez
                 if (!wasInGame)
                 {
-                    std::cout << "\n╔═══════════════════════════════════════════════════════════╗" << std::endl;
-                    std::cout << "║              ENTRASTE EN PARTIDA - ACTIVANDO ESP          ║" << std::endl;
-                    std::cout << "╚═══════════════════════════════════════════════════════════╝" << std::endl;
-                    std::cout << "[INFO] LocalPlayer detectado - Health: " << health << std::endl;
+                    std::cout << "\n  +===========================================================+\n";
+    std::cout << "  |           PARTIDA DETECTADA - ESP ACTIVADO                |\n";
+                    std::cout << "  +===========================================================+\n";
+                    std::cout << "  [OK] LocalPlayer detectado - Health: " << health << std::endl;
                     wasInGame = true;
                     
                     // Ejecutar scanner automáticamente la primera vez que entramos en partida
@@ -195,7 +196,7 @@ void Features::Update()
                 g_pLocalPlayer = nullptr;
                 if (wasInGame)
                 {
-                    std::cout << "[INFO] Saliste de la partida (Health invalido)" << std::endl;
+                    std::cout << "  [i] Saliste de la partida (Health invalido)" << std::endl;
                     wasInGame = false;
                 }
             }
@@ -205,7 +206,7 @@ void Features::Update()
             g_pLocalPlayer = nullptr;
             if (wasInGame)
             {
-                std::cout << "[INFO] Saliste de la partida (LocalPawn NULL)" << std::endl;
+                std::cout << "  [i] Saliste de la partida (LocalPawn NULL)" << std::endl;
                 wasInGame = false;
             }
         }
@@ -433,9 +434,11 @@ void Features::RenderESP()
     int validPawns = 0;
     int drawnEntities = 0;
     
-    // Iterate through player CONTROLLERS (1-64)
+    // Iterate through player CONTROLLERS (1-2048 for CS2 chunk system)
     // In CS2, we must iterate controllers first, then get their pawns
-    for (int i = 1; i <= 64 && i <= maxEntities; i++)
+    // Players are typically in range 1-64, but we scan more for safety
+    int scanLimit = (maxEntities > 2048) ? 2048 : maxEntities;
+    for (int i = 1; i <= scanLimit; i++)
     {
         __try
         {
@@ -462,7 +465,7 @@ void Features::RenderESP()
             
             // Validate health range
             int health = pawn->GetHealth();
-            if (health <= 0 || health > 200) continue;
+            if (health <= 0 || health > 100) continue;
             
             // Skip local player
             if (pawn == g_pLocalPlayer) continue;
@@ -880,8 +883,9 @@ void Features::RadarHack()
         int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
         if (maxEntities <= 0 || maxEntities > 8192) maxEntities = 64;
         
-        // Iterar sobre todos los jugadores (Controllers)
-        for (int i = 1; i <= 64 && i <= maxEntities; i++)
+        // Iterar sobre todos los jugadores (Controllers) - aumentado a 2048
+        int scanLimit = (maxEntities > 2048) ? 2048 : maxEntities;
+        for (int i = 1; i <= scanLimit; i++)
         {
             // Get controller
             C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
@@ -902,7 +906,7 @@ void Features::RadarHack()
             
             // Validar que es un jugador válido
             int health = pawn->GetHealth();
-            if (health <= 0 || health > 200) continue;
+            if (health <= 0 || health > 100) continue;
             
             // Marcar como spotted (visible en el radar)
             if (!pawn->IsSpotted())

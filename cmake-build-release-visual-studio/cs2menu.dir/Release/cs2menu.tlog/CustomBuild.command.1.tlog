@@ -1,6 +1,6 @@
-^C:\USERS\ABELM\DOCUMENTS\GITHUB\CS2MENU\CMAKELISTS.TXT
+^C:\USERS\ABELM\DOWNLOADS\KIROCS2MENUPROJECT\CS2MENU\CMAKELISTS.TXT
 setlocal
-"C:\Program Files\JetBrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -SC:/Users/abelm/Documents/GitHub/cs2menu -BC:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Documents/GitHub/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
+C:\mingw64\bin\cmake.exe -SC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu -BC:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio --check-stamp-file C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/cmake-build-release-visual-studio/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

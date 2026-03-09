@@ -226,8 +226,10 @@ struct ESPConfig {
     bool enabled=true, boxes=true, boxFilled=false, skeleton=true;
     bool health=true, healthBar=true, name=true, distance=true;
     bool weapon=true, snaplines=false, dormantCheck=false, teamCheck=false;
+    bool glow=false;  // Glow effect
     float boxColor[4]={1,0,0,1}, teamColor[4]={0,.5f,1,1};
     float skeletonColor[4]={1,1,1,.8f}, snaplineColor[4]={1,1,0,1};
+    float glowEnemyColor[4]={1,0,0,1}, glowTeamColor[4]={0,.5f,1,1};  // Glow colors
     float maxDistance=5000.f, boxThickness=1.5f;
 };
 struct AimbotConfig {
@@ -323,6 +325,9 @@ static void TabESP() {
     SectionTitle("  Esqueleto");
     ImGui::Checkbox("Esqueleto##sk",&cfg_esp.skeleton);
     if(cfg_esp.skeleton){ImGui::Indent();ImGui::ColorEdit4("Color##skc",cfg_esp.skeletonColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::Unindent();}
+    SectionTitle("  Glow Effect");
+    ImGui::Checkbox("Glow##glow",&cfg_esp.glow);
+    if(cfg_esp.glow){ImGui::Indent();ImGui::ColorEdit4("Color enemigo##glowec",cfg_esp.glowEnemyColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::SameLine();ImGui::ColorEdit4("Color equipo##glowtc",cfg_esp.glowTeamColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::Unindent();}
     SectionTitle("  Info jugadores");
     ImGui::Checkbox("Nombre##n",&cfg_esp.name);ImGui::SameLine(160);ImGui::Checkbox("Vida##h",&cfg_esp.health);
     ImGui::Checkbox("Barra vida##hb",&cfg_esp.healthBar);ImGui::SameLine(160);ImGui::Checkbox("Distancia##d",&cfg_esp.distance);
@@ -558,6 +563,13 @@ void ImGui_Renderer::Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTar
     lastTime = now;
 
     io.MouseDrawCursor = bShowMenu;
+    
+    // Capture mouse/keyboard input when menu is visible
+    if (bShowMenu)
+    {
+        io.WantCaptureMouse = true;
+        io.WantCaptureKeyboard = true;
+    }
 
     ImGui_ImplDX11_NewFrame();
     ImGui::NewFrame();

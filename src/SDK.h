@@ -25,27 +25,27 @@ struct ViewMatrix
 // Dynamic offsets loaded from OffsetManager
 namespace Offsets
 {
-    // Hardcoded fallback values (Build Feb 24, 2026)
+    // Hardcoded fallback values (Build 14138 - Mar 5, 2026)
     namespace Fallback
     {
-        constexpr uintptr_t dwEntityList            = 0x21CD670;  // 35422320 decimal
-        constexpr uintptr_t dwLocalPlayerPawn       = 0x2066DF0;  // 33970928 decimal  
+        constexpr uintptr_t dwEntityList            = 0x249B2A0;  // 38453920 decimal
+        constexpr uintptr_t dwLocalPlayerPawn       = 0x2066E10;  // 33970960 decimal  
         constexpr uintptr_t dwViewMatrix            = 0x2309460;  // 36749024 decimal
-        constexpr uintptr_t dwLocalPlayerController = 0x22F1888;
-        constexpr uintptr_t dwViewAngles            = 0x2318668;
-        constexpr uintptr_t dwGlobalVars            = 0x2058FC0;
-        constexpr uintptr_t dwGameRules             = 0x230A160;
-        constexpr uintptr_t dwGameEntitySystem_getHighestEntityIndex = 0x20A0;
-        constexpr uintptr_t dwForceJump             = 0x230A1E0;
+        constexpr uintptr_t dwLocalPlayerController = 0x22F1888;  // 36640904 decimal
+        constexpr uintptr_t dwViewAngles            = 0x2318668;  // 36796008 decimal
+        constexpr uintptr_t dwGlobalVars            = 0x2058FC0;  // 33928128 decimal
+        constexpr uintptr_t dwGameRules             = 0x230A160;  // 36745056 decimal
+        constexpr uintptr_t dwGameEntitySystem_getHighestEntityIndex = 0x20A0;  // 8352 decimal
+        constexpr uintptr_t dwForceJump             = 0x230A1E0;  // 36745696 decimal
         
-        constexpr uintptr_t m_iHealth        = 0x76C;
-        constexpr uintptr_t m_iMaxHealth     = 0xB54;
-        constexpr uintptr_t m_iTeamNum       = 0xD70;
-        constexpr uintptr_t m_pGameSceneNode = 0x598;  // Updated from scanner
-        constexpr uintptr_t m_vecAbsOrigin   = 0xC4;   // Updated from scanner (offset within GameSceneNode)
-        constexpr uintptr_t m_hPlayerPawn    = 0x90C;
-        constexpr uintptr_t m_iIDEntIndex    = 0x3EAC;
-        constexpr uintptr_t m_bDormant       = 0xE8;
+        constexpr uintptr_t m_iHealth        = 0x76C;  // 1900 decimal
+        constexpr uintptr_t m_iMaxHealth     = 0xB54;  // 2900 decimal
+        constexpr uintptr_t m_iTeamNum       = 0xD70;  // 3440 decimal
+        constexpr uintptr_t m_pGameSceneNode = 0x598;  // 1432 decimal - Updated from scanner (WORKING VALUE)
+        constexpr uintptr_t m_vecAbsOrigin   = 0xC4;   // 196 decimal - Updated from scanner (offset within GameSceneNode)
+        constexpr uintptr_t m_hPlayerPawn    = 0x90C;  // 2316 decimal
+        constexpr uintptr_t m_iIDEntIndex    = 0x3EAC; // 15020 decimal
+        constexpr uintptr_t m_bDormant       = 0xE8;   // 232 decimal
         
         constexpr uintptr_t m_fFlags         = 0x400;
         constexpr uintptr_t m_vecVelocity    = 0x438;
@@ -169,9 +169,9 @@ public:
             int health = GetHealth();
             int team = GetTeamNum();
             
-            // Basic sanity checks - más permisivo
-            if (health < 0 || health > 1000) return false;  // Aumentado a 1000
-            if (team < 0 || team > 10) return false;  // Aumentado a 10
+            // Basic sanity checks
+            if (health < 0 || health > 100) return false;  // Max health in CS2 is 100
+            if (team < 0 || team > 10) return false;
             
             return true;
         }
@@ -380,7 +380,6 @@ public:
     
     // Decode entity handle to get actual pointer
     // CS2 uses handles instead of direct pointers
-    // Handle format: [chunk_index:15][index_in_chunk:9][serial:8]
     C_BaseEntity* DecodeHandle(uint32_t handle)
     {
         if (handle == 0 || handle == 0xFFFFFFFF) return nullptr;
@@ -389,23 +388,13 @@ public:
         {
             uintptr_t entitySystem = (uintptr_t)this;
             
-            // Read the entity list pointer at +0x10
-            uintptr_t entityListArray = *(uintptr_t*)(entitySystem + 0x10);
-            if (!entityListArray || entityListArray < 0x1000) return nullptr;
+            // Use same method as GetBaseEntity
+            int index = handle & 0x7FFF;  // Extract index from handle
             
-            // Extract chunk index and index within chunk from handle
-            // Handle bits: [15 bits chunk][9 bits index][8 bits serial]
-            int chunkIndex = (handle & 0x7FFF) >> 9;  // Bits 9-23
-            int indexInChunk = handle & 0x1FF;         // Bits 0-8
+            uintptr_t listEntry = *(uintptr_t*)(entitySystem + 8 * ((index & 0x7FFF) >> 9) + 16);
+            if (!listEntry || listEntry < 0x1000) return nullptr;
             
-            // Read chunk pointer from entity list array
-            // Array starts at +16 bytes (0x10), each pointer is 8 bytes
-            uintptr_t chunkPtr = *(uintptr_t*)(entityListArray + 0x10 + (chunkIndex * 8));
-            if (!chunkPtr || chunkPtr < 0x1000) return nullptr;
-            
-            // Read entity pointer from chunk
-            // Each entity entry is 120 bytes (0x78)
-            uintptr_t entityPtr = *(uintptr_t*)(chunkPtr + (indexInChunk * 0x78));
+            uintptr_t entityPtr = *(uintptr_t*)(listEntry + 120 * (index & 0x1FF));
             if (!entityPtr || entityPtr < 0x1000) return nullptr;
             
             return (C_BaseEntity*)entityPtr;
@@ -416,38 +405,24 @@ public:
         }
     }
     
-    // Get entity by index (for Controllers - indices 1-64)
-    // This returns CCSPlayerController, NOT the pawn
+    // Get entity by index using CORRECT CS2 method
+    // Based on working code from UnknownCheats
     C_BaseEntity* GetBaseEntity(int index)
     {
         if (index < 0 || index > 8192) return nullptr;
         
         __try
         {
-            // CGameEntitySystem structure in CS2:
-            // +0x00: vtable
-            // +0x10: m_pEntityList (pointer to entity list array)
-            // The entity list array contains chunk pointers
-            
             uintptr_t entitySystem = (uintptr_t)this;
             
-            // Read the entity list pointer at +0x10
-            // This is the actual array of chunk pointers
-            uintptr_t entityListArray = *(uintptr_t*)(entitySystem + 0x10);
-            if (!entityListArray || entityListArray < 0x1000) return nullptr;
+            // CORRECT METHOD: Read list entry directly
+            // Formula: entitySystem + 8 * ((index & 0x7FFF) >> 9) + 16
+            uintptr_t listEntry = *(uintptr_t*)(entitySystem + 8 * ((index & 0x7FFF) >> 9) + 16);
+            if (!listEntry || listEntry < 0x1000) return nullptr;
             
-            // Calculate chunk index (each chunk holds 512 entities)
-            int chunkIndex = index >> 9;      // Divide by 512
-            int indexInChunk = index & 0x1FF; // Modulo 512
-            
-            // Read chunk pointer from entity list array
-            // Array starts at +16 bytes (0x10), each pointer is 8 bytes
-            uintptr_t chunkPtr = *(uintptr_t*)(entityListArray + 0x10 + (chunkIndex * 8));
-            if (!chunkPtr || chunkPtr < 0x1000) return nullptr;
-            
-            // Read entity pointer from chunk
-            // Each entity entry is 120 bytes (0x78)
-            uintptr_t entityPtr = *(uintptr_t*)(chunkPtr + (indexInChunk * 0x78));
+            // Read entity from list entry
+            // Formula: listEntry + 120 * (index & 0x1FF)
+            uintptr_t entityPtr = *(uintptr_t*)(listEntry + 120 * (index & 0x1FF));
             if (!entityPtr || entityPtr < 0x1000) return nullptr;
             
             return (C_BaseEntity*)entityPtr;

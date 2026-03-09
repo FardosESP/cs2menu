@@ -5,8 +5,49 @@
 #include <filesystem>
 #include <chrono>
 #include <thread>
+#include <sddl.h>
 
 namespace fs = std::filesystem;
+
+bool IsRunAsAdmin()
+{
+    BOOL isAdmin = FALSE;
+    PSID adminGroup = NULL;
+    SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+    
+    if (AllocateAndInitializeSid(&ntAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID,
+        DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &adminGroup))
+    {
+        CheckTokenMembership(NULL, adminGroup, &isAdmin);
+        FreeSid(adminGroup);
+    }
+    
+    return isAdmin;
+}
+
+bool ElevateProcess()
+{
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    
+    SHELLEXECUTEINFOW sei = { sizeof(sei) };
+    sei.lpVerb = L"runas";
+    sei.lpFile = exePath;
+    sei.hwnd = NULL;
+    sei.nShow = SW_NORMAL;
+    
+    if (!ShellExecuteExW(&sei))
+    {
+        DWORD error = GetLastError();
+        if (error == ERROR_CANCELLED)
+        {
+            std::cout << "[-] Usuario cancelo la elevacion de privilegios." << std::endl;
+        }
+        return false;
+    }
+    
+    return true;
+}
 
 DWORD GetProcessIdByName(const std::wstring& processName)
 {
@@ -24,6 +65,37 @@ DWORD GetProcessIdByName(const std::wstring& processName)
         CloseHandle(snapshot);
     }
     return pid;
+}
+
+bool IsModuleLoaded(DWORD pid, const std::wstring& moduleName)
+{
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (snapshot == INVALID_HANDLE_VALUE)
+        return false;
+    
+    MODULEENTRY32W me = { sizeof(me) };
+    bool found = false;
+    
+    if (Module32FirstW(snapshot, &me))
+    {
+        do {
+            if (_wcsicmp(me.szModule, moduleName.c_str()) == 0)
+            {
+                found = true;
+                break;
+            }
+        } while (Module32NextW(snapshot, &me));
+    }
+    
+    CloseHandle(snapshot);
+    return found;
+}
+
+bool IsGameFullyLoaded(DWORD pid)
+{
+    // Check if critical game modules are loaded
+    return IsModuleLoaded(pid, L"client.dll") && 
+           IsModuleLoaded(pid, L"engine2.dll");
 }
 
 // FIX Bug #2: usar wstring y LoadLibraryW para soportar rutas con espacios/unicode
@@ -45,7 +117,13 @@ bool InjectDLL(DWORD pid, const std::wstring& dllPath)
         return false;
     }
 
-    WriteProcessMemory(process, remoteBuf, dllPath.c_str(), pathSize, NULL);
+    if (!WriteProcessMemory(process, remoteBuf, dllPath.c_str(), pathSize, NULL))
+    {
+        std::cout << "[-] WriteProcessMemory fallo. Error: " << GetLastError() << std::endl;
+        VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
+        CloseHandle(process);
+        return false;
+    }
 
     LPTHREAD_START_ROUTINE pLoadLibraryW = (LPTHREAD_START_ROUTINE)GetProcAddress(
         GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW"
@@ -53,20 +131,50 @@ bool InjectDLL(DWORD pid, const std::wstring& dllPath)
 
     HANDLE remoteThread = CreateRemoteThread(process, NULL, 0, pLoadLibraryW, remoteBuf, 0, NULL);
 
-    if (remoteThread)
+    if (!remoteThread)
     {
-        // FIX Bug #1: esperar a que LoadLibraryW termine ANTES de liberar la memoria
-        WaitForSingleObject(remoteThread, 5000);
-        CloseHandle(remoteThread);
-        VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE); // ahora es seguro liberar
+        std::cout << "[-] CreateRemoteThread fallo. Error: " << GetLastError() << std::endl;
+        VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
         CloseHandle(process);
-        return true;
+        return false;
     }
 
-    std::cout << "[-] CreateRemoteThread fallo. Error: " << GetLastError() << std::endl;
+    // FIX: Wait with timeout and check result
+    DWORD waitResult = WaitForSingleObject(remoteThread, 30000);  // 30 second timeout
+    
+    if (waitResult == WAIT_TIMEOUT)
+    {
+        std::cout << "[-] Timeout esperando a que LoadLibraryW termine." << std::endl;
+        TerminateThread(remoteThread, 1);
+        CloseHandle(remoteThread);
+        VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
+        CloseHandle(process);
+        return false;
+    }
+    
+    // Check if LoadLibraryW succeeded
+    DWORD exitCode = 0;
+    GetExitCodeThread(remoteThread, &exitCode);
+    
+    CloseHandle(remoteThread);
     VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
     CloseHandle(process);
-    return false;
+    
+    if (exitCode == 0)
+    {
+        std::cout << "[-] LoadLibraryW retorno NULL - DLL no se cargo." << std::endl;
+        return false;
+    }
+    
+    // Verify DLL actually loaded
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    if (!IsModuleLoaded(pid, L"cs2menu.dll"))
+    {
+        std::cout << "[-] DLL no aparece en la lista de modulos del proceso." << std::endl;
+        return false;
+    }
+    
+    return true;
 }
 
 int main()
@@ -74,6 +182,38 @@ int main()
     std::cout << "========================================" << std::endl;
     std::cout << "   CS2MENU - LAUNCHER                   " << std::endl;
     std::cout << "========================================" << std::endl;
+    
+    // Check for admin privileges
+    if (!IsRunAsAdmin())
+    {
+        std::cout << "[!] No se esta ejecutando como Administrador." << std::endl;
+        std::cout << "[!] La inyeccion puede fallar sin privilegios elevados." << std::endl;
+        std::cout << "[?] Deseas reiniciar como Administrador? (S/N): ";
+        
+        char response;
+        std::cin >> response;
+        
+        if (response == 'S' || response == 's')
+        {
+            std::cout << "[*] Reiniciando con privilegios elevados..." << std::endl;
+            if (ElevateProcess())
+            {
+                return 0;  // Exit this instance, elevated one will start
+            }
+            else
+            {
+                std::cout << "[-] Fallo al elevar privilegios. Continuando sin admin..." << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "[*] Continuando sin privilegios de administrador..." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "[+] Ejecutando con privilegios de Administrador." << std::endl;
+    }
 
     std::wstring processName = L"cs2.exe";
     // FIX Bug #2: ruta como wstring desde el principio
@@ -98,14 +238,30 @@ int main()
     }
 
     std::cout << "[+] CS2 detectado! (PID: " << pid << ")" << std::endl;
-    std::cout << "[*] Esperando 15 segundos para que el juego cargue..." << std::endl;
+    std::cout << "[*] Esperando a que el juego cargue completamente..." << std::endl;
 
-    for (int i = 15; i > 0; i--)
+    // FIX: Dynamic wait for game modules instead of hardcoded 15 seconds
+    int attempts = 0;
+    const int maxAttempts = 60;  // 60 seconds max
+    
+    while (!IsGameFullyLoaded(pid) && attempts < maxAttempts)
     {
-        std::cout << "[i] Inyectando en " << i << " segundos...  \r" << std::flush;
+        std::cout << "[i] Esperando modulos del juego... (" << (attempts + 1) << "s)  \r" << std::flush;
         std::this_thread::sleep_for(std::chrono::seconds(1));
+        attempts++;
     }
     std::cout << std::endl;
+    
+    if (attempts >= maxAttempts)
+    {
+        std::cout << "[-] Timeout: El juego no cargo completamente en 60 segundos." << std::endl;
+        std::cout << "[-] Intenta inyectar manualmente cuando estes en partida." << std::endl;
+        Sleep(5000);
+        return 1;
+    }
+    
+    std::cout << "[+] Juego completamente cargado (client.dll + engine2.dll detectados)." << std::endl;
+    std::cout << "[*] Inyectando DLL..." << std::endl;
 
     if (InjectDLL(pid, dllPath.wstring()))
     {

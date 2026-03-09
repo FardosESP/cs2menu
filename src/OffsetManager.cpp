@@ -17,13 +17,23 @@ bool OffsetManager::Initialize()
     
     std::cout << "[OffsetManager] Initializing..." << std::endl;
     
-    // Try to load from JSON file first (cs2-dumper format)
-    if (LoadFromJSON("offsets.json"))
+    // Try multiple locations for offsets.json
+    const char* paths[] = {
+        "offsets.json",
+        "../offsets.json",
+        "../../offsets.json",
+        "./Release/offsets.json"
+    };
+    
+    for (const char* path : paths)
     {
-        std::cout << "[OffsetManager] Loaded offsets from offsets.json" << std::endl;
-        m_lastLoadedFile = "offsets.json";
-        m_initialized = true;
-        return true;
+        if (LoadFromJSON(path))
+        {
+            std::cout << "[OffsetManager] Loaded offsets from: " << path << std::endl;
+            m_lastLoadedFile = path;
+            m_initialized = true;
+            return true;
+        }
     }
     
     // Try simple config format
@@ -35,8 +45,8 @@ bool OffsetManager::Initialize()
         return true;
     }
     
-    // Fallback to hardcoded offsets
-    std::cout << "[OffsetManager] No offset files found, using fallback offsets" << std::endl;
+    // Fallback to hardcoded offsets (already updated to Mar 5, 2026)
+    std::cout << "[OffsetManager] Using built-in offsets (Mar 5, 2026)" << std::endl;
     LoadFallbackOffsets();
     m_initialized = true;
     
@@ -221,24 +231,25 @@ void OffsetManager::SetOffset(const std::string& name, uintptr_t value)
 
 void OffsetManager::LoadFallbackOffsets()
 {
-    std::cout << "[OffsetManager] Loading fallback offsets (Build 14138)" << std::endl;
+    std::cout << "[OffsetManager] Loading fallback offsets (Build 14138 - Mar 5, 2026)" << std::endl;
     
-    // Main offsets (client.dll) - from SDK.h
-    m_offsets["dwEntityList"] = 0x24AE628;
-    m_offsets["dwLocalPlayerPawn"] = 0x2066DE0;
-    m_offsets["dwViewMatrix"] = 0x2309420;
-    m_offsets["dwLocalPlayerController"] = 0x22F1888;
-    m_offsets["dwViewAngles"] = 0x2318668;
-    m_offsets["dwGlobalVars"] = 0x2058FC0;
-    m_offsets["dwGameRules"] = 0x230A160;
-    m_offsets["dwGameEntitySystem_getHighestEntityIndex"] = 0x20A0;
+    // Main offsets (client.dll) - Updated Mar 5, 2026
+    m_offsets["dwEntityList"] = 0x249B2A0;  // 38453920 decimal - UPDATED
+    m_offsets["dwLocalPlayerPawn"] = 0x2066E10;  // 33970960 decimal - UPDATED
+    m_offsets["dwViewMatrix"] = 0x2309460;  // 36749024 decimal - UPDATED
+    m_offsets["dwLocalPlayerController"] = 0x22F1888;  // 36640904 decimal
+    m_offsets["dwViewAngles"] = 0x2318668;  // 36796008 decimal
+    m_offsets["dwGlobalVars"] = 0x2058FC0;  // 33928128 decimal
+    m_offsets["dwGameRules"] = 0x230A160;  // 36745056 decimal
+    m_offsets["dwGameEntitySystem_getHighestEntityIndex"] = 0x20A0;  // 8352 decimal
+    m_offsets["dwForceJump"] = 0x230A1E0;  // 36745696 decimal
     
     // Entity offsets
     m_offsets["m_iHealth"] = 0x76C;
     m_offsets["m_iMaxHealth"] = 0xB54;
     m_offsets["m_iTeamNum"] = 0xD70;
-    m_offsets["m_pGameSceneNode"] = 0x338;
-    m_offsets["m_vecAbsOrigin"] = 0xD0;
+    m_offsets["m_pGameSceneNode"] = 0x598;  // Updated from scanner (WORKING VALUE)
+    m_offsets["m_vecAbsOrigin"] = 0xC4;     // Updated from scanner (offset within GameSceneNode)
     m_offsets["m_hPlayerPawn"] = 0x90C;
     m_offsets["m_iIDEntIndex"] = 0x3EAC;
     m_offsets["m_bDormant"] = 0xE8;
