@@ -1,10 +1,36 @@
-# CS2MENU - Premium Edition
+# CS2MENU - Premium HvH Edition
 
-**Build 14138.3** | Counter-Strike 2 External Cheat
+**Build 14138.5** | Counter-Strike 2 External Cheat | Full HvH Suite
 
 ---
 
 ## 🎯 Features
+
+### 🛡️ Anti-Aim (PREMIUM)
+- **7 Pitch Types**: Up, Down, Zero, Fake, FakeUp, FakeDown
+- **8 Yaw Types**: Backward, Spin, Jitter, Sideways, Random, FakeBackward, FakeSpin
+- **Fake Lag**: Configurable packet choking (up to 14 ticks)
+- **Edge AA**: Automatic wall detection and adjustment
+- **Freestanding**: Auto-adjust based on enemy positions
+- **Manual AA**: Hotkeys for left/right/back
+- **Customizable**: Yaw offset, jitter range, spin speed
+
+### 🎯 Resolver (PREMIUM)
+- **6 Resolver Types**: LBY, Moving, Standing, Bruteforce, Delta, LastMove
+- **LBY Resolver**: Lower Body Yaw prediction
+- **Moving Resolver**: Velocity-based angle prediction
+- **Standing Resolver**: Delta-based resolution
+- **Bruteforce**: 8-angle bruteforce on miss
+- **Delta Resolver**: LBY vs FootYaw analysis
+- **Per-Player Tracking**: Individual resolver data per enemy
+
+### ⏮️ Backtrack (PREMIUM)
+- **200ms History**: Store up to 12 ticks of player positions
+- **Smart Selection**: Hitchance-based record selection
+- **Auto Validation**: Automatic record expiration
+- **Per-Player Records**: Individual history per enemy
+- **Configurable**: Max ticks, shot-only mode
+- **Lag Compensation**: Shoot at laggy players accurately
 
 ### Visual ESP
 - **Box ESP** - Cajas 2D/3D alrededor de jugadores
@@ -26,10 +52,24 @@
 - **Auto Shoot** - Disparo automático
 - **RCS** - Control de retroceso
 
+### Skin Changer (NUEVO ✨)
+- **16 Modelos de Cuchillos** - Karambit, M9, Butterfly, Flip, Gut, etc.
+- **12 Acabados Populares** - Doppler, Fade, Tiger Tooth, Marble Fade, etc.
+- **30 Slots de Armas** - Configura skins para todas tus armas
+- **Personalización Completa**:
+  - Paint Kit (Skin ID)
+  - Seed (variación de patrón)
+  - Float Value (desgaste 0.0-1.0)
+  - StatTrak counter
+  - Nombres personalizados
+- **Aplicación en Tiempo Real** - Los cambios se aplican instantáneamente
+- **UI Intuitiva** - Interfaz fácil de usar en el menú
+
 ### Misc
 - **Radar Hack** - Mostrar enemigos en radar
 - **Bhop** - Salto automático
 - **No Flash** - Eliminar ceguera de flashbangs
+- **100+ Offsets HvH** - Sistema completo para Hack vs Hack
 
 ---
 

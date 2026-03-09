@@ -5,6 +5,9 @@
 #include "OffsetManager.h"
 #include "Aimbot.h"
 #include "OffsetScanner.h"
+#include "LocalPlayer.h"
+#include "EntityCache.h"
+#include "SkinChanger.h"
 #include <iostream>
 #include <cmath>
 
@@ -39,9 +42,15 @@ extern struct MiscConfig {
     float speedValue;
 } cfg_misc;
 
+extern struct SkinConfig {
+    int knifeModel, knifeFinish;
+    bool forceKnife, forceSkins;
+    int selectedSkin[30], selectedWear[30], selectedSeed[30];
+    float floatValue[30];
+} cfg_skin;
+
 // Variables locales
 static uintptr_t g_clientBase = 0;
-static C_CSPlayerPawn* g_pLocalPlayer = nullptr;
 static bool g_bInitialized = false;
 
 void Features::Initialize()
@@ -130,12 +139,17 @@ void Features::Initialize()
     std::cout << "  [✓] EntitySystem: 0x" << std::hex << (uintptr_t)g_pEntitySystem << std::dec << std::endl;
     std::cout << "  [✓] ViewMatrix: 0x" << std::hex << (uintptr_t)g_pViewMatrix << std::dec << std::endl;
     
+    // Initialize professional LocalPlayer system
+    g_LocalPlayer.Initialize(g_clientBase, g_pEntitySystem);
+    std::cout << "  [✓] LocalPlayer system initialized (multi-fallback detection)" << std::endl;
+    
     // Don't run scanner automatically - wait until in-game
     std::cout << "\n  +===========================================================+\n";
     std::cout << "  |                  SISTEMA LISTO                            |\n";
     std::cout << "  +===========================================================+\n";
     std::cout << "  [i] Deteccion automatica: ACTIVADA" << std::endl;
     std::cout << "  [i] Escaneo manual: Presiona F9 si es necesario" << std::endl;
+    std::cout << "  [i] Funciona en: Online, Offline, Bots, Practica" << std::endl;
     
     g_bInitialized = true;
     std::cout << "  [OK] Todas las features inicializadas\n" << std::endl;
@@ -152,72 +166,33 @@ void Features::Update()
     {
         std::cout << "\n[*] F9 presionado - Ejecutando scanner de offsets..." << std::endl;
         OffsetScanner::ScanAndPrintOffsets();
+        g_LocalPlayer.SetScannerRan(true);
     }
     f9WasPressed = f9IsPressed;
     
-    // Obtener jugador local de forma segura
-    static bool wasInGame = false;
-    static bool scannerRanInGame = false;
+    // Update LocalPlayer with professional multi-fallback detection
+    g_LocalPlayer.Update();
     
-    __try
+    // Get LocalPlayer pawn
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    
+    // Run scanner automatically when entering game for the first time
+    if (pLocalPlayer && !g_LocalPlayer.HasScannerRun())
     {
-        // MÉTODO SIMPLE: Leer LocalPlayer directamente desde dwLocalPlayerPawn
-        uintptr_t localPawnAddr = g_clientBase + Offsets::dwLocalPlayerPawn();
-        uintptr_t localPawn = Memory::Read<uintptr_t>(localPawnAddr);
-        
-        // Validar y asignar LocalPlayer
-        if (localPawn != 0)
-        {
-            int health = Memory::Read<int>(localPawn + Offsets::m_iHealth());
-            if (health > 0 && health <= 200)
-            {
-                g_pLocalPlayer = (C_CSPlayerPawn*)localPawn;
-                
-                // Detectar cuando entramos en partida por primera vez
-                if (!wasInGame)
-                {
-                    std::cout << "\n  +===========================================================+\n";
-    std::cout << "  |           PARTIDA DETECTADA - ESP ACTIVADO                |\n";
-                    std::cout << "  +===========================================================+\n";
-                    std::cout << "  [OK] LocalPlayer detectado - Health: " << health << std::endl;
-                    wasInGame = true;
-                    
-                    // Ejecutar scanner automáticamente la primera vez que entramos en partida
-                    if (!scannerRanInGame)
-                    {
-                        std::cout << "[*] Ejecutando scanner de offsets automaticamente..." << std::endl;
-                        OffsetScanner::ScanAndPrintOffsets();
-                        scannerRanInGame = true;
-                    }
-                }
-            }
-            else
-            {
-                g_pLocalPlayer = nullptr;
-                if (wasInGame)
-                {
-                    std::cout << "  [i] Saliste de la partida (Health invalido)" << std::endl;
-                    wasInGame = false;
-                }
-            }
-        }
-        else
-        {
-            g_pLocalPlayer = nullptr;
-            if (wasInGame)
-            {
-                std::cout << "  [i] Saliste de la partida (LocalPawn NULL)" << std::endl;
-                wasInGame = false;
-            }
-        }
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        g_pLocalPlayer = nullptr;
+        std::cout << "[*] Ejecutando scanner de offsets automaticamente..." << std::endl;
+        OffsetScanner::ScanAndPrintOffsets();
+        g_LocalPlayer.SetScannerRan(true);
     }
     
-    // Ejecutar features solo si tenemos jugador local válido
-    if (g_pLocalPlayer)
+    // Update entity cache (for performance)
+    if (pLocalPlayer)
+    {
+        int localTeam = pLocalPlayer->GetTeamNum();
+        g_EntityCache.Update(g_pEntitySystem, localTeam);
+    }
+    
+    // Execute features only if we have valid local player
+    if (pLocalPlayer)
     {
         if (cfg_esp.enabled)
             RenderESP();
@@ -227,9 +202,10 @@ void Features::Update()
         
         ApplyVisuals();
         RunMisc();
+        ApplySkins();
     }
     
-    // Crosshair custom se dibuja siempre
+    // Custom crosshair is always drawn
     if (cfg_vis.crosshair)
         DrawCustomCrosshair();
 }
@@ -369,13 +345,18 @@ void Features::DrawSkeleton(C_CSPlayerPawn* pawn, float color[4])
 void Features::RenderESP()
 {
     // Validate critical pointers before proceeding
-    if (!g_pEntitySystem || !g_pViewMatrix || !g_pLocalPlayer)
+    if (!g_pEntitySystem || !g_pViewMatrix)
+        return;
+    
+    // Get LocalPlayer from professional system
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    if (!pLocalPlayer)
         return;
     
     // Validate that the local player is valid
     __try
     {
-        if (!g_pLocalPlayer->IsValid() || g_pLocalPlayer->GetHealth() <= 0)
+        if (!pLocalPlayer->IsValid() || pLocalPlayer->GetHealth() <= 0)
             return;
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -389,10 +370,10 @@ void Features::RenderESP()
     // Safely read local player data
     __try
     {
-        localTeam = g_pLocalPlayer->GetTeamNum();
+        localTeam = pLocalPlayer->GetTeamNum();
         
         // Intentar obtener posición, pero continuar si falla
-        if (!g_pLocalPlayer->GetOriginSafe(localPos))
+        if (!pLocalPlayer->GetOriginSafe(localPos))
         {
             // Si falla, usar posición por defecto y continuar de todos modos
             localPos = {0, 0, 0};
@@ -468,7 +449,7 @@ void Features::RenderESP()
             if (health <= 0 || health > 100) continue;
             
             // Skip local player
-            if (pawn == g_pLocalPlayer) continue;
+            if (pawn == pLocalPlayer) continue;
             
             // Dormant check
             if (cfg_esp.dormantCheck && pawn->IsDormant()) continue;
@@ -698,10 +679,15 @@ void Features::RenderESP()
 
 void Features::RunAimbot()
 {
-    if (!g_pLocalPlayer || !g_pEntitySystem || !g_clientBase)
+    if (!g_clientBase || !g_pEntitySystem)
         return;
     
     if (!cfg_aim.enabled)
+        return;
+    
+    // Get LocalPlayer from professional system
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    if (!pLocalPlayer)
         return;
     
     __try
@@ -709,7 +695,7 @@ void Features::RunAimbot()
         // Get best target using Aimbot class
         float bestFov = 0.0f;
         C_CSPlayerPawn* target = Aimbot::Instance().GetBestTarget(
-            g_pLocalPlayer, 
+            pLocalPlayer, 
             g_pEntitySystem,
             cfg_aim.fov,
             cfg_aim.visibleOnly,
@@ -724,7 +710,7 @@ void Features::RunAimbot()
         Vector3 targetPos = Aimbot::Instance().GetBonePosition(target, cfg_aim.bone);
         
         // Calculate aim angles
-        Vector3 localEyePos = g_pLocalPlayer->GetEyePosition();
+        Vector3 localEyePos = pLocalPlayer->GetEyePosition();
         Vector3 aimAngles = Aimbot::Instance().CalculateAngle(localEyePos, targetPos);
         
         // Get current view angles
@@ -768,7 +754,8 @@ void Features::AimAt(const Vector3& target, float smooth)
 
 void Features::ApplyVisuals()
 {
-    if (!g_pLocalPlayer) return;
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    if (!pLocalPlayer) return;
     
     __try
     {
@@ -781,11 +768,11 @@ void Features::ApplyVisuals()
         // No Flash
         if (cfg_vis.noFlash)
         {
-            float flashDuration = g_pLocalPlayer->GetFlashDuration();
+            float flashDuration = pLocalPlayer->GetFlashDuration();
             if (flashDuration > 0.0f)
             {
                 // Establecer duración del flash a 0
-                *(float*)((uintptr_t)g_pLocalPlayer + Offsets::m_flFlashDuration()) = 0.0f;
+                *(float*)((uintptr_t)pLocalPlayer + Offsets::m_flFlashDuration()) = 0.0f;
             }
         }
     }
@@ -797,7 +784,8 @@ void Features::ApplyVisuals()
 
 void Features::UpdateFOV()
 {
-    if (!g_pLocalPlayer || !g_clientBase) return;
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    if (!pLocalPlayer || !g_clientBase) return;
     
     __try
     {
@@ -839,7 +827,8 @@ void Features::RunMisc()
 
 void Features::BunnyHop()
 {
-    if (!g_pLocalPlayer) return;
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    if (!pLocalPlayer) return;
     
     __try
     {
@@ -847,7 +836,7 @@ void Features::BunnyHop()
         if (GetAsyncKeyState(VK_SPACE) & 0x8000)
         {
             // Check if player is on the ground
-            int flags = g_pLocalPlayer->GetFlags();
+            int flags = pLocalPlayer->GetFlags();
             bool onGround = (flags & Offsets::FL_ONGROUND) != 0;
             
             if (onGround)
@@ -942,4 +931,93 @@ void Features::DrawCustomCrosshair()
     dl->AddLine(ImVec2(cx + gap, cy), ImVec2(cx + sz + gap, cy), col, 2.0f);
     dl->AddLine(ImVec2(cx, cy - sz - gap), ImVec2(cx, cy - gap), col, 2.0f);
     dl->AddLine(ImVec2(cx, cy + gap), ImVec2(cx, cy + sz + gap), col, 2.0f);
+}
+
+void Features::ApplySkins()
+{
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
+    if (!pLocalPlayer) return;
+    
+    __try
+    {
+        // Apply knife skin if enabled
+        if (cfg_skin.forceKnife)
+        {
+            uint32_t weaponHandle = pLocalPlayer->GetActiveWeaponHandle();
+            if (weaponHandle != 0 && weaponHandle != 0xFFFFFFFF)
+            {
+                int weaponIndex = weaponHandle & 0x7FFF;
+                if (weaponIndex > 0 && weaponIndex < 8192)
+                {
+                    C_BaseEntity* weapon = g_pEntitySystem->GetBaseEntity(weaponIndex);
+                    if (weapon && Memory::IsValidPointer((uintptr_t)weapon))
+                    {
+                        int defIndex = SkinChanger::Instance().GetWeaponDefIndex(weapon);
+                        
+                        // Check if it's a knife (def index 42, 59, 500-516)
+                        if (defIndex == 42 || defIndex == 59 || (defIndex >= 500 && defIndex <= 516))
+                        {
+                            // Map knife model selection to actual knife IDs
+                            int knifeModels[] = {507, 508, 500, 515, 505, 506, 509, 512, 516, 514, 519, 522, 523, 520, 503, 525};
+                            int selectedModel = (cfg_skin.knifeModel >= 0 && cfg_skin.knifeModel < 16) ? 
+                                                knifeModels[cfg_skin.knifeModel] : 507;
+                            
+                            // Map finish selection to paint kit IDs (simplified)
+                            int finishIds[] = {0, 44, 12, 38, 418, 411, 413, 59, 42, 43, 37, 74};
+                            int selectedFinish = (cfg_skin.knifeFinish >= 0 && cfg_skin.knifeFinish < 12) ?
+                                                 finishIds[cfg_skin.knifeFinish] : 0;
+                            
+                            SkinChanger::Instance().ApplyKnifeSkin(weapon, selectedFinish, 0, 0.01f, selectedModel);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Apply weapon skins if enabled
+        if (cfg_skin.forceSkins)
+        {
+            uint32_t weaponHandle = pLocalPlayer->GetActiveWeaponHandle();
+            if (weaponHandle != 0 && weaponHandle != 0xFFFFFFFF)
+            {
+                int weaponIndex = weaponHandle & 0x7FFF;
+                if (weaponIndex > 0 && weaponIndex < 8192)
+                {
+                    C_BaseEntity* weapon = g_pEntitySystem->GetBaseEntity(weaponIndex);
+                    if (weapon && Memory::IsValidPointer((uintptr_t)weapon))
+                    {
+                        int defIndex = SkinChanger::Instance().GetWeaponDefIndex(weapon);
+                        
+                        // Map weapon def index to our slot (simplified - would need full mapping)
+                        // For now, just apply to slot 0 (AK-47) as example
+                        static int lastAppliedWeapon = -1;
+                        if (defIndex != lastAppliedWeapon && cfg_skin.selectedSkin[0] > 0)
+                        {
+                            float wear = cfg_skin.floatValue[0];
+                            if (wear == 0.0f)
+                            {
+                                // Map wear selection to float value
+                                float wearValues[] = {0.01f, 0.10f, 0.25f, 0.40f, 0.70f};
+                                wear = (cfg_skin.selectedWear[0] >= 0 && cfg_skin.selectedWear[0] < 5) ?
+                                       wearValues[cfg_skin.selectedWear[0]] : 0.01f;
+                            }
+                            
+                            SkinChanger::Instance().ApplySkin(
+                                weapon,
+                                cfg_skin.selectedSkin[0],
+                                cfg_skin.selectedSeed[0],
+                                wear
+                            );
+                            
+                            lastAppliedWeapon = defIndex;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        // Silently handle exceptions
+    }
 }

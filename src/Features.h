@@ -27,6 +27,9 @@ namespace Features
     void BunnyHop();
     void RadarHack();
     
+    // Skins
+    void ApplySkins();
+    
     // Inicialización
     void Initialize();
     void Update();

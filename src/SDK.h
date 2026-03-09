@@ -38,42 +38,89 @@ namespace Offsets
         constexpr uintptr_t dwGameEntitySystem_getHighestEntityIndex = 0x20A0;  // 8352 decimal
         constexpr uintptr_t dwForceJump             = 0x230A1E0;  // 36745696 decimal
         
-        constexpr uintptr_t m_iHealth        = 0x76C;  // 1900 decimal
-        constexpr uintptr_t m_iMaxHealth     = 0xB54;  // 2900 decimal
-        constexpr uintptr_t m_iTeamNum       = 0xD70;  // 3440 decimal
-        constexpr uintptr_t m_pGameSceneNode = 0x598;  // 1432 decimal - Updated from scanner (WORKING VALUE)
-        constexpr uintptr_t m_vecAbsOrigin   = 0xC4;   // 196 decimal - Updated from scanner (offset within GameSceneNode)
-        constexpr uintptr_t m_hPlayerPawn    = 0x90C;  // 2316 decimal
-        constexpr uintptr_t m_iIDEntIndex    = 0x3EAC; // 15020 decimal
-        constexpr uintptr_t m_bDormant       = 0xE8;   // 232 decimal
+        // Core player offsets (Build 14138.4 - Mar 9, 2026)
+        constexpr uintptr_t m_iHealth        = 0x354;
+        constexpr uintptr_t m_iMaxHealth     = 0x350;
+        constexpr uintptr_t m_lifeState      = 0x35C;
+        constexpr uintptr_t m_iTeamNum       = 0x3F3;
+        constexpr uintptr_t m_pGameSceneNode = 0x338;
+        constexpr uintptr_t m_vecAbsOrigin   = 0xD0;
+        constexpr uintptr_t m_hPlayerPawn    = 0x90C;
+        constexpr uintptr_t m_iIDEntIndex    = 0x1598;
+        constexpr uintptr_t m_bDormant       = 0xE8;
         
+        // Movement & physics
         constexpr uintptr_t m_fFlags         = 0x400;
         constexpr uintptr_t m_vecVelocity    = 0x438;
+        constexpr uintptr_t m_MoveType       = 0x3FC;
+        constexpr uintptr_t m_flMaxspeed     = 0x57C;
+        constexpr uintptr_t m_flDuckAmount   = 0x5B4;
+        constexpr uintptr_t m_bDucked        = 0x5BC;
+        constexpr uintptr_t m_bDucking       = 0x5BD;
+        
+        // Aim & view
         constexpr uintptr_t m_angEyeAngles   = 0x3DD0;
-        constexpr uintptr_t m_vecViewOffset  = 0x790;  // Updated from scanner
+        constexpr uintptr_t m_angEyeAnglesVelocity = 0x3EA0;
+        constexpr uintptr_t m_vecViewOffset  = 0xD58;
         constexpr uintptr_t m_aimPunchAngle  = 0x16CC;
+        constexpr uintptr_t m_aimPunchAngleVel = 0x16D8;
         constexpr uintptr_t m_aimPunchCache  = 0x1728;
-        constexpr uintptr_t m_iShotsFired    = 0x1414;
+        constexpr uintptr_t m_aimPunchTickBase = 0x16E4;
+        constexpr uintptr_t m_aimPunchTickFraction = 0x16E8;
+        constexpr uintptr_t m_iShotsFired    = 0x270C;
+        constexpr uintptr_t m_flLowerBodyYawTarget = 0x3E90;
+        constexpr uintptr_t m_flFootYaw      = 0x3A9C;
+        constexpr uintptr_t m_flPoseParameter = 0x2764;
+        constexpr uintptr_t m_iMostRecentModelBone = 0x1F78;
+        constexpr uintptr_t m_angShootAngleHistory = 0x2780;
+        
+        // ESP & visuals
         constexpr uintptr_t m_bSpotted       = 0x8;
+        constexpr uintptr_t m_bSpottedByMask = 0xC;
         constexpr uintptr_t m_bIsScoped      = 0x26F8;
         constexpr uintptr_t m_flFlashDuration = 0x1470;
+        constexpr uintptr_t m_flFlashMaxAlpha = 0x1474;
+        constexpr uintptr_t m_flFlashBangTime = 0x1478;
+        
+        // Player state
+        constexpr uintptr_t m_flSimulationTime = 0x3C8;
+        constexpr uintptr_t m_flOldSimulationTime = 0x3CC;
+        constexpr uintptr_t m_nTickBase      = 0x6C0;
+        constexpr uintptr_t m_iObserverMode  = 0x3A0;
+        constexpr uintptr_t m_hObserverTarget = 0x3A4;
+        
+        // Player equipment
+        constexpr uintptr_t m_ArmorValue     = 0x2424;
+        constexpr uintptr_t m_bHasDefuser    = 0x2428;
+        constexpr uintptr_t m_bHasHelmet     = 0x2429;
+        constexpr uintptr_t m_bIsDefusing    = 0x242A;
+        constexpr uintptr_t m_bIsRescuing    = 0x242B;
+        constexpr uintptr_t m_bIsGrabbingHostage = 0x26FB;
+        constexpr uintptr_t m_bIsWalking     = 0x24C8;
+        constexpr uintptr_t m_iAccount       = 0x1720;
         
         // Player controller offsets
         constexpr uintptr_t m_iszPlayerName = 0x6F8; // 1784 in decimal
         
         // Weapon offsets
-        constexpr uintptr_t m_hActiveWeapon = 0x12F8;
-        
-        // Model and bone offsets
-        constexpr uintptr_t m_modelState = 0x160; // 352 in decimal
-        constexpr uintptr_t m_boneArray = 0x80;   // Offset within CModelState
-        
+        constexpr uintptr_t m_hActiveWeapon = 0x60;
+        constexpr uintptr_t m_hLastWeapon   = 0x64;
         constexpr uintptr_t m_pClippingWeapon = 0x1290;
         constexpr uintptr_t m_iClip1          = 0x1564;
         constexpr uintptr_t m_iClip2          = 0x1568;
+        
+        // Skin changer offsets
         constexpr uintptr_t m_nFallbackPaintKit = 0x31B8;
         constexpr uintptr_t m_nFallbackSeed     = 0x31BC;
         constexpr uintptr_t m_flFallbackWear    = 0x31C0;
+        constexpr uintptr_t m_nFallbackStatTrak = 0x31C4;
+        constexpr uintptr_t m_iItemDefinitionIndex = 0x1A8;
+        constexpr uintptr_t m_szCustomName      = 0x304;
+        
+        // Model and bone offsets
+        constexpr uintptr_t m_modelState = 0x160;
+        constexpr uintptr_t m_boneArray = 0x80;
+        constexpr uintptr_t m_nHitboxSet = 0x438;
         
         // Glow offsets (from C_BaseModelEntity)
         constexpr uintptr_t m_Glow = 0xCC0; // CGlowProperty
@@ -105,6 +152,7 @@ namespace Offsets
     
     inline uintptr_t m_iHealth()        { return OffsetManager::Instance().GetOffset("m_iHealth", Fallback::m_iHealth); }
     inline uintptr_t m_iMaxHealth()     { return OffsetManager::Instance().GetOffset("m_iMaxHealth", Fallback::m_iMaxHealth); }
+    inline uintptr_t m_lifeState()      { return OffsetManager::Instance().GetOffset("m_lifeState", Fallback::m_lifeState); }
     inline uintptr_t m_iTeamNum()       { return OffsetManager::Instance().GetOffset("m_iTeamNum", Fallback::m_iTeamNum); }
     inline uintptr_t m_pGameSceneNode() { return OffsetManager::Instance().GetOffset("m_pGameSceneNode", Fallback::m_pGameSceneNode); }
     inline uintptr_t m_vecAbsOrigin()   { return OffsetManager::Instance().GetOffset("m_vecAbsOrigin", Fallback::m_vecAbsOrigin); }
@@ -114,27 +162,67 @@ namespace Offsets
     
     inline uintptr_t m_fFlags()         { return OffsetManager::Instance().GetOffset("m_fFlags", Fallback::m_fFlags); }
     inline uintptr_t m_vecVelocity()    { return OffsetManager::Instance().GetOffset("m_vecVelocity", Fallback::m_vecVelocity); }
+    inline uintptr_t m_MoveType()       { return OffsetManager::Instance().GetOffset("m_MoveType", Fallback::m_MoveType); }
+    inline uintptr_t m_flMaxspeed()     { return OffsetManager::Instance().GetOffset("m_flMaxspeed", Fallback::m_flMaxspeed); }
+    inline uintptr_t m_flDuckAmount()   { return OffsetManager::Instance().GetOffset("m_flDuckAmount", Fallback::m_flDuckAmount); }
+    inline uintptr_t m_bDucked()        { return OffsetManager::Instance().GetOffset("m_bDucked", Fallback::m_bDucked); }
+    inline uintptr_t m_bDucking()       { return OffsetManager::Instance().GetOffset("m_bDucking", Fallback::m_bDucking); }
+    
     inline uintptr_t m_angEyeAngles()   { return OffsetManager::Instance().GetOffset("m_angEyeAngles", Fallback::m_angEyeAngles); }
+    inline uintptr_t m_angEyeAnglesVelocity() { return OffsetManager::Instance().GetOffset("m_angEyeAnglesVelocity", Fallback::m_angEyeAnglesVelocity); }
     inline uintptr_t m_vecViewOffset()  { return OffsetManager::Instance().GetOffset("m_vecViewOffset", Fallback::m_vecViewOffset); }
     inline uintptr_t m_aimPunchAngle()  { return OffsetManager::Instance().GetOffset("m_aimPunchAngle", Fallback::m_aimPunchAngle); }
+    inline uintptr_t m_aimPunchAngleVel() { return OffsetManager::Instance().GetOffset("m_aimPunchAngleVel", Fallback::m_aimPunchAngleVel); }
     inline uintptr_t m_aimPunchCache()  { return OffsetManager::Instance().GetOffset("m_aimPunchCache", Fallback::m_aimPunchCache); }
+    inline uintptr_t m_aimPunchTickBase() { return OffsetManager::Instance().GetOffset("m_aimPunchTickBase", Fallback::m_aimPunchTickBase); }
+    inline uintptr_t m_aimPunchTickFraction() { return OffsetManager::Instance().GetOffset("m_aimPunchTickFraction", Fallback::m_aimPunchTickFraction); }
     inline uintptr_t m_iShotsFired()    { return OffsetManager::Instance().GetOffset("m_iShotsFired", Fallback::m_iShotsFired); }
+    inline uintptr_t m_flLowerBodyYawTarget() { return OffsetManager::Instance().GetOffset("m_flLowerBodyYawTarget", Fallback::m_flLowerBodyYawTarget); }
+    inline uintptr_t m_flFootYaw()      { return OffsetManager::Instance().GetOffset("m_flFootYaw", Fallback::m_flFootYaw); }
+    inline uintptr_t m_flPoseParameter() { return OffsetManager::Instance().GetOffset("m_flPoseParameter", Fallback::m_flPoseParameter); }
+    inline uintptr_t m_iMostRecentModelBone() { return OffsetManager::Instance().GetOffset("m_iMostRecentModelBone", Fallback::m_iMostRecentModelBone); }
+    inline uintptr_t m_angShootAngleHistory() { return OffsetManager::Instance().GetOffset("m_angShootAngleHistory", Fallback::m_angShootAngleHistory); }
+    
     inline uintptr_t m_bSpotted()       { return OffsetManager::Instance().GetOffset("m_bSpotted", Fallback::m_bSpotted); }
+    inline uintptr_t m_bSpottedByMask() { return OffsetManager::Instance().GetOffset("m_bSpottedByMask", Fallback::m_bSpottedByMask); }
     inline uintptr_t m_bIsScoped()      { return OffsetManager::Instance().GetOffset("m_bIsScoped", Fallback::m_bIsScoped); }
     inline uintptr_t m_flFlashDuration() { return OffsetManager::Instance().GetOffset("m_flFlashDuration", Fallback::m_flFlashDuration); }
+    inline uintptr_t m_flFlashMaxAlpha() { return OffsetManager::Instance().GetOffset("m_flFlashMaxAlpha", Fallback::m_flFlashMaxAlpha); }
+    inline uintptr_t m_flFlashBangTime() { return OffsetManager::Instance().GetOffset("m_flFlashBangTime", Fallback::m_flFlashBangTime); }
     
     inline uintptr_t m_iszPlayerName() { return OffsetManager::Instance().GetOffset("m_iszPlayerName", Fallback::m_iszPlayerName); }
+    
+    inline uintptr_t m_flSimulationTime() { return OffsetManager::Instance().GetOffset("m_flSimulationTime", Fallback::m_flSimulationTime); }
+    inline uintptr_t m_flOldSimulationTime() { return OffsetManager::Instance().GetOffset("m_flOldSimulationTime", Fallback::m_flOldSimulationTime); }
+    inline uintptr_t m_nTickBase()      { return OffsetManager::Instance().GetOffset("m_nTickBase", Fallback::m_nTickBase); }
+    inline uintptr_t m_iObserverMode()  { return OffsetManager::Instance().GetOffset("m_iObserverMode", Fallback::m_iObserverMode); }
+    inline uintptr_t m_hObserverTarget() { return OffsetManager::Instance().GetOffset("m_hObserverTarget", Fallback::m_hObserverTarget); }
+    
+    inline uintptr_t m_ArmorValue()     { return OffsetManager::Instance().GetOffset("m_ArmorValue", Fallback::m_ArmorValue); }
+    inline uintptr_t m_bHasDefuser()    { return OffsetManager::Instance().GetOffset("m_bHasDefuser", Fallback::m_bHasDefuser); }
+    inline uintptr_t m_bHasHelmet()     { return OffsetManager::Instance().GetOffset("m_bHasHelmet", Fallback::m_bHasHelmet); }
+    inline uintptr_t m_bIsDefusing()    { return OffsetManager::Instance().GetOffset("m_bIsDefusing", Fallback::m_bIsDefusing); }
+    inline uintptr_t m_bIsRescuing()    { return OffsetManager::Instance().GetOffset("m_bIsRescuing", Fallback::m_bIsRescuing); }
+    inline uintptr_t m_bIsGrabbingHostage() { return OffsetManager::Instance().GetOffset("m_bIsGrabbingHostage", Fallback::m_bIsGrabbingHostage); }
+    inline uintptr_t m_bIsWalking()     { return OffsetManager::Instance().GetOffset("m_bIsWalking", Fallback::m_bIsWalking); }
+    inline uintptr_t m_iAccount()       { return OffsetManager::Instance().GetOffset("m_iAccount", Fallback::m_iAccount); }
+    
     inline uintptr_t m_hActiveWeapon() { return OffsetManager::Instance().GetOffset("m_hActiveWeapon", Fallback::m_hActiveWeapon); }
-    
-    inline uintptr_t m_modelState() { return OffsetManager::Instance().GetOffset("m_modelState", Fallback::m_modelState); }
-    inline uintptr_t m_boneArray() { return OffsetManager::Instance().GetOffset("m_boneArray", Fallback::m_boneArray); }
-    
+    inline uintptr_t m_hLastWeapon()   { return OffsetManager::Instance().GetOffset("m_hLastWeapon", Fallback::m_hLastWeapon); }
     inline uintptr_t m_pClippingWeapon() { return OffsetManager::Instance().GetOffset("m_pClippingWeapon", Fallback::m_pClippingWeapon); }
     inline uintptr_t m_iClip1()          { return OffsetManager::Instance().GetOffset("m_iClip1", Fallback::m_iClip1); }
     inline uintptr_t m_iClip2()          { return OffsetManager::Instance().GetOffset("m_iClip2", Fallback::m_iClip2); }
+    
     inline uintptr_t m_nFallbackPaintKit() { return OffsetManager::Instance().GetOffset("m_nFallbackPaintKit", Fallback::m_nFallbackPaintKit); }
     inline uintptr_t m_nFallbackSeed()     { return OffsetManager::Instance().GetOffset("m_nFallbackSeed", Fallback::m_nFallbackSeed); }
     inline uintptr_t m_flFallbackWear()    { return OffsetManager::Instance().GetOffset("m_flFallbackWear", Fallback::m_flFallbackWear); }
+    inline uintptr_t m_nFallbackStatTrak() { return OffsetManager::Instance().GetOffset("m_nFallbackStatTrak", Fallback::m_nFallbackStatTrak); }
+    inline uintptr_t m_iItemDefinitionIndex() { return OffsetManager::Instance().GetOffset("m_iItemDefinitionIndex", Fallback::m_iItemDefinitionIndex); }
+    inline uintptr_t m_szCustomName()      { return OffsetManager::Instance().GetOffset("m_szCustomName", Fallback::m_szCustomName); }
+    
+    inline uintptr_t m_modelState() { return OffsetManager::Instance().GetOffset("m_modelState", Fallback::m_modelState); }
+    inline uintptr_t m_boneArray() { return OffsetManager::Instance().GetOffset("m_boneArray", Fallback::m_boneArray); }
+    inline uintptr_t m_nHitboxSet() { return OffsetManager::Instance().GetOffset("m_nHitboxSet", Fallback::m_nHitboxSet); }
     
     // Glow offsets
     inline uintptr_t m_Glow() { return OffsetManager::Instance().GetOffset("m_Glow", Fallback::m_Glow); }
@@ -257,6 +345,103 @@ public:
         {
             return 0;
         }
+    }
+    
+    // Advanced HvH methods
+    float GetLowerBodyYawTarget()
+    {
+        return *(float*)((uintptr_t)this + Offsets::m_flLowerBodyYawTarget());
+    }
+    
+    float GetFootYaw()
+    {
+        return *(float*)((uintptr_t)this + Offsets::m_flFootYaw());
+    }
+    
+    float GetPoseParameter(int index = 0)
+    {
+        // m_flPoseParameter is an array, index 0-24
+        return *(float*)((uintptr_t)this + Offsets::m_flPoseParameter() + (index * sizeof(float)));
+    }
+    
+    int GetMostRecentModelBone()
+    {
+        return *(int*)((uintptr_t)this + Offsets::m_iMostRecentModelBone());
+    }
+    
+    int GetShotsFired()
+    {
+        return *(int*)((uintptr_t)this + Offsets::m_iShotsFired());
+    }
+    
+    Vector3 GetAimPunchAngle()
+    {
+        return *(Vector3*)((uintptr_t)this + Offsets::m_aimPunchAngle());
+    }
+    
+    Vector3 GetAimPunchAngleVel()
+    {
+        return *(Vector3*)((uintptr_t)this + Offsets::m_aimPunchAngleVel());
+    }
+    
+    int GetArmorValue()
+    {
+        return *(int*)((uintptr_t)this + Offsets::m_ArmorValue());
+    }
+    
+    bool HasDefuser()
+    {
+        return *(bool*)((uintptr_t)this + Offsets::m_bHasDefuser());
+    }
+    
+    bool HasHelmet()
+    {
+        return *(bool*)((uintptr_t)this + Offsets::m_bHasHelmet());
+    }
+    
+    bool IsDefusing()
+    {
+        return *(bool*)((uintptr_t)this + Offsets::m_bIsDefusing());
+    }
+    
+    bool IsWalking()
+    {
+        return *(bool*)((uintptr_t)this + Offsets::m_bIsWalking());
+    }
+    
+    int GetMoney()
+    {
+        return *(int*)((uintptr_t)this + Offsets::m_iAccount());
+    }
+    
+    float GetDuckAmount()
+    {
+        return *(float*)((uintptr_t)this + Offsets::m_flDuckAmount());
+    }
+    
+    bool IsDucked()
+    {
+        return *(bool*)((uintptr_t)this + Offsets::m_bDucked());
+    }
+    
+    bool IsDucking()
+    {
+        return *(bool*)((uintptr_t)this + Offsets::m_bDucking());
+    }
+    
+    int GetTickBase()
+    {
+        return *(int*)((uintptr_t)this + Offsets::m_nTickBase());
+    }
+    
+    float GetSimulationTime()
+    {
+        return *(float*)((uintptr_t)this + Offsets::m_flSimulationTime());
+    }
+    
+    float GetOldSimulationTime()
+    {
+        return *(float*)((uintptr_t)this + Offsets::m_flOldSimulationTime());
     }
     
     // Get bone position by bone ID

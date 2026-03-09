@@ -9,7 +9,7 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-bool    bShowMenu       = true;
+bool    bShowMenu       = false;  // Start with menu closed
 static bool bImGuiReady = false;
 static HMODULE g_hSDL   = nullptr;
 extern UINT g_BackBufferWidth;
