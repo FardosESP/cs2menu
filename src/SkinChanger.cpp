@@ -28,43 +28,52 @@ void SkinChanger::ApplySkin(C_BaseEntity* weapon, int paintKit, int seed, float 
     if (!weapon || !Memory::IsValidPointer((uintptr_t)weapon))
         return;
     
-    __try
+    uintptr_t weaponAddr = (uintptr_t)weapon;
+    
+    // Check each offset before writing (CRITICAL FIX)
+    uintptr_t paintKitAddr = weaponAddr + WeaponOffsets::m_nFallbackPaintKit();
+    if (!Memory::IsValidPointer(paintKitAddr)) return;
+    
+    uintptr_t seedAddr = weaponAddr + WeaponOffsets::m_nFallbackSeed();
+    if (!Memory::IsValidPointer(seedAddr)) return;
+    
+    uintptr_t wearAddr = weaponAddr + WeaponOffsets::m_flFallbackWear();
+    if (!Memory::IsValidPointer(wearAddr)) return;
+    
+    // Force owner to local (FIX: skins not applying)
+    Memory::Write<uint64_t>(weaponAddr + WeaponOffsets::m_OriginalOwnerXuidLow(), 0);
+    Memory::Write<uint64_t>(weaponAddr + WeaponOffsets::m_OriginalOwnerXuidHigh(), 0);
+    
+    // Force quality to exotic (4 = unusual/exotic)
+    Memory::Write<int>(weaponAddr + WeaponOffsets::m_iEntityQuality(), 4);
+    
+    // Apply skin
+    Memory::Write<int>(paintKitAddr, paintKit);
+    Memory::Write<int>(seedAddr, seed);
+    Memory::Write<float>(wearAddr, wear);
+    
+    // Set StatTrak counter if specified
+    if (statTrak >= 0)
     {
-        uintptr_t weaponAddr = (uintptr_t)weapon;
-        
-        // Set fallback paint kit (skin ID)
-        *(int*)(weaponAddr + WeaponOffsets::m_nFallbackPaintKit()) = paintKit;
-        
-        // Set fallback seed (pattern variation)
-        *(int*)(weaponAddr + WeaponOffsets::m_nFallbackSeed()) = seed;
-        
-        // Set fallback wear (0.0 = Factory New, 1.0 = Battle-Scarred)
-        *(float*)(weaponAddr + WeaponOffsets::m_flFallbackWear()) = wear;
-        
-        // Set StatTrak counter if specified
-        if (statTrak >= 0)
+        uintptr_t statTrakAddr = weaponAddr + WeaponOffsets::m_nFallbackStatTrak();
+        if (Memory::IsValidPointer(statTrakAddr))
+            Memory::Write<int>(statTrakAddr, statTrak);
+    }
+    
+    // Force full update (CRUCIAL - makes skins visible immediately)
+    uintptr_t attrAddr = weaponAddr + WeaponOffsets::m_AttributeManager();
+    if (Memory::IsValidPointer(attrAddr))
+    {
+        uintptr_t itemAddr = attrAddr + WeaponOffsets::m_Item();
+        if (Memory::IsValidPointer(itemAddr))
         {
-            *(int*)(weaponAddr + WeaponOffsets::m_nFallbackStatTrak()) = statTrak;
+            Memory::Write<int>(itemAddr + WeaponOffsets::m_iItemIDHigh(), -1);
+            Memory::Write<int>(itemAddr + WeaponOffsets::m_iItemIDLow(), -1);
         }
-        
-        // Force update by modifying item ID
-        // This tricks the game into thinking it's a new item
-        uintptr_t attributeManager = weaponAddr + WeaponOffsets::m_AttributeManager();
-        uintptr_t item = attributeManager + WeaponOffsets::m_Item();
-        
-        // Set item ID high to -1 to force update
-        *(int*)(item + WeaponOffsets::m_iItemIDHigh()) = -1;
-        
-        // Set entity quality (4 = unusual, makes skins work)
-        *(int*)(weaponAddr + WeaponOffsets::m_iEntityQuality()) = 4;
-        
-        std::cout << "[SkinChanger] Applied skin: PaintKit=" << paintKit 
-                  << ", Seed=" << seed << ", Wear=" << wear << std::endl;
     }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        std::cout << "[SkinChanger] Error applying skin" << std::endl;
-    }
+    
+    std::cout << "[SkinChanger] Applied skin to 0x" << std::hex << weaponAddr << std::dec 
+              << " (PaintKit=" << paintKit << ", Seed=" << seed << ", Wear=" << wear << ")" << std::endl;
 }
 
 void SkinChanger::ApplyToAllWeapons(C_CSPlayerPawn* localPlayer, int paintKit, int seed, float wear)
@@ -72,35 +81,33 @@ void SkinChanger::ApplyToAllWeapons(C_CSPlayerPawn* localPlayer, int paintKit, i
     if (!localPlayer || !Memory::IsValidPointer((uintptr_t)localPlayer))
         return;
     
-    __try
-    {
-        // Get active weapon handle
-        uint32_t weaponHandle = localPlayer->GetActiveWeaponHandle();
-        if (weaponHandle == 0 || weaponHandle == 0xFFFFFFFF)
-            return;
-        
-        // Extract entity index from handle
-        int weaponIndex = weaponHandle & 0x7FFF;
-        
-        if (weaponIndex <= 0 || weaponIndex >= 8192)
-            return;
-        
-        // Get weapon entity from entity system
-        extern C_CSGameEntitySystem* g_pEntitySystem;
-        if (!g_pEntitySystem)
-            return;
-        
-        C_BaseEntity* weapon = g_pEntitySystem->GetBaseEntity(weaponIndex);
-        if (!weapon)
-            return;
-        
-        // Apply skin to active weapon
-        ApplySkin(weapon, paintKit, seed, wear);
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        std::cout << "[SkinChanger] Error applying to all weapons" << std::endl;
-    }
+    // Get active weapon handle
+    uint32_t weaponHandle = localPlayer->GetActiveWeaponHandle();
+    if (weaponHandle == 0 || weaponHandle == 0xFFFFFFFF)
+        return;
+    
+    // Extract entity index from handle
+    int weaponIndex = weaponHandle & 0x7FFF;
+    
+    if (weaponIndex <= 0 || weaponIndex >= 8192)
+        return;
+    
+    // Get weapon entity from entity system
+    extern C_CSGameEntitySystem* g_pEntitySystem;
+    if (!g_pEntitySystem)
+        return;
+    
+    C_BaseEntity* weapon = g_pEntitySystem->GetBaseEntity(weaponIndex);
+    if (!weapon || !Memory::IsValidPointer((uintptr_t)weapon))
+        return;
+    
+    // Validate it's actually a weapon (FIX: don't apply to props/bots)
+    int defIndex = GetWeaponDefIndex(weapon);
+    if (defIndex <= 0)
+        return;
+    
+    // Apply skin to active weapon
+    ApplySkin(weapon, paintKit, seed, wear);
 }
 
 void SkinChanger::ApplyKnifeSkin(C_BaseEntity* knife, int paintKit, int seed, float wear, int knifeModel)
@@ -140,15 +147,20 @@ int SkinChanger::GetWeaponDefIndex(C_BaseEntity* weapon)
     if (!weapon || !Memory::IsValidPointer((uintptr_t)weapon))
         return -1;
     
-    __try
-    {
-        uintptr_t weaponAddr = (uintptr_t)weapon;
-        return *(int*)(weaponAddr + WeaponOffsets::m_iItemDefinitionIndex());
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
+    uintptr_t weaponAddr = (uintptr_t)weapon;
+    uintptr_t defIndexAddr = weaponAddr + WeaponOffsets::m_iItemDefinitionIndex();
+    
+    if (!Memory::IsValidPointer(defIndexAddr))
         return -1;
-    }
+    
+    // Safe read with fallback
+    int defIndex = Memory::Read<int>(defIndexAddr);
+    
+    // Validate def index (weapons are typically 1-65, knives 500-525)
+    if (defIndex < 0 || defIndex > 600)
+        return -1;
+    
+    return defIndex;
 }
 
 void SkinChanger::SetCustomName(C_BaseEntity* weapon, const char* name)
@@ -156,18 +168,16 @@ void SkinChanger::SetCustomName(C_BaseEntity* weapon, const char* name)
     if (!weapon || !Memory::IsValidPointer((uintptr_t)weapon) || !name)
         return;
     
-    __try
-    {
-        uintptr_t weaponAddr = (uintptr_t)weapon;
-        
-        // Copy custom name (max 32 characters)
-        char* customNamePtr = (char*)(weaponAddr + WeaponOffsets::m_szCustomName());
-        strncpy_s(customNamePtr, 32, name, _TRUNCATE);
-        
-        std::cout << "[SkinChanger] Set custom name: " << name << std::endl;
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        std::cout << "[SkinChanger] Error setting custom name" << std::endl;
-    }
+    uintptr_t weaponAddr = (uintptr_t)weapon;
+    uintptr_t customNameAddr = weaponAddr + WeaponOffsets::m_szCustomName();
+    
+    // Check pointer before writing (CRITICAL FIX)
+    if (!Memory::IsValidPointer(customNameAddr))
+        return;
+    
+    // Copy custom name safely (max 32 characters)
+    char* customNamePtr = (char*)customNameAddr;
+    strncpy_s(customNamePtr, 32, name, _TRUNCATE);
+    
+    std::cout << "[SkinChanger] Set custom name: " << name << std::endl;
 }

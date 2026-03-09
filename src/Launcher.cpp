@@ -128,12 +128,31 @@ bool InjectDLL(DWORD pid, const std::wstring& dllPath)
     LPTHREAD_START_ROUTINE pLoadLibraryW = (LPTHREAD_START_ROUTINE)GetProcAddress(
         GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW"
     );
+    
+    if (!pLoadLibraryW)
+    {
+        std::cout << "[-] No se pudo obtener direccion de LoadLibraryW" << std::endl;
+        VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
+        CloseHandle(process);
+        return false;
+    }
+    
+    std::cout << "[i] LoadLibraryW address: 0x" << std::hex << (uintptr_t)pLoadLibraryW << std::dec << std::endl;
+    std::cout << "[i] Remote buffer: 0x" << std::hex << (uintptr_t)remoteBuf << std::dec << std::endl;
 
     HANDLE remoteThread = CreateRemoteThread(process, NULL, 0, pLoadLibraryW, remoteBuf, 0, NULL);
 
     if (!remoteThread)
     {
-        std::cout << "[-] CreateRemoteThread fallo. Error: " << GetLastError() << std::endl;
+        DWORD error = GetLastError();
+        std::cout << "[-] CreateRemoteThread fallo. Error: " << error << std::endl;
+        
+        // Common error codes
+        if (error == ERROR_ACCESS_DENIED)
+            std::cout << "[!] ERROR_ACCESS_DENIED - El proceso esta protegido o necesitas mas privilegios" << std::endl;
+        else if (error == ERROR_NOT_ENOUGH_MEMORY)
+            std::cout << "[!] ERROR_NOT_ENOUGH_MEMORY - No hay suficiente memoria" << std::endl;
+        
         VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
         CloseHandle(process);
         return false;
@@ -156,6 +175,8 @@ bool InjectDLL(DWORD pid, const std::wstring& dllPath)
     DWORD exitCode = 0;
     GetExitCodeThread(remoteThread, &exitCode);
     
+    std::cout << "[i] Thread exit code: 0x" << std::hex << exitCode << std::dec << std::endl;
+    
     CloseHandle(remoteThread);
     VirtualFreeEx(process, remoteBuf, 0, MEM_RELEASE);
     CloseHandle(process);
@@ -163,6 +184,11 @@ bool InjectDLL(DWORD pid, const std::wstring& dllPath)
     if (exitCode == 0)
     {
         std::cout << "[-] LoadLibraryW retorno NULL - DLL no se cargo." << std::endl;
+        std::cout << "[!] Posibles causas:" << std::endl;
+        std::cout << "    1. Dependencias faltantes (d3d11.dll, vcruntime, etc)" << std::endl;
+        std::cout << "    2. Windows Defender bloqueando la DLL" << std::endl;
+        std::cout << "    3. VAC/Anti-cheat bloqueando la inyeccion" << std::endl;
+        std::cout << "    4. Ruta de DLL invalida o inaccesible" << std::endl;
         return false;
     }
     

@@ -248,6 +248,31 @@ struct MiscConfig {
     bool bhop=false, autoStrafe=false, radarHack=false, speedhack=false, antiAim=false;
     float speedValue=1.2f;
 };
+struct AntiAimConfig {
+    bool enabled=false;
+    int pitchType=0;  // 0=None, 1=Up, 2=Down, 3=Zero, 4=Fake
+    int yawType=0;    // 0=None, 1=Backward, 2=Spin, 3=Jitter, 4=Sideways, 5=Random
+    float yawOffset=0.0f;
+    float jitterRange=45.0f;
+    float spinSpeed=10.0f;
+    bool fakeLag=false;
+    int fakeLagTicks=14;
+    bool freestanding=false;
+    bool edgeAA=false;
+    int manualAA=0;  // 0=None, 1=Left, 2=Right, 3=Back
+};
+struct ResolverConfig {
+    bool enabled=false;
+    int resolverType=0;  // 0=LBY, 1=Moving, 2=Standing, 3=Bruteforce, 4=Delta, 5=LastMove
+    bool autoResolve=true;
+    bool showMisses=true;
+};
+struct BacktrackConfig {
+    bool enabled=false;
+    int maxTicks=12;  // 200ms @ 64 tick
+    bool visualize=false;
+    float visualizeColor[4]={1,0,0,0.5f};
+};
 struct SkinConfig {
     int knifeModel=0, knifeFinish=0;
     bool forceKnife=false, forceSkins=false;
@@ -260,6 +285,9 @@ ESPConfig     cfg_esp;
 AimbotConfig  cfg_aim;
 VisualsConfig cfg_vis;
 MiscConfig    cfg_misc;
+AntiAimConfig cfg_antiaim;
+ResolverConfig cfg_resolver;
+BacktrackConfig cfg_backtrack;
 SkinConfig    cfg_skin;
 
 static void ApplyStyle()
@@ -315,46 +343,115 @@ static HWND GetCS2Window() {
 }
 
 static void TabESP() {
-    ImGui::BeginChild("##esp",{0,0},false);
+    ImGui::BeginChild("##esp", {0, 0}, false);
+    
     SectionTitle("  ESP General");
-    ImGui::Checkbox("Activar ESP",&cfg_esp.enabled);
-    if(cfg_esp.enabled){ImGui::Indent();ImGui::Checkbox("Solo enemigos",&cfg_esp.teamCheck);ImGui::Checkbox("Ignorar dormant",&cfg_esp.dormantCheck);ImGui::SliderFloat("Distancia max",&cfg_esp.maxDistance,50,2000,"%.0f u");ImGui::Unindent();}
+    ImGui::Checkbox("Activar ESP", &cfg_esp.enabled);
+    if (cfg_esp.enabled) {
+        ImGui::Indent();
+        ImGui::Checkbox("Solo enemigos", &cfg_esp.teamCheck);
+        ImGui::Checkbox("Ignorar dormant", &cfg_esp.dormantCheck);
+        ImGui::SliderFloat("Distancia max", &cfg_esp.maxDistance, 50, 2000, "%.0f u");
+        ImGui::Unindent();
+    }
+    
+    ImGui::Spacing();
     SectionTitle("  Cajas");
-    ImGui::Checkbox("Cajas##b",&cfg_esp.boxes);
-    if(cfg_esp.boxes){ImGui::Indent();ImGui::Checkbox("Relleno",&cfg_esp.boxFilled);ImGui::SliderFloat("Grosor",&cfg_esp.boxThickness,.5f,4,"%.1f");ImGui::ColorEdit4("Color enemigo##bc",cfg_esp.boxColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::SameLine();ImGui::ColorEdit4("Color equipo##tc",cfg_esp.teamColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::Unindent();}
+    ImGui::Checkbox("Cajas##b", &cfg_esp.boxes);
+    if (cfg_esp.boxes) {
+        ImGui::Indent();
+        ImGui::Checkbox("Relleno", &cfg_esp.boxFilled);
+        ImGui::SliderFloat("Grosor", &cfg_esp.boxThickness, .5f, 4, "%.1f");
+        ImGui::ColorEdit4("Color enemigo##bc", cfg_esp.boxColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar);
+        ImGui::SameLine();
+        ImGui::ColorEdit4("Color equipo##tc", cfg_esp.teamColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar);
+        ImGui::Unindent();
+    }
+    
+    ImGui::Spacing();
     SectionTitle("  Esqueleto");
-    ImGui::Checkbox("Esqueleto##sk",&cfg_esp.skeleton);
-    if(cfg_esp.skeleton){ImGui::Indent();ImGui::ColorEdit4("Color##skc",cfg_esp.skeletonColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::Unindent();}
+    ImGui::Checkbox("Esqueleto##sk", &cfg_esp.skeleton);
+    if (cfg_esp.skeleton) {
+        ImGui::Indent();
+        ImGui::ColorEdit4("Color##skc", cfg_esp.skeletonColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar);
+        ImGui::Unindent();
+    }
+    
+    ImGui::Spacing();
     SectionTitle("  Glow Effect");
-    ImGui::Checkbox("Glow##glow",&cfg_esp.glow);
-    if(cfg_esp.glow){ImGui::Indent();ImGui::ColorEdit4("Color enemigo##glowec",cfg_esp.glowEnemyColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::SameLine();ImGui::ColorEdit4("Color equipo##glowtc",cfg_esp.glowTeamColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::Unindent();}
+    ImGui::Checkbox("Glow##glow", &cfg_esp.glow);
+    if (cfg_esp.glow) {
+        ImGui::Indent();
+        ImGui::ColorEdit4("Color enemigo##glowec", cfg_esp.glowEnemyColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar);
+        ImGui::SameLine();
+        ImGui::ColorEdit4("Color equipo##glowtc", cfg_esp.glowTeamColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar);
+        ImGui::Unindent();
+    }
+    
+    ImGui::Spacing();
     SectionTitle("  Info jugadores");
-    ImGui::Checkbox("Nombre##n",&cfg_esp.name);ImGui::SameLine(160);ImGui::Checkbox("Vida##h",&cfg_esp.health);
-    ImGui::Checkbox("Barra vida##hb",&cfg_esp.healthBar);ImGui::SameLine(160);ImGui::Checkbox("Distancia##d",&cfg_esp.distance);
-    ImGui::Checkbox("Arma##w",&cfg_esp.weapon);ImGui::SameLine(160);ImGui::Checkbox("Snaplines##sl",&cfg_esp.snaplines);
-    if(cfg_esp.snaplines){ImGui::Indent();ImGui::ColorEdit4("Color snapline",cfg_esp.snaplineColor,ImGuiColorEditFlags_NoInputs|ImGuiColorEditFlags_AlphaBar);ImGui::Unindent();}
+    ImGui::Checkbox("Nombre##n", &cfg_esp.name);
+    ImGui::SameLine(200);
+    ImGui::Checkbox("Vida##h", &cfg_esp.health);
+    
+    ImGui::Checkbox("Barra vida##hb", &cfg_esp.healthBar);
+    ImGui::SameLine(200);
+    ImGui::Checkbox("Distancia##d", &cfg_esp.distance);
+    
+    ImGui::Checkbox("Arma##w", &cfg_esp.weapon);
+    ImGui::SameLine(200);
+    ImGui::Checkbox("Snaplines##sl", &cfg_esp.snaplines);
+    
+    if (cfg_esp.snaplines) {
+        ImGui::Indent();
+        ImGui::ColorEdit4("Color snapline", cfg_esp.snaplineColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar);
+        ImGui::Unindent();
+    }
+    
     ImGui::EndChild();
 }
 static void TabAimbot() {
-    ImGui::BeginChild("##aim",{0,0},false);
+    ImGui::BeginChild("##aim", {0, 0}, false);
+    
     SectionTitle("  Aimbot");
-    ImGui::Checkbox("Activar Aimbot",&cfg_aim.enabled);
-    if(cfg_aim.enabled){
+    ImGui::Checkbox("Activar Aimbot", &cfg_aim.enabled);
+    
+    if (cfg_aim.enabled) {
         ImGui::Indent();
-        ImGui::Checkbox("Solo visibles",&cfg_aim.visibleOnly);Tip("No apunta a traves de paredes");
-        ImGui::Checkbox("No atacar equipo",&cfg_aim.teamCheck);
-        ImGui::Checkbox("Auto disparo",&cfg_aim.autoShoot);Tip("Dispara cuando el objetivo entra en el FOV");
-        ImGui::Checkbox("Silent Aim",&cfg_aim.silentAim);Tip("El movimiento del raton no es visible");
+        ImGui::Checkbox("Solo visibles", &cfg_aim.visibleOnly);
+        Tip("No apunta a traves de paredes");
+        
+        ImGui::Checkbox("No atacar equipo", &cfg_aim.teamCheck);
+        ImGui::Checkbox("Auto disparo", &cfg_aim.autoShoot);
+        Tip("Dispara cuando el objetivo entra en el FOV");
+        
+        ImGui::Checkbox("Silent Aim", &cfg_aim.silentAim);
+        Tip("El movimiento del raton no es visible");
+        
         ImGui::Spacing();
-        const char* bones[]={"Cabeza","Cuello","Cuerpo"};
-        ImGui::Combo("Hueso objetivo",&cfg_aim.bone,bones,3);
-        ImGui::SliderFloat("FOV",&cfg_aim.fov,1,180,"%.1f deg");
-        ImGui::SliderFloat("Suavizado",&cfg_aim.smooth,1,30,"%.1f");
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        const char* bones[] = {"Cabeza", "Cuello", "Cuerpo"};
+        ImGui::SetNextItemWidth(200);
+        ImGui::Combo("Hueso objetivo", &cfg_aim.bone, bones, 3);
+        
+        ImGui::SliderFloat("FOV", &cfg_aim.fov, 1, 180, "%.1f deg");
+        ImGui::SliderFloat("Suavizado", &cfg_aim.smooth, 1, 30, "%.1f");
         ImGui::Unindent();
     }
-    SectionTitle("  RCS");
-    ImGui::Checkbox("Activar RCS",&cfg_aim.rcs);
-    if(cfg_aim.rcs){ImGui::Indent();ImGui::SliderFloat("Horizontal",&cfg_aim.rcsX,0,2,"%.2f");ImGui::SliderFloat("Vertical",&cfg_aim.rcsY,0,2,"%.2f");ImGui::Unindent();}
+    
+    ImGui::Spacing();
+    SectionTitle("  RCS (Recoil Control)");
+    ImGui::Checkbox("Activar RCS", &cfg_aim.rcs);
+    
+    if (cfg_aim.rcs) {
+        ImGui::Indent();
+        ImGui::SliderFloat("Horizontal", &cfg_aim.rcsX, 0, 2, "%.2f");
+        ImGui::SliderFloat("Vertical", &cfg_aim.rcsY, 0, 2, "%.2f");
+        ImGui::Unindent();
+    }
+    
     ImGui::EndChild();
 }
 static void TabVisuals() {
@@ -384,6 +481,89 @@ static void TabVisuals() {
         dl->AddLine({cx-sz-gap,cy},{cx-gap,cy},col,1.5f);dl->AddLine({cx+gap,cy},{cx+sz+gap,cy},col,1.5f);
         dl->AddLine({cx,cy-sz-gap},{cx,cy-gap},col,1.5f);dl->AddLine({cx,cy+gap},{cx,cy+sz+gap},col,1.5f);
         ImGui::Dummy({120,40});ImGui::SameLine();ImGui::TextDisabled("(preview)");
+    }
+    ImGui::EndChild();
+}
+static void TabAntiAim() {
+    ImGui::BeginChild("##antiaim",{0,0},false);
+    SectionTitle("  Anti-Aim Principal");
+    ImGui::Checkbox("Activar Anti-Aim",&cfg_antiaim.enabled);Tip("Sistema profesional de Anti-Aim");
+    
+    if(cfg_antiaim.enabled){
+        ImGui::Spacing();
+        SectionTitle("  Pitch (Arriba/Abajo)");
+        const char* pitchTypes[]={"Ninguno","Arriba","Abajo","Cero","Fake Up","Fake Down","Jitter"};
+        ImGui::Combo("Tipo Pitch",&cfg_antiaim.pitchType,pitchTypes,IM_ARRAYSIZE(pitchTypes));
+        
+        ImGui::Spacing();
+        SectionTitle("  Yaw (Izquierda/Derecha)");
+        const char* yawTypes[]={"Ninguno","Atras","Spin","Jitter","Sideways","Random","Fake Backward","Fake Spin"};
+        ImGui::Combo("Tipo Yaw",&cfg_antiaim.yawType,yawTypes,IM_ARRAYSIZE(yawTypes));
+        
+        ImGui::SliderFloat("Offset Yaw",&cfg_antiaim.yawOffset,-180.0f,180.0f,"%.0f°");
+        
+        if(cfg_antiaim.yawType == 3){ // Jitter
+            ImGui::SliderFloat("Rango Jitter",&cfg_antiaim.jitterRange,0.0f,180.0f,"%.0f°");
+        }
+        if(cfg_antiaim.yawType == 2 || cfg_antiaim.yawType == 7){ // Spin
+            ImGui::SliderFloat("Velocidad Spin",&cfg_antiaim.spinSpeed,1.0f,50.0f,"%.1f");
+        }
+        
+        ImGui::Spacing();
+        SectionTitle("  Avanzado");
+        ImGui::Checkbox("Fake Lag",&cfg_antiaim.fakeLag);Tip("Choke packets para confundir enemigos");
+        if(cfg_antiaim.fakeLag){
+            ImGui::Indent();
+            ImGui::SliderInt("Ticks",&cfg_antiaim.fakeLagTicks,1,14);
+            ImGui::Unindent();
+        }
+        
+        ImGui::Checkbox("Freestanding",&cfg_antiaim.freestanding);Tip("Auto-ajuste basado en enemigos");
+        ImGui::Checkbox("Edge AA",&cfg_antiaim.edgeAA);Tip("Detectar paredes y ajustar");
+        
+        ImGui::Spacing();
+        SectionTitle("  Manual AA (Keybinds)");
+        const char* manualTypes[]={"Ninguno","Izquierda","Derecha","Atras"};
+        ImGui::Combo("Manual Override",&cfg_antiaim.manualAA,manualTypes,IM_ARRAYSIZE(manualTypes));
+        ImGui::TextDisabled("Usa teclas para control manual");
+    }
+    ImGui::EndChild();
+}
+static void TabResolver() {
+    ImGui::BeginChild("##resolver",{0,0},false);
+    SectionTitle("  Resolver de Enemigos");
+    ImGui::Checkbox("Activar Resolver",&cfg_resolver.enabled);Tip("Resolver anti-aim enemigo");
+    
+    if(cfg_resolver.enabled){
+        ImGui::Spacing();
+        SectionTitle("  Metodo de Resolver");
+        const char* resolverTypes[]={"LBY (Lower Body)","Moving (Movimiento)","Standing (Parado)","Bruteforce","Delta (Diferencia)","Last Move"};
+        ImGui::Combo("Tipo",&cfg_resolver.resolverType,resolverTypes,IM_ARRAYSIZE(resolverTypes));
+        
+        ImGui::Spacing();
+        ImGui::Checkbox("Auto Resolver",&cfg_resolver.autoResolve);Tip("Cambiar metodo automaticamente");
+        ImGui::Checkbox("Mostrar Misses",&cfg_resolver.showMisses);Tip("Mostrar disparos fallados");
+        
+        ImGui::Spacing();
+        SectionTitle("  Informacion");
+        ImGui::TextDisabled("LBY: Basado en Lower Body Yaw");
+        ImGui::TextDisabled("Moving: Basado en velocidad");
+        ImGui::TextDisabled("Bruteforce: Probar todos los angulos");
+        ImGui::TextDisabled("Delta: Diferencia entre angulos");
+        
+        ImGui::Spacing();
+        SectionTitle("  Backtrack");
+        ImGui::Checkbox("Activar Backtrack",&cfg_backtrack.enabled);Tip("Disparar a posiciones pasadas");
+        if(cfg_backtrack.enabled){
+            ImGui::Indent();
+            ImGui::SliderInt("Max Ticks",&cfg_backtrack.maxTicks,1,12);
+            ImGui::TextDisabled("12 ticks = 200ms @ 64 tick");
+            ImGui::Checkbox("Visualizar",&cfg_backtrack.visualize);
+            if(cfg_backtrack.visualize){
+                ImGui::ColorEdit4("Color##bt",cfg_backtrack.visualizeColor);
+            }
+            ImGui::Unindent();
+        }
     }
     ImGui::EndChild();
 }
@@ -455,31 +635,33 @@ static void TabSkins() {
 static void DrawMainMenu()
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2 center = {275.0f, 215.0f};
+    ImVec2 center = {400.0f, 350.0f};
     if (io.DisplaySize.x > 0.0f && io.DisplaySize.y > 0.0f)
         center = {io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f};
 
-    ImGui::SetNextWindowSize({550,430}, ImGuiCond_Always);
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, {.5f, .5f});
+    // Solo centrar la primera vez, después permitir mover
+    ImGui::SetNextWindowSize({700, 600}, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, {.5f, .5f});
     ImGui::Begin("##cs2menu",nullptr,
                  ImGuiWindowFlags_NoCollapse|
-                 ImGuiWindowFlags_NoScrollbar|
-                 ImGuiWindowFlags_NoScrollWithMouse|
                  ImGuiWindowFlags_NoSavedSettings);
+    
     ImDrawList* dl=ImGui::GetWindowDrawList();
     ImVec2 wp=ImGui::GetWindowPos(),ws=ImGui::GetWindowSize();
     dl->AddRectFilled({wp.x,wp.y},{wp.x+ws.x,wp.y+3},IM_COL32(50,120,220,255));
+    
     ImGui::Spacing();
-    ImGui::TextColored({.26f,.55f,1,1},"CS2MENU");ImGui::SameLine();
-    ImGui::TextDisabled("v2.0   |   INSERT ocultar   |   END salir");
+    ImGui::TextColored({.26f,.55f,1,1},"CS2MENU");
     ImGui::SameLine();
-    ImGui::TextDisabled("[Mouse %.0f,%.0f L:%s]",
-                        io.MousePos.x, io.MousePos.y,
-                        io.MouseDown[0] ? "ON" : "OFF");
-    ImGui::Separator();ImGui::Spacing();
-    if(ImGui::BeginTabBar("##tabs")){
+    ImGui::TextDisabled("Build 14138.6 Premium HvH   |   INSERT ocultar   |   END salir");
+    ImGui::Separator();
+    ImGui::Spacing();
+    
+    if(ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)){
         if(ImGui::BeginTabItem("  ESP  "))      {TabESP();    ImGui::EndTabItem();}
         if(ImGui::BeginTabItem("  Aimbot  "))   {TabAimbot(); ImGui::EndTabItem();}
+        if(ImGui::BeginTabItem("  Anti-Aim  ")) {TabAntiAim();ImGui::EndTabItem();}
+        if(ImGui::BeginTabItem("  Resolver  ")) {TabResolver();ImGui::EndTabItem();}
         if(ImGui::BeginTabItem("  Visuales  ")) {TabVisuals();ImGui::EndTabItem();}
         if(ImGui::BeginTabItem("  Misc  "))     {TabMisc();   ImGui::EndTabItem();}
         if(ImGui::BeginTabItem("  Skins  "))    {TabSkins();  ImGui::EndTabItem();}

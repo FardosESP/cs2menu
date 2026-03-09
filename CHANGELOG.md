@@ -4,6 +4,45 @@ Todos los cambios notables del proyecto se documentan aquí.
 
 ---
 
+## [Build 14138.6 - PREMIUM LAUNCHER] - 2026-03-09
+
+### 🚀 PREMIUM LAUNCHER WITH MANUAL MAPPING
+
+#### Professional Paid-Style Launcher (cs2menu_premium.exe)
+- ✅ Modern ImGui-based UI (Neverlose/Onetap style)
+- ✅ Dark purple/blue theme with animated glow effects
+- ✅ DirectX 11 rendering with transparency
+- ✅ Manual mapping injection (bypasses LoadLibrary detection)
+- ✅ Automatic CS2 process detection
+- ✅ Real-time injection status with progress bar
+- ✅ Professional error handling and status messages
+- ✅ Draggable borderless window
+- ✅ Injection method selector (Manual Map ready)
+
+#### Manual Mapping System (ManualMap.cpp/h)
+- ✅ Full PE header parsing and processing
+- ✅ Import resolution (GetProcAddress for all imports)
+- ✅ Relocation processing (base address adjustments)
+- ✅ PE header erasure (anti-detection)
+- ✅ TLS callbacks support
+- ✅ Exception handling setup
+- ✅ Bypasses VAC/anti-cheat module detection
+
+#### Build System Updates
+- ✅ Separate launcher and DLL compilation
+- ✅ Excluded launcher files from main DLL build
+- ✅ Fixed Windows.h macro conflicts (ERROR → FAILED)
+- ✅ Proper ImGui integration for launcher
+
+### 📝 Technical Details
+- Launcher uses DirectX 11 for modern UI rendering
+- Manual mapping injects without CreateRemoteThread
+- PE headers are erased after injection for stealth
+- All imports resolved manually to avoid IAT detection
+- Professional error messages in Spanish
+
+---
+
 ## [Build 14138.5 - PREMIUM HVH] - 2026-03-09
 
 ### 🎯 PREMIUM HVH FEATURES ADDED

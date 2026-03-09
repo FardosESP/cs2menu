@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "src/*.h")
 list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/Launcher.cpp")
+list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/PremiumLauncher.cpp")
+list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/PremiumLauncherImGui.cpp")
+list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/ManualMap.cpp")
 # Excluir archivos de test
 file(GLOB_RECURSE TEST_FILES "src/*.test.cpp")
 list(REMOVE_ITEM SOURCE_FILES ${TEST_FILES})
@@ -69,7 +72,7 @@ if(WIN32)
     )
 endif()
 
-# 5. Launcher
+# 5. Launcher (Standard)
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/Launcher.cpp")
     add_executable(cs2menu_launcher src/Launcher.cpp)
     target_include_directories(cs2menu_launcher PRIVATE src)
@@ -80,10 +83,36 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/Launcher.cpp")
     add_dependencies(cs2menu_launcher cs2menu)
 endif()
 
+# 5.1 Premium Launcher (GUI + Manual Map) - ImGui Version
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/PremiumLauncherImGui.cpp")
+    add_executable(cs2menu_premium
+            src/PremiumLauncherImGui.cpp
+            src/ManualMap.cpp
+            "${IMGUI_DIR}/imgui.cpp"
+            "${IMGUI_DIR}/imgui_draw.cpp"
+            "${IMGUI_DIR}/imgui_widgets.cpp"
+            "${IMGUI_DIR}/imgui_tables.cpp"
+            "${IMGUI_DIR}/backends/imgui_impl_dx11.cpp"
+            "${IMGUI_DIR}/backends/imgui_impl_win32.cpp"
+    )
+    target_include_directories(cs2menu_premium PRIVATE src "${IMGUI_DIR}" "${IMGUI_DIR}/backends")
+    if(WIN32)
+        target_compile_options(cs2menu_premium PRIVATE /MD)
+        target_link_libraries(cs2menu_premium PRIVATE 
+            user32.lib advapi32.lib d3d11.lib dxgi.lib
+        )
+        # Set as Windows GUI application
+        set_target_properties(cs2menu_premium PROPERTIES
+            LINK_FLAGS "/SUBSYSTEM:WINDOWS"
+        )
+    endif()
+    add_dependencies(cs2menu_premium cs2menu)
+endif()
+
 # 6. Target "ALL" para compilar todo junto con un solo Build
 # Esto hace que al pulsar Build en CLion se compilen DLL + Launcher a la vez
 add_custom_target(build_all ALL
-        DEPENDS cs2menu $<TARGET_NAME_IF_EXISTS:cs2menu_launcher>
+        DEPENDS cs2menu $<TARGET_NAME_IF_EXISTS:cs2menu_launcher> $<TARGET_NAME_IF_EXISTS:cs2menu_premium>
 )
 
 # 7. Directorio de salida unificado
@@ -93,6 +122,11 @@ set_target_properties(cs2menu PROPERTIES
 )
 if(TARGET cs2menu_launcher)
     set_target_properties(cs2menu_launcher PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
+    )
+endif()
+if(TARGET cs2menu_premium)
+    set_target_properties(cs2menu_premium PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
     )
 endif()

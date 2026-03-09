@@ -19,10 +19,13 @@ bool OffsetManager::Initialize()
     
     // Try multiple locations for offsets.json
     const char* paths[] = {
-        "offsets.json",
-        "../offsets.json",
-        "../../offsets.json",
-        "./Release/offsets.json"
+        "offsets.json",                                    // Same directory as DLL
+        "../offsets.json",                                 // Parent directory
+        "../../offsets.json",                              // Two levels up
+        "./Release/offsets.json",                          // Release subdirectory
+        "./Release/Release/offsets.json",                  // Build output directory
+        "../Release/Release/offsets.json",                 // Build output (parent)
+        "../../build/Release/Release/offsets.json"         // Full build path
     };
     
     for (const char* path : paths)

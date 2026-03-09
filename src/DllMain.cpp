@@ -25,7 +25,7 @@ void CreateDebugConsole()
         std::cout << "  +===========================================================+\n";
         std::cout << "  |                                                           |\n";
         std::cout << "  |              CS2MENU - PREMIUM EDITION                    |\n";
-        std::cout << "  |                   Build 14138.3                           |\n";
+        std::cout << "  |                   Build 14138.5                           |\n";
         std::cout << "  |                                                           |\n";
         std::cout << "  +===========================================================+\n";
         std::cout << "\n";
@@ -97,6 +97,7 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
     std::cout << "  +===========================================================+\n";
     std::cout << "  |  INSERT  ->  Abrir/Cerrar Menu                            |\n";
     std::cout << "  |  F9      ->  Escanear Offsets (Manual)                    |\n";
+    std::cout << "  |  F10     ->  Diagnostico Completo                         |\n";
     std::cout << "  |  END     ->  Desinyectar Cheat                            |\n";
     std::cout << "  +===========================================================+\n";
     std::cout << "\n";

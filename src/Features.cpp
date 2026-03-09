@@ -8,6 +8,10 @@
 #include "LocalPlayer.h"
 #include "EntityCache.h"
 #include "SkinChanger.h"
+#include "AntiAim.h"
+#include "Resolver.h"
+#include "Backtrack.h"
+#include "DiagnosticSystem.h"
 #include <iostream>
 #include <cmath>
 
@@ -41,6 +45,29 @@ extern struct MiscConfig {
     bool bhop, autoStrafe, radarHack, speedhack, antiAim;
     float speedValue;
 } cfg_misc;
+
+extern struct AntiAimConfig {
+    bool enabled;
+    int pitchType, yawType;
+    float yawOffset, jitterRange, spinSpeed;
+    bool fakeLag;
+    int fakeLagTicks;
+    bool freestanding, edgeAA;
+    int manualAA;
+} cfg_antiaim;
+
+extern struct ResolverConfig {
+    bool enabled;
+    int resolverType;
+    bool autoResolve, showMisses;
+} cfg_resolver;
+
+extern struct BacktrackConfig {
+    bool enabled;
+    int maxTicks;
+    bool visualize;
+    float visualizeColor[4];
+} cfg_backtrack;
 
 extern struct SkinConfig {
     int knifeModel, knifeFinish;
@@ -148,7 +175,8 @@ void Features::Initialize()
     std::cout << "  |                  SISTEMA LISTO                            |\n";
     std::cout << "  +===========================================================+\n";
     std::cout << "  [i] Deteccion automatica: ACTIVADA" << std::endl;
-    std::cout << "  [i] Escaneo manual: Presiona F9 si es necesario" << std::endl;
+    std::cout << "  [i] F9  - Escanear offsets manualmente" << std::endl;
+    std::cout << "  [i] F10 - Ejecutar diagnostico completo" << std::endl;
     std::cout << "  [i] Funciona en: Online, Offline, Bots, Practica" << std::endl;
     
     g_bInitialized = true;
@@ -169,6 +197,17 @@ void Features::Update()
         g_LocalPlayer.SetScannerRan(true);
     }
     f9WasPressed = f9IsPressed;
+    
+    // Check for F10 key to run full diagnostic
+    static bool f10WasPressed = false;
+    bool f10IsPressed = (GetAsyncKeyState(VK_F10) & 0x8000) != 0;
+    if (f10IsPressed && !f10WasPressed)
+    {
+        std::cout << "\n[*] F10 presionado - Ejecutando diagnostico completo..." << std::endl;
+        DiagnosticSystem::RunFullDiagnostic(g_clientBase, g_pEntitySystem);
+        DiagnosticSystem::TestESP(g_clientBase, g_pEntitySystem);
+    }
+    f10WasPressed = f10IsPressed;
     
     // Update LocalPlayer with professional multi-fallback detection
     g_LocalPlayer.Update();
@@ -194,6 +233,78 @@ void Features::Update()
     // Execute features only if we have valid local player
     if (pLocalPlayer)
     {
+        // Update Resolver for all enemies (scan entity list)
+        if (cfg_resolver.enabled)
+        {
+            int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
+            if (maxEntities > 0 && maxEntities < 8192)
+            {
+                for (int i = 1; i <= 64; i++)
+                {
+                    C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
+                    if (!controller || !Memory::IsValidPointer((uintptr_t)controller)) continue;
+                    
+                    C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
+                    if (!pawn || !Memory::IsValidPointer((uintptr_t)pawn)) continue;
+                    
+                    if (pawn == pLocalPlayer) continue; // Skip local player
+                    
+                    // Update resolver for this enemy
+                    Resolver::Instance().Update(pawn);
+                }
+            }
+        }
+        
+        // Update Backtrack records for all enemies
+        if (cfg_backtrack.enabled)
+        {
+            int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
+            if (maxEntities > 0 && maxEntities < 8192)
+            {
+                for (int i = 1; i <= 64; i++)
+                {
+                    C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
+                    if (!controller || !Memory::IsValidPointer((uintptr_t)controller)) continue;
+                    
+                    C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
+                    if (!pawn || !Memory::IsValidPointer((uintptr_t)pawn)) continue;
+                    
+                    if (pawn == pLocalPlayer) continue; // Skip local player
+                    
+                    // Update backtrack for this enemy
+                    Backtrack::Instance().Update(pawn);
+                }
+            }
+        }
+        
+        // Apply Anti-Aim
+        if (cfg_antiaim.enabled)
+        {
+            uintptr_t viewAnglesAddr = g_clientBase + Offsets::dwViewAngles();
+            Vector3 viewAngles = Memory::Read<Vector3>(viewAnglesAddr);
+            
+            // Configure Anti-Aim
+            AntiAim::Instance().enabled = true;
+            AntiAim::Instance().pitchType = (AntiAim::PitchType)cfg_antiaim.pitchType;
+            AntiAim::Instance().yawType = (AntiAim::YawType)cfg_antiaim.yawType;
+            AntiAim::Instance().yawOffset = cfg_antiaim.yawOffset;
+            AntiAim::Instance().jitterRange = cfg_antiaim.jitterRange;
+            AntiAim::Instance().spinSpeed = cfg_antiaim.spinSpeed;
+            AntiAim::Instance().fakeLagEnabled = cfg_antiaim.fakeLag;
+            
+            // Apply Anti-Aim
+            AntiAim::Instance().Apply(pLocalPlayer, viewAngles);
+            
+            // Write back angles
+            Memory::Write<Vector3>(viewAnglesAddr, viewAngles);
+            
+            // Apply Fake Lag
+            if (cfg_antiaim.fakeLag)
+            {
+                AntiAim::Instance().FakeLag(cfg_antiaim.fakeLagTicks);
+            }
+        }
+        
         if (cfg_esp.enabled)
             RenderESP();
         
