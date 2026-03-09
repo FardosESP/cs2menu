@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <d3d11.h>
 #include <TlHelp32.h>
+#include <Psapi.h>
 #include <string>
 #include <thread>
 #include <chrono>
@@ -10,6 +11,7 @@
 #include "ManualMap.h"
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "psapi.lib")
 
 // Premium Launcher - Neverlose/Onetap Style
 // Modern UI with animations, blur effects, and professional design
@@ -85,15 +87,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
     g_wc = { sizeof(g_wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"CS2MenuLauncher", nullptr };
     RegisterClassExW(&g_wc);
     
-    // Create borderless window
+    // Create borderless window - LARGER SIZE
     g_hwnd = CreateWindowExW(
         WS_EX_TOPMOST | WS_EX_LAYERED,
         g_wc.lpszClassName,
         L"CS2MENU Premium",
         WS_POPUP,
         (GetSystemMetrics(SM_CXSCREEN) - 600) / 2,
-        (GetSystemMetrics(SM_CYSCREEN) - 400) / 2,
-        600, 400,
+        (GetSystemMetrics(SM_CYSCREEN) - 750) / 2,
+        600, 750,  // Increased from 600x400 to 600x750
         nullptr, nullptr, g_wc.hInstance, nullptr
     );
 
@@ -117,6 +119,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr; // Disable imgui.ini
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.WantCaptureMouse = true;  // Enable mouse capture
+    io.WantCaptureKeyboard = true;  // Enable keyboard capture
 
     // Setup style
     SetupImGuiStyle();
@@ -179,13 +183,13 @@ void SetupImGuiStyle()
     ImGuiStyle& style = ImGui::GetStyle();
     
     // Rounding - más suave y moderno
-    style.WindowRounding = 12.0f;
-    style.ChildRounding = 8.0f;
-    style.FrameRounding = 6.0f;
-    style.PopupRounding = 6.0f;
-    style.ScrollbarRounding = 6.0f;
-    style.GrabRounding = 6.0f;
-    style.TabRounding = 6.0f;
+    style.WindowRounding = 16.0f;
+    style.ChildRounding = 10.0f;
+    style.FrameRounding = 8.0f;
+    style.PopupRounding = 8.0f;
+    style.ScrollbarRounding = 8.0f;
+    style.GrabRounding = 8.0f;
+    style.TabRounding = 8.0f;
     
     // Spacing - más amplio y respirable
     style.WindowPadding = ImVec2(20, 20);
@@ -292,11 +296,11 @@ void RenderLauncher()
         draw->AddCircleFilled(ImVec2(x, y), 2.0f, IM_COL32(102, 89, 230, (int)(alpha * 255)));
     }
     
-    // Center content area - FIXED SIZE (más grande)
+    // Center content area - OPTIMIZED SIZE
     float centerX = io.DisplaySize.x * 0.5f;
     float centerY = io.DisplaySize.y * 0.5f;
     float panelWidth = 550.0f;
-    float panelHeight = 650.0f;
+    float panelHeight = 700.0f;  // Increased from 650
     float panelX = centerX - panelWidth * 0.5f;
     float panelY = centerY - panelHeight * 0.5f;
     
@@ -308,55 +312,28 @@ void RenderLauncher()
         12.0f
     );
     
-    // Main panel background
+    // Main panel background with better rounded corners
     draw->AddRectFilled(
         ImVec2(panelX, panelY),
         ImVec2(panelX + panelWidth, panelY + panelHeight),
         IM_COL32(20, 20, 28, 245),
-        12.0f
+        16.0f  // Increased rounding
     );
     
-    // Top accent bar with gradient
-    draw->AddRectFilledMultiColor(
+    // Panel border for better definition
+    draw->AddRect(
         ImVec2(panelX, panelY),
-        ImVec2(panelX + panelWidth, panelY + 4),
-        IM_COL32(102, 89, 230, 255),
-        IM_COL32(127, 89, 230, 255),
-        IM_COL32(127, 89, 230, 255),
-        IM_COL32(102, 89, 230, 255)
+        ImVec2(panelX + panelWidth, panelY + panelHeight),
+        IM_COL32(102, 89, 230, 120),  // Purple border
+        16.0f,
+        0,
+        2.0f  // Thicker border
     );
     
-    // Animated glow line
-    float glowOffset = (sinf(g_launcherData.animationTime * 2.0f) * 0.5f + 0.5f) * panelWidth;
-    draw->AddRectFilledMultiColor(
-        ImVec2(panelX + glowOffset - 100, panelY),
-        ImVec2(panelX + glowOffset + 100, panelY + 4),
-        IM_COL32(102, 89, 230, 0),
-        IM_COL32(180, 160, 255, 200),
-        IM_COL32(180, 160, 255, 200),
-        IM_COL32(102, 89, 230, 0)
-    );
+    // NO top accent bar - removed to avoid the light bug
     
-    // Close button
-    ImGui::SetNextWindowPos(ImVec2(panelX + panelWidth - 50, panelY + 15));
-    ImGui::SetNextWindowSize(ImVec2(40, 40));
-    ImGui::Begin("##CloseBtn", nullptr, 
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | 
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
-        ImGuiWindowFlags_NoBackground);
-    
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.1f, 0.1f, 0.8f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.1f, 0.1f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
-    if (ImGui::Button("X", ImVec2(35, 35)))
-        PostQuitMessage(0);
-    ImGui::PopStyleVar();
-    ImGui::PopStyleColor(3);
-    ImGui::End();
-    
-    // Main content window - FIXED PADDING
-    float contentPadding = 40.0f;
+    // Main content window - OPTIMIZED PADDING
+    float contentPadding = 35.0f;  // Reduced from 40
     ImGui::SetNextWindowPos(ImVec2(panelX + contentPadding, panelY + contentPadding));
     ImGui::SetNextWindowSize(ImVec2(panelWidth - contentPadding * 2, panelHeight - contentPadding * 2));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -368,8 +345,49 @@ void RenderLauncher()
     
     float contentWidth = panelWidth - contentPadding * 2;
     
+    // Close button at top right INSIDE content
+    ImGui::SetCursorPos(ImVec2(contentWidth - 35, 5));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.22f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.1f, 0.1f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    if (ImGui::Button("X", ImVec2(30, 30)))
+        PostQuitMessage(0);
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(4);
+    
+    // Header with brand name
+    ImGui::SetCursorPosY(8);
+    ImGui::PushFont(io.Fonts->Fonts[1]); // Title font
+    float brandWidth = ImGui::CalcTextSize("TangaCheatHVH").x;
+    ImGui::SetCursorPosX((contentWidth - brandWidth) * 0.5f);
+    
+    // Animated rainbow/glow effect on brand
+    float hue = fmodf(g_launcherData.animationTime * 0.3f, 1.0f);
+    float r = 0.5f + 0.5f * sinf(hue * 6.28f);
+    float g = 0.4f + 0.4f * sinf((hue + 0.33f) * 6.28f);
+    float b = 0.9f + 0.1f * sinf((hue + 0.66f) * 6.28f);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r, g, b, 1.0f));
+    ImGui::Text("TangaCheatHVH");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+    
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8);
+    
+    // Separator line under brand
+    ImVec2 brandSep = ImGui::GetCursorScreenPos();
+    draw->AddLine(
+        ImVec2(brandSep.x + 50, brandSep.y),
+        ImVec2(brandSep.x + contentWidth - 50, brandSep.y),
+        IM_COL32(102, 89, 230, 150),
+        2.0f
+    );
+    
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 18);
+    
     // Logo section
-    ImGui::SetCursorPosY(10);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);
     
     // Calculate title width properly
     ImGui::PushFont(io.Fonts->Fonts[1]); // Title font
@@ -389,7 +407,7 @@ void RenderLauncher()
     ImGui::Text("Premium HvH Edition");
     ImGui::PopStyleColor();
     
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 18);
     
     // Separator line
     ImVec2 sepStart = ImGui::GetCursorScreenPos();
@@ -402,11 +420,11 @@ void RenderLauncher()
     
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
     
-    // Status section with fancy box
+    // Status section with fancy box - SMALLER
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.12f, 0.12f, 0.18f, 0.6f));
-    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);  // More rounded
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
-    ImGui::BeginChild("##StatusBox", ImVec2(contentWidth, 140), true, ImGuiWindowFlags_NoScrollbar);
+    ImGui::BeginChild("##StatusBox", ImVec2(contentWidth, 110), true, ImGuiWindowFlags_NoScrollbar);
     
     // Status icon and text centered
     const char* statusIcon = "●";
@@ -437,7 +455,7 @@ void RenderLauncher()
         break;
     }
     
-    ImGui::SetCursorPosY(35);
+    ImGui::SetCursorPosY(25);
     
     // Center the status text
     float iconWidth = ImGui::CalcTextSize(statusIcon).x;
@@ -455,11 +473,11 @@ void RenderLauncher()
     // Progress bar with glow
     if (g_launcherData.progress > 0.0f)
     {
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 12);
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5f, 0.4f, 1.0f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.2f, 0.8f));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-        ImGui::ProgressBar(g_launcherData.progress, ImVec2(-1, 10), "");
+        ImGui::ProgressBar(g_launcherData.progress, ImVec2(-1, 8), "");
         ImGui::PopStyleVar();
         ImGui::PopStyleColor(2);
     }
@@ -476,7 +494,7 @@ void RenderLauncher()
     
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.22f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.20f, 0.28f, 1.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 8));
     
     ImGui::SetNextItemWidth(contentWidth);
@@ -503,7 +521,7 @@ void RenderLauncher()
     if (!canInject)
         ImGui::BeginDisabled();
     
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.45f, 0.35f, 0.95f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.55f, 0.45f, 1.0f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.30f, 0.85f, 1.0f));
@@ -544,30 +562,30 @@ void RenderLauncher()
 void InjectionThread()
 {
     g_launcherData.state = LauncherState::SEARCHING;
-    g_launcherData.statusMessage = "Searching for CS2...";
+    g_launcherData.statusMessage = "Waiting for CS2 to start...";
     g_launcherData.progress = 0.1f;
     
-    // Find CS2 process
+    // Find CS2 process - wait indefinitely until found
     DWORD pid = 0;
-    for (int i = 0; i < 30; i++)
+    int attempts = 0;
+    while (pid == 0)
     {
         pid = FindProcessByName(L"cs2.exe");
         if (pid != 0) break;
+        
+        attempts++;
+        if (attempts % 10 == 0)
+        {
+            g_launcherData.statusMessage = "Waiting for CS2... (" + std::to_string(attempts / 2) + "s)";
+        }
+        
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     
-    if (pid == 0)
-    {
-        g_launcherData.state = LauncherState::FAILED;
-        g_launcherData.statusMessage = "CS2 not found! Please start the game.";
-        g_launcherData.progress = 0.0f;
-        return;
-    }
-    
-    g_launcherData.statusMessage = "CS2 found! Opening process...";
+    g_launcherData.statusMessage = "CS2 detected! Waiting for game to load...";
     g_launcherData.progress = 0.3f;
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     
+    // Wait for game to fully load (check for client.dll)
     HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if (!hProcess)
     {
@@ -577,10 +595,48 @@ void InjectionThread()
         return;
     }
     
+    // Wait for client.dll to be loaded (game fully initialized)
+    bool clientLoaded = false;
+    for (int i = 0; i < 60; i++)  // Wait up to 30 seconds
+    {
+        HMODULE hMods[1024];
+        DWORD cbNeeded;
+        if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded))
+        {
+            for (unsigned int j = 0; j < (cbNeeded / sizeof(HMODULE)); j++)
+            {
+                wchar_t szModName[MAX_PATH];
+                if (GetModuleFileNameExW(hProcess, hMods[j], szModName, sizeof(szModName) / sizeof(wchar_t)))
+                {
+                    std::wstring modName(szModName);
+                    if (modName.find(L"client.dll") != std::wstring::npos)
+                    {
+                        clientLoaded = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (clientLoaded) break;
+        
+        g_launcherData.statusMessage = "Waiting for game to load... (" + std::to_string(i / 2) + "s)";
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+    
+    if (!clientLoaded)
+    {
+        g_launcherData.state = LauncherState::FAILED;
+        g_launcherData.statusMessage = "Game took too long to load!";
+        g_launcherData.progress = 0.0f;
+        CloseHandle(hProcess);
+        return;
+    }
+    
     g_launcherData.state = LauncherState::INJECTING;
     g_launcherData.statusMessage = "Injecting DLL...";
-    g_launcherData.progress = 0.6f;
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    g_launcherData.progress = 0.7f;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
     // Get DLL path
     wchar_t path[MAX_PATH];
@@ -729,7 +785,13 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         LRESULT hit = DefWindowProc(hWnd, msg, wParam, lParam);
         if (hit == HTCLIENT)
-            hit = HTCAPTION; // Make window draggable
+        {
+            // Only make top 50 pixels draggable, not the whole window
+            POINT pt = { LOWORD(lParam), HIWORD(lParam) };
+            ScreenToClient(hWnd, &pt);
+            if (pt.y < 50)
+                hit = HTCAPTION;
+        }
         return hit;
     }
     }
