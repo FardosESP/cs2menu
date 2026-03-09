@@ -126,9 +126,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
     // Load fonts
-    io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 16.0f);
-    ImFont* titleFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", 28.0f);
-    ImFont* iconFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", 48.0f);
+    io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 15.0f);
+    ImFont* titleFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", 24.0f);
 
     // Main loop
     bool done = false;
@@ -293,11 +292,11 @@ void RenderLauncher()
         draw->AddCircleFilled(ImVec2(x, y), 2.0f, IM_COL32(102, 89, 230, (int)(alpha * 255)));
     }
     
-    // Center content area
+    // Center content area - FIXED SIZE (más grande)
     float centerX = io.DisplaySize.x * 0.5f;
     float centerY = io.DisplaySize.y * 0.5f;
-    float panelWidth = 480.0f;
-    float panelHeight = 520.0f;
+    float panelWidth = 550.0f;
+    float panelHeight = 650.0f;
     float panelX = centerX - panelWidth * 0.5f;
     float panelY = centerY - panelHeight * 0.5f;
     
@@ -339,8 +338,8 @@ void RenderLauncher()
     );
     
     // Close button
-    ImGui::SetNextWindowPos(ImVec2(panelX + panelWidth - 45, panelY + 15));
-    ImGui::SetNextWindowSize(ImVec2(35, 35));
+    ImGui::SetNextWindowPos(ImVec2(panelX + panelWidth - 50, panelY + 15));
+    ImGui::SetNextWindowSize(ImVec2(40, 40));
     ImGui::Begin("##CloseBtn", nullptr, 
         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | 
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
@@ -349,48 +348,65 @@ void RenderLauncher()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.1f, 0.1f, 0.8f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.1f, 0.1f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
-    if (ImGui::Button("X", ImVec2(30, 30)))
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    if (ImGui::Button("X", ImVec2(35, 35)))
         PostQuitMessage(0);
+    ImGui::PopStyleVar();
     ImGui::PopStyleColor(3);
     ImGui::End();
     
-    // Main content window
-    ImGui::SetNextWindowPos(ImVec2(panelX + 30, panelY + 30));
-    ImGui::SetNextWindowSize(ImVec2(panelWidth - 60, panelHeight - 60));
+    // Main content window - FIXED PADDING
+    float contentPadding = 40.0f;
+    ImGui::SetNextWindowPos(ImVec2(panelX + contentPadding, panelY + contentPadding));
+    ImGui::SetNextWindowSize(ImVec2(panelWidth - contentPadding * 2, panelHeight - contentPadding * 2));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin("##Content", nullptr,
         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoBackground);
+    ImGui::PopStyleVar();
+    
+    float contentWidth = panelWidth - contentPadding * 2;
     
     // Logo section
-    ImGui::SetCursorPosX((panelWidth - 60 - 200) * 0.5f);
+    ImGui::SetCursorPosY(10);
+    
+    // Calculate title width properly
     ImGui::PushFont(io.Fonts->Fonts[1]); // Title font
+    float titleWidth = ImGui::CalcTextSize("CS2MENU").x;
+    ImGui::SetCursorPosX((contentWidth - titleWidth) * 0.5f);
     
     // Animated glow effect on title
-    float titleGlow = 0.4f + 0.3f * sinf(g_launcherData.animationTime * 1.5f);
+    float titleGlow = 0.6f + 0.3f * sinf(g_launcherData.animationTime * 1.5f);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.5f, 1.0f, titleGlow));
     ImGui::Text("CS2MENU");
     ImGui::PopStyleColor();
     ImGui::PopFont();
     
-    ImGui::SetCursorPosX((panelWidth - 60 - 150) * 0.5f);
+    float subtitleWidth = ImGui::CalcTextSize("Premium HvH Edition").x;
+    ImGui::SetCursorPosX((contentWidth - subtitleWidth) * 0.5f);
     ImGui::PushStyleColor(ImGuiCol_Text, ColorScheme::TextDim());
     ImGui::Text("Premium HvH Edition");
     ImGui::PopStyleColor();
     
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15);
+    
+    // Separator line
+    ImVec2 sepStart = ImGui::GetCursorScreenPos();
+    draw->AddLine(
+        ImVec2(sepStart.x + 30, sepStart.y),
+        ImVec2(sepStart.x + contentWidth - 30, sepStart.y),
+        IM_COL32(60, 60, 80, 150),
+        1.0f
+    );
+    
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
     
     // Status section with fancy box
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.12f, 0.12f, 0.18f, 0.6f));
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
-    ImGui::BeginChild("##StatusBox", ImVec2(0, 140), true, ImGuiWindowFlags_NoScrollbar);
-    
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+    ImGui::BeginChild("##StatusBox", ImVec2(contentWidth, 140), true, ImGuiWindowFlags_NoScrollbar);
     
     // Status icon and text centered
     const char* statusIcon = "●";
@@ -421,77 +437,65 @@ void RenderLauncher()
         break;
     }
     
+    ImGui::SetCursorPosY(35);
+    
     // Center the status text
+    float iconWidth = ImGui::CalcTextSize(statusIcon).x;
     float textWidth = ImGui::CalcTextSize(statusText).x;
-    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - textWidth - 30) * 0.5f);
+    float totalWidth = iconWidth + textWidth + 10;
+    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - totalWidth) * 0.5f);
     
     ImGui::PushStyleColor(ImGuiCol_Text, statusColor);
-    ImGui::PushFont(io.Fonts->Fonts[1]);
     ImGui::Text("%s", statusIcon);
-    ImGui::PopFont();
     ImGui::PopStyleColor();
     
     ImGui::SameLine();
     ImGui::Text("%s", statusText);
     
-    ImGui::Spacing();
-    ImGui::Spacing();
-    
     // Progress bar with glow
     if (g_launcherData.progress > 0.0f)
     {
-        ImGui::SetCursorPosX(20);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15);
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5f, 0.4f, 1.0f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.2f, 0.8f));
-        ImGui::ProgressBar(g_launcherData.progress, ImVec2(ImGui::GetContentRegionAvail().x - 20, 8), "");
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+        ImGui::ProgressBar(g_launcherData.progress, ImVec2(-1, 10), "");
+        ImGui::PopStyleVar();
         ImGui::PopStyleColor(2);
-        
-        // Glow effect on progress bar
-        ImVec2 barPos = ImGui::GetItemRectMin();
-        ImVec2 barSize = ImGui::GetItemRectSize();
-        ImDrawList* dl = ImGui::GetWindowDrawList();
-        dl->AddRectFilled(
-            ImVec2(barPos.x, barPos.y),
-            ImVec2(barPos.x + barSize.x * g_launcherData.progress, barPos.y + barSize.y),
-            IM_COL32(127, 89, 230, 100),
-            4.0f
-        );
     }
     
-    ImGui::Spacing();
     ImGui::EndChild();
-    ImGui::PopStyleVar();
+    ImGui::PopStyleVar(2);
     ImGui::PopStyleColor();
     
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
     
     // Injection method selector
     ImGui::Text("Injection Method");
-    ImGui::Spacing();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8);
     
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.22f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.20f, 0.28f, 1.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 8));
     
-    ImGui::SetNextItemWidth(-1);
+    ImGui::SetNextItemWidth(contentWidth);
     const char* methods[] = { "LoadLibrary (Basic)", "Manual Map (Stealth)", "Thread Hijack (Advanced)" };
     ImGui::Combo("##Method", &g_launcherData.injectionMethod, methods, IM_ARRAYSIZE(methods));
     
-    ImGui::PopStyleVar();
+    ImGui::PopStyleVar(2);
     ImGui::PopStyleColor(2);
     
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 12);
     
     // Info text
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.6f, 0.8f));
+    ImGui::PushTextWrapPos(contentWidth);
     ImGui::TextWrapped("Manual Map bypasses most anti-cheat detection by avoiding LoadLibrary and erasing PE headers.");
+    ImGui::PopTextWrapPos();
     ImGui::PopStyleColor();
     
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
     
     // Inject button with glow
     bool canInject = (g_launcherData.state == LauncherState::IDLE || g_launcherData.state == LauncherState::FAILED);
@@ -505,7 +509,7 @@ void RenderLauncher()
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.30f, 0.85f, 1.0f));
     
     ImGui::PushFont(io.Fonts->Fonts[1]);
-    if (ImGui::Button("INJECT", ImVec2(-1, 55)))
+    if (ImGui::Button("INJECT", ImVec2(contentWidth, 50)))
     {
         std::thread(InjectionThread).detach();
     }
@@ -516,9 +520,8 @@ void RenderLauncher()
     {
         ImVec2 btnMin = ImGui::GetItemRectMin();
         ImVec2 btnMax = ImGui::GetItemRectMax();
-        ImDrawList* dl = ImGui::GetWindowDrawList();
         float glowAlpha = 0.3f + 0.2f * sinf(g_launcherData.animationTime * 3.0f);
-        dl->AddRect(btnMin, btnMax, IM_COL32(127, 89, 230, (int)(glowAlpha * 255)), 8.0f, 0, 2.0f);
+        draw->AddRect(btnMin, btnMax, IM_COL32(127, 89, 230, (int)(glowAlpha * 255)), 8.0f, 0, 2.0f);
     }
     
     ImGui::PopStyleColor(3);
@@ -527,10 +530,10 @@ void RenderLauncher()
     if (!canInject)
         ImGui::EndDisabled();
     
-    ImGui::Spacing();
-    
     // Footer
     ImGui::SetCursorPosY(ImGui::GetWindowSize().y - 25);
+    float footerWidth = ImGui::CalcTextSize("Build 14138.6 - Premium Edition").x;
+    ImGui::SetCursorPosX((contentWidth - footerWidth) * 0.5f);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.5f, 0.6f));
     ImGui::Text("Build 14138.6 - Premium Edition");
     ImGui::PopStyleColor();
