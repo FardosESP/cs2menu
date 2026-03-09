@@ -1,0 +1,16 @@
+// Resumen: El cheat tiene los offsets correctos y LocalPlayer se detecta,
+// pero crashea cuando intenta ejecutar las features.
+// 
+// SOLUCION: Deshabilitar temporalmente TODAS las features para evitar crashes.
+// Una vez confirmado que no crashea, habilitar features una por una.
+//
+// OFFSETS CORRECTOS (Build 14138.6 - Mar 9, 2026):
+// - dwLocalPlayerPawn: 0x2066B60 ✅
+// - dwLocalPlayerController: 0x22F1208 ✅  
+// - dwEntityList: 0x24AB298 ✅
+// - m_iHealth: 0x354 ✅
+// - m_iTeamNum: 0x3F3 ✅
+// - m_pGameSceneNode: 0x338 ✅
+//
+// ESTADO: LocalPlayer se detecta correctamente, pero features causan crash.
+// SIGUIENTE PASO: Compilar con features deshabilitadas y confirmar que no crashea.

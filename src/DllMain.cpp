@@ -7,28 +7,64 @@
 
 extern bool bShowMenu;
 
+// Global log file handle
+static FILE* g_logFile = nullptr;
+
 void CreateDebugConsole()
 {
-    if (AllocConsole()) {
+    // ALWAYS create log file first (for crash debugging)
+    fopen_s(&g_logFile, "cs2menu_debug.log", "w");
+    
+    // Try to create console (for convenience)
+    FreeConsole(); // Free any existing console
+    bool hasConsole = AllocConsole();
+    
+    if (hasConsole)
+    {
         FILE* f;
         freopen_s(&f, "CONOUT$", "w", stdout);
         freopen_s(&f, "CONOUT$", "w", stderr);
+        freopen_s(&f, "CONIN$", "r", stdin);
         
-        // Set console to support ASCII box drawing
         SetConsoleOutputCP(CP_UTF8);
+        SetConsoleCP(CP_UTF8);
+        SetConsoleTitleA("CS2MENU - Premium Edition [Build 14138.6]");
         
-        // Set console title
-        SetConsoleTitleA("CS2MENU v1.0 - Premium Edition");
-        
-        // Professional header with ASCII box drawing
-        std::cout << "\n";
-        std::cout << "  +===========================================================+\n";
-        std::cout << "  |                                                           |\n";
-        std::cout << "  |              CS2MENU - PREMIUM EDITION                    |\n";
-        std::cout << "  |                   Build 14138.5                           |\n";
-        std::cout << "  |                                                           |\n";
-        std::cout << "  +===========================================================+\n";
-        std::cout << "\n";
+        HWND consoleWindow = GetConsoleWindow();
+        if (consoleWindow)
+        {
+            ShowWindow(consoleWindow, SW_SHOW);
+            SetForegroundWindow(consoleWindow);
+        }
+    }
+    else if (g_logFile)
+    {
+        // No console - redirect stdout to log file
+        freopen_s(&g_logFile, "cs2menu_debug.log", "w", stdout);
+        freopen_s(&g_logFile, "cs2menu_debug.log", "w", stderr);
+    }
+    
+    // Professional header
+    std::cout << "\n";
+    std::cout << "  +===========================================================+\n";
+    std::cout << "  |                                                           |\n";
+    std::cout << "  |              CS2MENU - PREMIUM EDITION                    |\n";
+    std::cout << "  |                   Build 14138.6                           |\n";
+    std::cout << "  |                                                           |\n";
+    std::cout << "  +===========================================================+\n";
+    std::cout << "\n";
+    
+    if (!hasConsole)
+    {
+        std::cout << "  [!] Console no disponible - logging a cs2menu_debug.log" << std::endl;
+    }
+    
+    // Also write to log file manually if we have console
+    if (hasConsole && g_logFile)
+    {
+        fprintf(g_logFile, "\n=== CS2MENU DEBUG LOG - Build 14138.6 ===\n");
+        fprintf(g_logFile, "Console: AVAILABLE\n\n");
+        fflush(g_logFile);
     }
 }
 

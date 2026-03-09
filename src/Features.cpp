@@ -7,6 +7,7 @@
 #include "OffsetScanner.h"
 #include "LocalPlayer.h"
 #include "EntityCache.h"
+#include "EntityCachePro.h"
 #include "SkinChanger.h"
 #include "AntiAim.h"
 #include "Resolver.h"
@@ -187,6 +188,16 @@ void Features::Update()
 {
     if (!g_bInitialized || !g_clientBase) return;
     
+    static bool firstRun = true;
+    if (firstRun)
+    {
+        std::cout << "[DEBUG] Features::Update() - Primera ejecucion" << std::endl;
+        std::cout << "[DEBUG] g_clientBase: 0x" << std::hex << g_clientBase << std::dec << std::endl;
+        std::cout << "[DEBUG] g_pEntitySystem: 0x" << std::hex << (uintptr_t)g_pEntitySystem << std::dec << std::endl;
+        std::cout << "[DEBUG] g_pViewMatrix: 0x" << std::hex << (uintptr_t)g_pViewMatrix << std::dec << std::endl;
+        firstRun = false;
+    }
+    
     // Check for F9 key to manually run scanner
     static bool f9WasPressed = false;
     bool f9IsPressed = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
@@ -209,116 +220,207 @@ void Features::Update()
     }
     f10WasPressed = f10IsPressed;
     
-    // Update LocalPlayer with professional multi-fallback detection
-    g_LocalPlayer.Update();
+    // PROFESSIONAL METHOD: Get LocalPlayer safely
+    // This handles NULL during team selection/respawn
+    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetSafeLocalPlayer();
     
-    // Get LocalPlayer pawn
-    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
-    
-    // Run scanner automatically when entering game for the first time
-    if (pLocalPlayer && !g_LocalPlayer.HasScannerRun())
+    // If LocalPlayer is NULL, skip this frame (SAFE - no crash)
+    // This happens during team selection, respawn, etc.
+    if (!pLocalPlayer)
     {
-        std::cout << "[*] Ejecutando scanner de offsets automaticamente..." << std::endl;
-        OffsetScanner::ScanAndPrintOffsets();
-        g_LocalPlayer.SetScannerRan(true);
+        static bool nullWarned = false;
+        static int nullCount = 0;
+        
+        nullCount++;
+        
+        // Log only once every 300 frames (5 seconds @ 60fps)
+        if (!nullWarned || nullCount % 300 == 0)
+        {
+            std::cout << "[INFO] LocalPlayer NULL - skipping frame (normal during team select/respawn)" << std::endl;
+            nullWarned = true;
+        }
+        
+        return; // SAFE EXIT - No crash
     }
     
-    // Update entity cache (for performance)
-    if (pLocalPlayer)
+    // LocalPlayer is valid - reset warning
+    static bool validWarned = false;
+    if (!validWarned)
     {
-        int localTeam = pLocalPlayer->GetTeamNum();
-        g_EntityCache.Update(g_pEntitySystem, localTeam);
+        std::cout << "[INFO] LocalPlayer VALID - features active" << std::endl;
+        validWarned = true;
     }
     
     // Execute features only if we have valid local player
+    // IMPORTANT: Features will ONLY run when manually enabled from menu
     if (pLocalPlayer)
     {
-        // Update Resolver for all enemies (scan entity list)
-        if (cfg_resolver.enabled)
+        // ESP - Only runs when user enables it from menu
+        __try
         {
-            int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
-            if (maxEntities > 0 && maxEntities < 8192)
+            if (cfg_esp.enabled)
             {
-                for (int i = 1; i <= 64; i++)
+                static bool firstESPRun = true;
+                if (firstESPRun)
                 {
-                    C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
-                    if (!controller || !Memory::IsValidPointer((uintptr_t)controller)) continue;
-                    
-                    C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
-                    if (!pawn || !Memory::IsValidPointer((uintptr_t)pawn)) continue;
-                    
-                    if (pawn == pLocalPlayer) continue; // Skip local player
-                    
-                    // Update resolver for this enemy
-                    Resolver::Instance().Update(pawn);
+                    std::cout << "[ESP] ESP activado por primera vez - ejecutando..." << std::endl;
+                    firstESPRun = false;
+                }
+                RenderESP();
+            }
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cout << "[ERROR] ESP crashed!" << std::endl;
+        }
+        
+        /* DISABLED FEATURES - Enable one by one after ESP works
+        
+        // Aimbot
+        __try
+        {
+            if (cfg_aim.enabled)
+                RunAimbot();
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cout << "[ERROR] Aimbot crashed!" << std::endl;
+        }
+        
+        // Visuals
+        __try
+        {
+            ApplyVisuals();
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cout << "[ERROR] Visuals crashed!" << std::endl;
+        }
+        
+        // Misc (Bhop, etc)
+        __try
+        {
+            RunMisc();
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cout << "[ERROR] Misc crashed!" << std::endl;
+        }
+        
+        // Skins
+        __try
+        {
+            ApplySkins();
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cout << "[ERROR] Skins crashed!" << std::endl;
+        }
+        
+        // Anti-Aim
+        __try
+        {
+            if (cfg_antiaim.enabled)
+            {
+                uintptr_t viewAnglesAddr = g_clientBase + Offsets::dwViewAngles();
+                Vector3 viewAngles = Memory::Read<Vector3>(viewAnglesAddr);
+                
+                AntiAim::Instance().enabled = true;
+                AntiAim::Instance().pitchType = (AntiAim::PitchType)cfg_antiaim.pitchType;
+                AntiAim::Instance().yawType = (AntiAim::YawType)cfg_antiaim.yawType;
+                AntiAim::Instance().yawOffset = cfg_antiaim.yawOffset;
+                AntiAim::Instance().jitterRange = cfg_antiaim.jitterRange;
+                AntiAim::Instance().spinSpeed = cfg_antiaim.spinSpeed;
+                AntiAim::Instance().fakeLagEnabled = cfg_antiaim.fakeLag;
+                
+                AntiAim::Instance().Apply(pLocalPlayer, viewAngles);
+                Memory::Write<Vector3>(viewAnglesAddr, viewAngles);
+                
+                if (cfg_antiaim.fakeLag)
+                {
+                    AntiAim::Instance().FakeLag(cfg_antiaim.fakeLagTicks);
                 }
             }
         }
-        
-        // Update Backtrack records for all enemies
-        if (cfg_backtrack.enabled)
+        __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
-            if (maxEntities > 0 && maxEntities < 8192)
+            std::cout << "[ERROR] AntiAim crashed!" << std::endl;
+        }
+        
+        // Resolver
+        __try
+        {
+            if (cfg_resolver.enabled)
             {
-                for (int i = 1; i <= 64; i++)
+                int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
+                if (maxEntities > 0 && maxEntities < 8192)
                 {
-                    C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
-                    if (!controller || !Memory::IsValidPointer((uintptr_t)controller)) continue;
-                    
-                    C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
-                    if (!pawn || !Memory::IsValidPointer((uintptr_t)pawn)) continue;
-                    
-                    if (pawn == pLocalPlayer) continue; // Skip local player
-                    
-                    // Update backtrack for this enemy
-                    Backtrack::Instance().Update(pawn);
+                    for (int i = 1; i <= 64; i++)
+                    {
+                        C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
+                        if (!controller || !Memory::IsValidPointer((uintptr_t)controller)) continue;
+                        
+                        C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
+                        if (!pawn || !Memory::IsValidPointer((uintptr_t)pawn)) continue;
+                        
+                        if (pawn == pLocalPlayer) continue;
+                        
+                        Resolver::Instance().Update(pawn);
+                    }
                 }
             }
         }
-        
-        // Apply Anti-Aim
-        if (cfg_antiaim.enabled)
+        __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            uintptr_t viewAnglesAddr = g_clientBase + Offsets::dwViewAngles();
-            Vector3 viewAngles = Memory::Read<Vector3>(viewAnglesAddr);
-            
-            // Configure Anti-Aim
-            AntiAim::Instance().enabled = true;
-            AntiAim::Instance().pitchType = (AntiAim::PitchType)cfg_antiaim.pitchType;
-            AntiAim::Instance().yawType = (AntiAim::YawType)cfg_antiaim.yawType;
-            AntiAim::Instance().yawOffset = cfg_antiaim.yawOffset;
-            AntiAim::Instance().jitterRange = cfg_antiaim.jitterRange;
-            AntiAim::Instance().spinSpeed = cfg_antiaim.spinSpeed;
-            AntiAim::Instance().fakeLagEnabled = cfg_antiaim.fakeLag;
-            
-            // Apply Anti-Aim
-            AntiAim::Instance().Apply(pLocalPlayer, viewAngles);
-            
-            // Write back angles
-            Memory::Write<Vector3>(viewAnglesAddr, viewAngles);
-            
-            // Apply Fake Lag
-            if (cfg_antiaim.fakeLag)
-            {
-                AntiAim::Instance().FakeLag(cfg_antiaim.fakeLagTicks);
-            }
+            std::cout << "[ERROR] Resolver crashed!" << std::endl;
         }
         
-        if (cfg_esp.enabled)
-            RenderESP();
+        // Backtrack
+        __try
+        {
+            if (cfg_backtrack.enabled)
+            {
+                int maxEntities = g_pEntitySystem->GetHighestEntityIndex();
+                if (maxEntities > 0 && maxEntities < 8192)
+                {
+                    for (int i = 1; i <= 64; i++)
+                    {
+                        C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
+                        if (!controller || !Memory::IsValidPointer((uintptr_t)controller)) continue;
+                        
+                        C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
+                        if (!pawn || !Memory::IsValidPointer((uintptr_t)pawn)) continue;
+                        
+                        if (pawn == pLocalPlayer) continue;
+                        
+                        Backtrack::Instance().Update(pawn);
+                    }
+                }
+            }
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cout << "[ERROR] Backtrack crashed!" << std::endl;
+        }
         
-        if (cfg_aim.enabled)
-            RunAimbot();
-        
-        ApplyVisuals();
-        RunMisc();
-        ApplySkins();
+        */ // END DISABLED FEATURES
     }
     
-    // Custom crosshair is always drawn
+    // Custom crosshair - DISABLED for testing
+    // Only enable from menu if needed
+    /*
     if (cfg_vis.crosshair)
-        DrawCustomCrosshair();
+    {
+        __try
+        {
+            DrawCustomCrosshair();
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            // Silently ignore crosshair crashes
+        }
+    }
+    */
 }
 
 bool Features::WorldToScreen(const Vector3& world, Vector3& screen)
@@ -455,336 +557,167 @@ void Features::DrawSkeleton(C_CSPlayerPawn* pawn, float color[4])
 
 void Features::RenderESP()
 {
-    // Validate critical pointers before proceeding
-    if (!g_pEntitySystem || !g_pViewMatrix)
-        return;
+    // PREMIUM METHOD - Direct Pawn Iteration (Neverlose/Onetap 2025)
+    // NO controllers, NO handles - Direct pawn scan
+    // Fastest and most reliable method
     
-    // Get LocalPlayer from professional system
-    C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetPawn();
-    if (!pLocalPlayer)
-        return;
-    
-    // Validate that the local player is valid
     __try
     {
-        if (!pLocalPlayer->IsValid() || pLocalPlayer->GetHealth() <= 0)
+        if (!g_pEntitySystem || !g_pViewMatrix)
             return;
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        return;
-    }
-    
-    int localTeam = 0;
-    Vector3 localPos = {0, 0, 0};  // Inicializar con valores por defecto
-    
-    // Safely read local player data
-    __try
-    {
-        localTeam = pLocalPlayer->GetTeamNum();
         
-        // Intentar obtener posición, pero continuar si falla
-        if (!pLocalPlayer->GetOriginSafe(localPos))
+        C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetSafeLocalPlayer();
+        if (!pLocalPlayer)
+            return;
+        
+        static bool firstRun = true;
+        if (firstRun)
         {
-            // Si falla, usar posición por defecto y continuar de todos modos
-            localPos = {0, 0, 0};
-            
-            static int originFailCount = 0;
-            originFailCount++;
-            if (originFailCount % 300 == 0)
+            std::cout << "[ESP-PREMIUM] Direct Pawn Iteration (Neverlose method)" << std::endl;
+            firstRun = false;
+        }
+        
+        // Get LocalPlayer data
+        int localHealth = 0, localTeam = 0;
+        if (!g_LocalPlayer.GetLocalPlayerHealth(localHealth) || 
+            !g_LocalPlayer.GetLocalPlayerTeam(localTeam))
+            return;
+        
+        // Scan every 10 frames
+        static int scanCounter = 0;
+        scanCounter++;
+        if (scanCounter % 10 != 0)
+            return;
+        
+        int validPlayers = 0;
+        uintptr_t entitySystem = (uintptr_t)g_pEntitySystem;
+        
+        // PREMIUM: Scan ALL entity indices directly (no controller/handle bullshit)
+        // This is how Neverlose/Onetap do it - simple and works always
+        for (int i = 1; i <= 64; i++)
+        {
+            __try
             {
-                std::cout << "[ESP] GetOriginSafe() falla, pero continuando sin filtro de distancia" << std::endl;
+                // Direct entity read using GetBaseEntity formula
+                uintptr_t listEntryAddr = entitySystem + 8 * ((i & 0x7FFF) >> 9) + 16;
+                if (IsBadReadPtr((void*)listEntryAddr, sizeof(uintptr_t)))
+                    continue;
+                
+                uintptr_t listEntry = *(uintptr_t*)listEntryAddr;
+                if (!listEntry || listEntry < 0x10000)
+                    continue;
+                
+                uintptr_t entityPtrAddr = listEntry + 120 * (i & 0x1FF);
+                if (IsBadReadPtr((void*)entityPtrAddr, sizeof(uintptr_t)))
+                    continue;
+                
+                uintptr_t entity = *(uintptr_t*)entityPtrAddr;
+                if (!entity || entity < 0x10000 || entity > 0x7FFFFFFFFFFF)
+                    continue;
+                
+                // Skip local player
+                if (entity == (uintptr_t)pLocalPlayer)
+                    continue;
+                
+                // Validate: Read health (this tells us if it's a player pawn)
+                uintptr_t healthAddr = entity + Offsets::m_iHealth();
+                if (IsBadReadPtr((void*)healthAddr, sizeof(int)))
+                    continue;
+                
+                int health = *(int*)healthAddr;
+                if (health <= 0 || health > 100)
+                    continue;
+                
+                // Validate: Read team
+                uintptr_t teamAddr = entity + Offsets::m_iTeamNum();
+                if (IsBadReadPtr((void*)teamAddr, sizeof(int)))
+                    continue;
+                
+                int team = *(int*)teamAddr;
+                if (team < 2 || team > 3)  // Only T (2) and CT (3)
+                    continue;
+                
+                // Team check
+                if (cfg_esp.teamCheck && team == localTeam)
+                    continue;
+                
+                // VALID PLAYER FOUND!
+                validPlayers++;
+                
+                C_CSPlayerPawn* pawn = (C_CSPlayerPawn*)entity;
+                
+                // Get origin
+                Vector3 origin;
+                if (!pawn->GetOriginSafe(origin))
+                    continue;
+                
+                // Head/feet positions
+                Vector3 headPos = {origin.x, origin.y, origin.z + 75.0f};
+                Vector3 feetPos = origin;
+                
+                // WorldToScreen
+                Vector3 screenHead, screenFeet;
+                if (!WorldToScreen(headPos, screenHead) || !WorldToScreen(feetPos, screenFeet))
+                    continue;
+                
+                // Draw box
+                if (cfg_esp.boxes)
+                {
+                    float* color = (team == localTeam) ? cfg_esp.teamColor : cfg_esp.boxColor;
+                    DrawBox(screenHead, screenFeet, cfg_esp.boxFilled, cfg_esp.boxThickness, color);
+                }
+                
+                // Draw health bar
+                if (cfg_esp.healthBar)
+                {
+                    float height = screenFeet.y - screenHead.y;
+                    float width = height / 2.0f;
+                    float barWidth = 4.0f;
+                    float barHeight = height * (health / 100.0f);
+                    
+                    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+                    if (!drawList) continue;
+                    
+                    // Background
+                    drawList->AddRectFilled(
+                        ImVec2(screenHead.x - width / 2 - barWidth - 2, screenHead.y),
+                        ImVec2(screenHead.x - width / 2 - 2, screenFeet.y),
+                        IM_COL32(0, 0, 0, 180)
+                    );
+                    
+                    // Health bar
+                    float healthPercent = health / 100.0f;
+                    ImU32 healthColor = IM_COL32(
+                        (int)(255 * (1.0f - healthPercent)),
+                        (int)(255 * healthPercent),
+                        0,
+                        255
+                    );
+                    
+                    drawList->AddRectFilled(
+                        ImVec2(screenHead.x - width / 2 - barWidth - 2, screenFeet.y - barHeight),
+                        ImVec2(screenHead.x - width / 2 - 2, screenFeet.y),
+                        healthColor
+                    );
+                }
             }
-            // NO RETORNAR - continuar sin distancia
-        }
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        localTeam = 2;  // Valor por defecto
-        localPos = {0, 0, 0};
-    }
-    
-    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    if (!drawList) return;
-    
-    // Safely get the maximum entity index
-    int maxEntities = 0;
-    __try
-    {
-        maxEntities = g_pEntitySystem->GetHighestEntityIndex();
-        if (maxEntities <= 0 || maxEntities > 8192)
-        {
-            maxEntities = 64;
-        }
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        maxEntities = 64;
-    }
-    
-    int validControllers = 0;
-    int validPawns = 0;
-    int drawnEntities = 0;
-    
-    // Iterate through player CONTROLLERS (1-2048 for CS2 chunk system)
-    // In CS2, we must iterate controllers first, then get their pawns
-    // Players are typically in range 1-64, but we scan more for safety
-    int scanLimit = (maxEntities > 2048) ? 2048 : maxEntities;
-    for (int i = 1; i <= scanLimit; i++)
-    {
-        __try
-        {
-            // Step 1: Get controller entity
-            C_BaseEntity* controller = g_pEntitySystem->GetBaseEntity(i);
-            if (!controller) continue;
-            
-            // Validate controller pointer
-            if (!Memory::IsValidPointer((uintptr_t)controller)) continue;
-            
-            validControllers++;
-            
-            // Step 2: Get pawn from controller using handle decoding
-            C_CSPlayerPawn* pawn = g_pEntitySystem->GetPlayerPawn(controller);
-            if (!pawn) continue;
-            
-            // Validate pawn pointer
-            if (!Memory::IsValidPointer((uintptr_t)pawn)) continue;
-            
-            // Use safe validation method on pawn
-            if (!pawn->IsValid()) continue;
-            
-            validPawns++;
-            
-            // Validate health range
-            int health = pawn->GetHealth();
-            if (health <= 0 || health > 100) continue;
-            
-            // Skip local player
-            if (pawn == pLocalPlayer) continue;
-            
-            // Dormant check
-            if (cfg_esp.dormantCheck && pawn->IsDormant()) continue;
-            
-            // Team check
-            int team = pawn->GetTeamNum();
-            if (cfg_esp.teamCheck && team == localTeam) continue;
-            
-            // Safely get entity origin
-            Vector3 origin = {};
-            bool hasOrigin = pawn->GetOriginSafe(origin);
-            
-            // Si no tenemos origin, SKIP este jugador
-            if (!hasOrigin)
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
                 continue;
-            
-            // Distance check
-            float distance = 0.0f;
-            if (localPos.x != 0 || localPos.y != 0 || localPos.z != 0)
-            {
-                float dx = origin.x - localPos.x;
-                float dy = origin.y - localPos.y;
-                float dz = origin.z - localPos.z;
-                distance = sqrtf(dx*dx + dy*dy + dz*dz);
-                
-                if (distance > cfg_esp.maxDistance) continue;
-            }
-            else
-            {
-                // Si no tenemos posición local, no filtrar por distancia
-                distance = 0.0f;
-            }
-            
-            // Calculate screen positions
-            Vector3 headPos = origin;
-            headPos.z += 75.0f;
-            Vector3 feetPos = origin;
-            
-            Vector3 screenHead, screenFeet;
-            if (!WorldToScreen(headPos, screenHead)) continue;
-            if (!WorldToScreen(feetPos, screenFeet)) continue;
-            
-            drawnEntities++;
-            
-            // Select color based on team
-            float* boxColor = (team == localTeam) ? cfg_esp.teamColor : cfg_esp.boxColor;
-            
-            // Draw box
-            if (cfg_esp.boxes)
-            {
-                DrawBox(screenHead, screenFeet, cfg_esp.boxFilled, cfg_esp.boxThickness, boxColor);
-            }
-            
-            // Draw snaplines
-            if (cfg_esp.snaplines)
-            {
-                ImGuiIO& io = ImGui::GetIO();
-                ImVec2 screenCenter(io.DisplaySize.x / 2, io.DisplaySize.y);
-                ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(
-                    cfg_esp.snaplineColor[0], cfg_esp.snaplineColor[1],
-                    cfg_esp.snaplineColor[2], cfg_esp.snaplineColor[3]
-                ));
-                drawList->AddLine(screenCenter, ImVec2(screenFeet.x, screenFeet.y), col, 1.0f);
-            }
-            
-            // Draw info text
-            float textY = screenHead.y - 15.0f;
-            
-            if (cfg_esp.health)
-            {
-                char healthText[32];
-                sprintf_s(healthText, "HP: %d", health);
-                drawList->AddText(ImVec2(screenHead.x - 20, textY), IM_COL32(255, 255, 255, 255), healthText);
-                textY -= 15.0f;
-            }
-            
-            if (cfg_esp.distance)
-            {
-                char distText[32];
-                sprintf_s(distText, "%.0fm", distance / 50.0f);
-                drawList->AddText(ImVec2(screenHead.x - 20, textY), IM_COL32(255, 255, 255, 255), distText);
-                textY -= 15.0f;
-            }
-            
-            // Draw player name (requires controller)
-            if (cfg_esp.name)
-            {
-                __try
-                {
-                    // Get player controller from entity index
-                    // Note: This is a simplified approach - may need adjustment
-                    uintptr_t controllerAddr = g_clientBase + Offsets::dwLocalPlayerController();
-                    uintptr_t controller = Memory::Read<uintptr_t>(controllerAddr);
-                    
-                    if (controller != 0)
-                    {
-                        C_CSPlayerController* pController = (C_CSPlayerController*)controller;
-                        const char* playerName = pController->GetPlayerName();
-                        
-                        if (playerName && playerName[0] != '\0')
-                        {
-                            // Truncate long names
-                            char truncatedName[32];
-                            strncpy_s(truncatedName, playerName, 20);
-                            truncatedName[20] = '\0';
-                            
-                            drawList->AddText(ImVec2(screenHead.x - 30, textY), IM_COL32(255, 255, 0, 255), truncatedName);
-                            textY -= 15.0f;
-                        }
-                    }
-                }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    // Silently continue if name reading fails
-                }
-            }
-            
-            // Draw weapon name
-            if (cfg_esp.weapon)
-            {
-                __try
-                {
-                    uint32_t weaponHandle = pawn->GetActiveWeaponHandle();
-                    if (weaponHandle != 0)
-                    {
-                        // Extract entity index from handle
-                        int weaponIndex = weaponHandle & 0x7FFF;
-                        
-                        if (weaponIndex > 0 && weaponIndex < 8192)
-                        {
-                            C_BaseEntity* weaponEntity = g_pEntitySystem->GetBaseEntity(weaponIndex);
-                            if (weaponEntity && Memory::IsValidPointer((uintptr_t)weaponEntity))
-                            {
-                                // For now, just show "Weapon" - proper weapon name requires more offsets
-                                drawList->AddText(ImVec2(screenFeet.x - 20, screenFeet.y + 5), 
-                                    IM_COL32(200, 200, 200, 255), "Weapon");
-                            }
-                        }
-                    }
-                }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    // Silently continue if weapon reading fails
-                }
-            }
-            
-            // Health bar
-            if (cfg_esp.healthBar)
-            {
-                float barHeight = screenFeet.y - screenHead.y;
-                float barWidth = 4.0f;
-                float healthPercent = (float)health / 100.0f;
-                
-                ImVec2 barPos(screenHead.x - (barHeight / 4) - 6, screenHead.y);
-                ImVec2 barSize(barWidth, barHeight);
-                
-                // Background
-                drawList->AddRectFilled(barPos, ImVec2(barPos.x + barSize.x, barPos.y + barSize.y), 
-                    IM_COL32(0, 0, 0, 180));
-                
-                // Health bar
-                ImU32 healthColor = IM_COL32(
-                    (int)((1.0f - healthPercent) * 255),
-                    (int)(healthPercent * 255),
-                    0, 255
-                );
-                drawList->AddRectFilled(barPos, 
-                    ImVec2(barPos.x + barSize.x, barPos.y + barSize.y * healthPercent), 
-                    healthColor);
-            }
-            
-            // Skeleton ESP
-            if (cfg_esp.skeleton)
-            {
-                DrawSkeleton(pawn, cfg_esp.skeletonColor);
-            }
-            
-            // Glow ESP
-            if (cfg_esp.glow)
-            {
-                __try
-                {
-                    // Convert float colors to Color struct (0-255)
-                    Color enemyGlowColor = {
-                        (uint8_t)(cfg_esp.glowEnemyColor[0] * 255),
-                        (uint8_t)(cfg_esp.glowEnemyColor[1] * 255),
-                        (uint8_t)(cfg_esp.glowEnemyColor[2] * 255),
-                        (uint8_t)(cfg_esp.glowEnemyColor[3] * 255)
-                    };
-                    
-                    Color teamGlowColor = {
-                        (uint8_t)(cfg_esp.glowTeamColor[0] * 255),
-                        (uint8_t)(cfg_esp.glowTeamColor[1] * 255),
-                        (uint8_t)(cfg_esp.glowTeamColor[2] * 255),
-                        (uint8_t)(cfg_esp.glowTeamColor[3] * 255)
-                    };
-                    
-                    // Apply team-based glow
-                    pawn->SetGlowTeamBased(localTeam, enemyGlowColor, teamGlowColor);
-                }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    // Silently continue if glow fails
-                }
             }
         }
-        __except(EXCEPTION_EXECUTE_HANDLER)
+        
+        // Log only when count changes
+        static int lastValidCount = -1;
+        if (validPlayers != lastValidCount)
         {
-            // Silently continue on exception
-            continue;
+            std::cout << "[ESP-PREMIUM] Found " << validPlayers << " players" << std::endl;
+            lastValidCount = validPlayers;
         }
     }
-    
-    // Report findings only when entities are found
-    static int lastControllerCount = 0;
-    static int lastPawnCount = 0;
-    static int lastDrawnCount = 0;
-    
-    if (validControllers != lastControllerCount || validPawns != lastPawnCount || drawnEntities != lastDrawnCount)
+    __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        std::cout << "[ESP] Controllers: " << validControllers << ", Pawns: " << validPawns << ", Dibujados: " << drawnEntities << std::endl;
-        lastControllerCount = validControllers;
-        lastPawnCount = validPawns;
-        lastDrawnCount = drawnEntities;
+        // Silent fail
     }
 }
 

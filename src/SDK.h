@@ -599,16 +599,31 @@ public:
         __try
         {
             uintptr_t entitySystem = (uintptr_t)this;
+            if (!entitySystem || entitySystem < 0x10000) return nullptr;
             
             // CORRECT METHOD: Read list entry directly
             // Formula: entitySystem + 8 * ((index & 0x7FFF) >> 9) + 16
-            uintptr_t listEntry = *(uintptr_t*)(entitySystem + 8 * ((index & 0x7FFF) >> 9) + 16);
-            if (!listEntry || listEntry < 0x1000) return nullptr;
+            uintptr_t listEntryAddr = entitySystem + 8 * ((index & 0x7FFF) >> 9) + 16;
+            
+            // SAFE: Validate before reading
+            if (IsBadReadPtr((void*)listEntryAddr, sizeof(uintptr_t)))
+                return nullptr;
+            
+            uintptr_t listEntry = *(uintptr_t*)listEntryAddr;
+            if (!listEntry || listEntry < 0x10000 || listEntry > 0x7FFFFFFFFFFF)
+                return nullptr;
             
             // Read entity from list entry
             // Formula: listEntry + 120 * (index & 0x1FF)
-            uintptr_t entityPtr = *(uintptr_t*)(listEntry + 120 * (index & 0x1FF));
-            if (!entityPtr || entityPtr < 0x1000) return nullptr;
+            uintptr_t entityPtrAddr = listEntry + 120 * (index & 0x1FF);
+            
+            // SAFE: Validate before reading
+            if (IsBadReadPtr((void*)entityPtrAddr, sizeof(uintptr_t)))
+                return nullptr;
+            
+            uintptr_t entityPtr = *(uintptr_t*)entityPtrAddr;
+            if (!entityPtr || entityPtr < 0x10000 || entityPtr > 0x7FFFFFFFFFFF)
+                return nullptr;
             
             return (C_BaseEntity*)entityPtr;
         }
@@ -626,8 +641,17 @@ public:
         
         __try
         {
+            uintptr_t controllerAddr = (uintptr_t)controller;
+            if (controllerAddr < 0x10000 || controllerAddr > 0x7FFFFFFFFFFF)
+                return nullptr;
+            
+            // SAFE: Validate before reading pawn handle
+            uintptr_t pawnHandleAddr = controllerAddr + Offsets::m_hPlayerPawn();
+            if (IsBadReadPtr((void*)pawnHandleAddr, sizeof(uint32_t)))
+                return nullptr;
+            
             // Read pawn handle from controller
-            uint32_t pawnHandle = *(uint32_t*)((uintptr_t)controller + Offsets::m_hPlayerPawn());
+            uint32_t pawnHandle = *(uint32_t*)pawnHandleAddr;
             if (pawnHandle == 0 || pawnHandle == 0xFFFFFFFF) return nullptr;
             
             // Decode handle to get actual pawn pointer

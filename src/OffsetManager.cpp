@@ -234,28 +234,28 @@ void OffsetManager::SetOffset(const std::string& name, uintptr_t value)
 
 void OffsetManager::LoadFallbackOffsets()
 {
-    std::cout << "[OffsetManager] Loading fallback offsets (Build 14138 - Mar 5, 2026)" << std::endl;
+    std::cout << "[OffsetManager] Loading fallback offsets (Build 14138.6 - Mar 9, 2026)" << std::endl;
     
-    // Main offsets (client.dll) - Updated Mar 5, 2026
-    m_offsets["dwEntityList"] = 0x249B2A0;  // 38453920 decimal - UPDATED
-    m_offsets["dwLocalPlayerPawn"] = 0x2066E10;  // 33970960 decimal - UPDATED
-    m_offsets["dwViewMatrix"] = 0x2309460;  // 36749024 decimal - UPDATED
-    m_offsets["dwLocalPlayerController"] = 0x22F1888;  // 36640904 decimal
+    // Main offsets (client.dll) - Updated Mar 9, 2026 - Build 14138.6 - FROM CS2-DUMPER
+    m_offsets["dwEntityList"] = 0x24AB298;  // 38453928 decimal
+    m_offsets["dwLocalPlayerPawn"] = 0x2066B60;  // 33975136 decimal
+    m_offsets["dwViewMatrix"] = 0x2311A20;  // 36753312 decimal
+    m_offsets["dwLocalPlayerController"] = 0x22F1208;  // 36639240 decimal
     m_offsets["dwViewAngles"] = 0x2318668;  // 36796008 decimal
     m_offsets["dwGlobalVars"] = 0x2058FC0;  // 33928128 decimal
     m_offsets["dwGameRules"] = 0x230A160;  // 36745056 decimal
     m_offsets["dwGameEntitySystem_getHighestEntityIndex"] = 0x20A0;  // 8352 decimal
     m_offsets["dwForceJump"] = 0x230A1E0;  // 36745696 decimal
     
-    // Entity offsets
-    m_offsets["m_iHealth"] = 0x76C;
-    m_offsets["m_iMaxHealth"] = 0xB54;
-    m_offsets["m_iTeamNum"] = 0xD70;
-    m_offsets["m_pGameSceneNode"] = 0x598;  // Updated from scanner (WORKING VALUE)
-    m_offsets["m_vecAbsOrigin"] = 0xC4;     // Updated from scanner (offset within GameSceneNode)
-    m_offsets["m_hPlayerPawn"] = 0x90C;
-    m_offsets["m_iIDEntIndex"] = 0x3EAC;
-    m_offsets["m_bDormant"] = 0xE8;
+    // Entity offsets - CORRECTED FROM DUMPER (Mar 9, 2026)
+    m_offsets["m_iHealth"] = 0x354;         // 852 decimal - CORRECTED
+    m_offsets["m_iMaxHealth"] = 0x350;      // 848 decimal - CORRECTED
+    m_offsets["m_iTeamNum"] = 0x3F3;        // 1011 decimal - CORRECTED
+    m_offsets["m_pGameSceneNode"] = 0x338;  // 824 decimal - CORRECTED
+    m_offsets["m_vecAbsOrigin"] = 0xD0;     // 208 decimal (offset within GameSceneNode) - CORRECTED
+    m_offsets["m_hPlayerPawn"] = 0x90C;     // 2316 decimal - CORRECT
+    m_offsets["m_iIDEntIndex"] = 0x1598;    // 5528 decimal - CORRECTED
+    m_offsets["m_bDormant"] = 0xE8;         // Keep as is
     
     // Player offsets
     m_offsets["m_fFlags"] = 0x400;
