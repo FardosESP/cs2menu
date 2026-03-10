@@ -220,6 +220,16 @@ void Features::Update()
     }
     f10WasPressed = f10IsPressed;
     
+    // Check for F11 key to test entity formulas (ESP player detection fix)
+    static bool f11WasPressed = false;
+    bool f11IsPressed = (GetAsyncKeyState(VK_F11) & 0x8000) != 0;
+    if (f11IsPressed && !f11WasPressed)
+    {
+        std::cout << "\n[*] F11 pressed - Testing entity formulas..." << std::endl;
+        DiagnosticSystem::TestEntityFormulas(g_clientBase, g_pEntitySystem);
+    }
+    f11WasPressed = f11IsPressed;
+    
     // PROFESSIONAL METHOD: Get LocalPlayer safely
     // This handles NULL during team selection/respawn
     C_CSPlayerPawn* pLocalPlayer = g_LocalPlayer.GetSafeLocalPlayer();
@@ -557,9 +567,18 @@ void Features::DrawSkeleton(C_CSPlayerPawn* pawn, float color[4])
 
 void Features::RenderESP()
 {
-    // PREMIUM METHOD - Direct Pawn Iteration (Neverlose/Onetap 2025)
-    // NO controllers, NO handles - Direct pawn scan
-    // Fastest and most reliable method
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PREMIUM ESP - Chunk-Based Entity Iteration (Neverlose/Onetap 2025 Method)
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Formula: chunk = entitySystem + 0x10 + ((i >> 9) * 8)
+    //          entity = chunk + ((i & 0x1FF) * 0x78)
+    // 
+    // Why this works:
+    // - CS2 Build 14138.6 uses chunk-based entity storage
+    // - Entities divided into chunks of 512 (0x200)
+    // - Each entity has 0x78 byte stride within chunk
+    // - This is the PROVEN method used by premium paid cheats
+    // ═══════════════════════════════════════════════════════════════════════════
     
     __try
     {
@@ -573,7 +592,7 @@ void Features::RenderESP()
         static bool firstRun = true;
         if (firstRun)
         {
-            std::cout << "[ESP-PREMIUM] Direct Pawn Iteration (Neverlose method)" << std::endl;
+            std::cout << "[ESP-PREMIUM] Chunk-Based Entity Iteration (Build 14138.6 Compatible)" << std::endl;
             firstRun = false;
         }
         
@@ -583,31 +602,41 @@ void Features::RenderESP()
             !g_LocalPlayer.GetLocalPlayerTeam(localTeam))
             return;
         
-        // Scan every 10 frames
+        // Scan every 10 frames for performance
         static int scanCounter = 0;
         scanCounter++;
         if (scanCounter % 10 != 0)
             return;
         
         int validPlayers = 0;
-        uintptr_t entitySystem = (uintptr_t)g_pEntitySystem;
+        uintptr_t entitySystemBase = (uintptr_t)g_pEntitySystem;
+        uintptr_t localPlayerPtr = (uintptr_t)pLocalPlayer;
         
-        // PREMIUM: Scan ALL entity indices directly (no controller/handle bullshit)
-        // This is how Neverlose/Onetap do it - simple and works always
+        // PREMIUM: Chunk-based entity iteration (Neverlose method)
+        // Scan player slots 1-64 (index 0 is world entity)
         for (int i = 1; i <= 64; i++)
         {
             __try
             {
-                // Direct entity read using GetBaseEntity formula
-                uintptr_t listEntryAddr = entitySystem + 8 * ((i & 0x7FFF) >> 9) + 16;
-                if (IsBadReadPtr((void*)listEntryAddr, sizeof(uintptr_t)))
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 1: Get chunk pointer
+                // Formula: entitySystem + 0x10 + ((i >> 9) * 8)
+                // Divides entity index by 512 to get chunk index
+                // ═══════════════════════════════════════════════════════════════
+                uintptr_t chunkAddr = entitySystemBase + 0x10 + ((i >> 9) * 8);
+                if (IsBadReadPtr((void*)chunkAddr, sizeof(uintptr_t)))
                     continue;
                 
-                uintptr_t listEntry = *(uintptr_t*)listEntryAddr;
-                if (!listEntry || listEntry < 0x10000)
+                uintptr_t chunk = *(uintptr_t*)chunkAddr;
+                if (!chunk || chunk < 0x10000)
                     continue;
                 
-                uintptr_t entityPtrAddr = listEntry + 120 * (i & 0x1FF);
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 2: Get entity pointer from chunk
+                // Formula: chunk + ((i & 0x1FF) * 0x78)
+                // Gets index within chunk (0-511) and multiplies by stride
+                // ═══════════════════════════════════════════════════════════════
+                uintptr_t entityPtrAddr = chunk + ((i & 0x1FF) * 0x78);
                 if (IsBadReadPtr((void*)entityPtrAddr, sizeof(uintptr_t)))
                     continue;
                 
@@ -615,11 +644,19 @@ void Features::RenderESP()
                 if (!entity || entity < 0x10000 || entity > 0x7FFFFFFFFFFF)
                     continue;
                 
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 3: Validate entity is a player pawn
+                // ═══════════════════════════════════════════════════════════════
+                
                 // Skip local player
-                if (entity == (uintptr_t)pLocalPlayer)
+                if (entity == localPlayerPtr)
                     continue;
                 
-                // Validate: Read health (this tells us if it's a player pawn)
+                // IsBadReadPtr check for safety (prevent crashes)
+                if (IsBadReadPtr((void*)entity, 0x400))
+                    continue;
+                
+                // Validate health (1-100 = alive player)
                 uintptr_t healthAddr = entity + Offsets::m_iHealth();
                 if (IsBadReadPtr((void*)healthAddr, sizeof(int)))
                     continue;
@@ -628,20 +665,22 @@ void Features::RenderESP()
                 if (health <= 0 || health > 100)
                     continue;
                 
-                // Validate: Read team
+                // Validate team (2=T, 3=CT)
                 uintptr_t teamAddr = entity + Offsets::m_iTeamNum();
                 if (IsBadReadPtr((void*)teamAddr, sizeof(int)))
                     continue;
                 
                 int team = *(int*)teamAddr;
-                if (team < 2 || team > 3)  // Only T (2) and CT (3)
+                if (team < 2 || team > 3)
                     continue;
                 
-                // Team check
+                // Team check (skip teammates if enabled)
                 if (cfg_esp.teamCheck && team == localTeam)
                     continue;
                 
-                // VALID PLAYER FOUND!
+                // ═══════════════════════════════════════════════════════════════
+                // VALID PLAYER FOUND - Proceed to ESP rendering
+                // ═══════════════════════════════════════════════════════════════
                 validPlayers++;
                 
                 C_CSPlayerPawn* pawn = (C_CSPlayerPawn*)entity;

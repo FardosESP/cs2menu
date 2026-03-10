@@ -317,4 +317,316 @@ public:
             break; // Solo mostrar el primero
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PREMIUM: Entity Formula Testing System
+    // Purpose: Test 4 different entity iteration formulas to find which one works
+    //          for CS2 Build 14138.6 (ESP player detection fix)
+    // ═══════════════════════════════════════════════════════════════════════════
+    static void TestEntityFormulas(uintptr_t clientBase, C_CSGameEntitySystem* entitySystem)
+    {
+        std::cout << "\n╔═══════════════════════════════════════════════════════════╗\n";
+        std::cout << "║                                                           ║\n";
+        std::cout << "║        ENTITY FORMULA TESTING - BUILD 14138.6             ║\n";
+        std::cout << "║                                                           ║\n";
+        std::cout << "╚═══════════════════════════════════════════════════════════╝\n\n";
+
+        // Get LocalPlayer pointer for validation (exclude self from results)
+        uintptr_t localPlayerPtr = Memory::Read<uintptr_t>(clientBase + Offsets::dwLocalPlayerPawn());
+        
+        if (!localPlayerPtr || !Memory::IsValidPointer(localPlayerPtr)) {
+            std::cout << "[!] ERROR: LocalPlayer is NULL or invalid\n";
+            std::cout << "    You must be IN-GAME and SPAWNED to run this test\n";
+            std::cout << "    Join a bot match, wait to spawn, then press F11\n\n";
+            return;
+        }
+
+        std::cout << "[✓] LocalPlayer detected: 0x" << std::hex << localPlayerPtr << std::dec << "\n";
+        std::cout << "[*] Testing 4 entity iteration formulas...\n";
+        std::cout << "[*] Scanning indices 1-64 (player slots)\n\n";
+
+        // Get EntitySystem base address
+        uintptr_t entitySystemBase = (uintptr_t)entitySystem;
+        
+        // Health and team offsets
+        uintptr_t healthOffset = Offsets::m_iHealth();
+        uintptr_t teamOffset = Offsets::m_iTeamNum();
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // METHOD 1: Simple Direct Index (Sequential)
+        // Formula: entitySystem + (i * 0x78)
+        // Theory: Entities stored sequentially with 0x78 byte stride
+        // ═══════════════════════════════════════════════════════════════════════
+        std::cout << "[METHOD 1] Simple Direct Index (Sequential)\n";
+        std::cout << "  Formula: entitySystem + (i * 0x78)\n";
+        
+        int method1Valid = 0;
+        int method1Checked = 0;
+        
+        for (int i = 1; i <= 64; i++)
+        {
+            __try
+            {
+                uintptr_t entityPtr = Memory::Read<uintptr_t>(entitySystemBase + (i * 0x78));
+                
+                // Basic pointer validation
+                if (!entityPtr || entityPtr < 0x10000 || entityPtr > 0x7FFFFFFFFFFF)
+                    continue;
+                
+                // Skip LocalPlayer
+                if (entityPtr == localPlayerPtr)
+                    continue;
+                
+                // Use IsBadReadPtr for crash prevention
+                if (IsBadReadPtr((void*)entityPtr, 0x400))
+                    continue;
+                
+                method1Checked++;
+                
+                // Validate health (1-100)
+                int health = Memory::Read<int>(entityPtr + healthOffset);
+                if (health <= 0 || health > 100)
+                    continue;
+                
+                // Validate team (2=T, 3=CT)
+                int team = Memory::Read<int>(entityPtr + teamOffset);
+                if (team < 2 || team > 3)
+                    continue;
+                
+                method1Valid++;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                // Silent exception handling
+                continue;
+            }
+        }
+        
+        std::cout << "  Result: " << method1Valid << " valid players (checked " << method1Checked << " entities)\n\n";
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // METHOD 2: Chunk-based (Old Neverlose Style)
+        // Formula: chunk = entitySystem + 0x10 + ((i >> 9) * 8)
+        //          entity = chunk + ((i & 0x1FF) * 0x78)
+        // Theory: Entities divided into chunks of 512, then indexed within chunk
+        // ═══════════════════════════════════════════════════════════════════════
+        std::cout << "[METHOD 2] Chunk-based (Old Neverlose Style)\n";
+        std::cout << "  Formula: chunk = entitySystem + 0x10 + ((i >> 9) * 8)\n";
+        std::cout << "           entity = chunk + ((i & 0x1FF) * 0x78)\n";
+        
+        int method2Valid = 0;
+        int method2Checked = 0;
+        
+        for (int i = 1; i <= 64; i++)
+        {
+            __try
+            {
+                // Get chunk pointer
+                uintptr_t chunkAddr = entitySystemBase + 0x10 + ((i >> 9) * 8);
+                uintptr_t chunk = Memory::Read<uintptr_t>(chunkAddr);
+                
+                // Validate chunk pointer
+                if (!chunk || chunk < 0x10000)
+                    continue;
+                
+                // Get entity from chunk
+                uintptr_t entityPtr = Memory::Read<uintptr_t>(chunk + ((i & 0x1FF) * 0x78));
+                
+                // Basic pointer validation
+                if (!entityPtr || entityPtr < 0x10000 || entityPtr > 0x7FFFFFFFFFFF)
+                    continue;
+                
+                // Skip LocalPlayer
+                if (entityPtr == localPlayerPtr)
+                    continue;
+                
+                // Use IsBadReadPtr for crash prevention
+                if (IsBadReadPtr((void*)entityPtr, 0x400))
+                    continue;
+                
+                method2Checked++;
+                
+                // Validate health (1-100)
+                int health = Memory::Read<int>(entityPtr + healthOffset);
+                if (health <= 0 || health > 100)
+                    continue;
+                
+                // Validate team (2=T, 3=CT)
+                int team = Memory::Read<int>(entityPtr + teamOffset);
+                if (team < 2 || team > 3)
+                    continue;
+                
+                method2Valid++;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                // Silent exception handling
+                continue;
+            }
+        }
+        
+        std::cout << "  Result: " << method2Valid << " valid players (checked " << method2Checked << " entities)\n\n";
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // METHOD 3: Modified Current Formula (Adjusted Stride)
+        // Formula: listEntry = entitySystem + 8 * ((i & 0x7FFF) >> 9) + 16
+        //          entity = listEntry + 0x78 * (i & 0x1FF)
+        // Theory: Current formula but with 0x78 stride instead of 120
+        // ═══════════════════════════════════════════════════════════════════════
+        std::cout << "[METHOD 3] Modified Current Formula (Adjusted Stride)\n";
+        std::cout << "  Formula: listEntry = entitySystem + 8 * ((i & 0x7FFF) >> 9) + 16\n";
+        std::cout << "           entity = listEntry + 0x78 * (i & 0x1FF)\n";
+        
+        int method3Valid = 0;
+        int method3Checked = 0;
+        
+        for (int i = 1; i <= 64; i++)
+        {
+            __try
+            {
+                // Get list entry pointer
+                uintptr_t listEntryAddr = entitySystemBase + 8 * ((i & 0x7FFF) >> 9) + 16;
+                uintptr_t listEntry = Memory::Read<uintptr_t>(listEntryAddr);
+                
+                // Validate list entry pointer
+                if (!listEntry || listEntry < 0x10000)
+                    continue;
+                
+                // Get entity from list entry
+                uintptr_t entityPtr = Memory::Read<uintptr_t>(listEntry + 0x78 * (i & 0x1FF));
+                
+                // Basic pointer validation
+                if (!entityPtr || entityPtr < 0x10000 || entityPtr > 0x7FFFFFFFFFFF)
+                    continue;
+                
+                // Skip LocalPlayer
+                if (entityPtr == localPlayerPtr)
+                    continue;
+                
+                // Use IsBadReadPtr for crash prevention
+                if (IsBadReadPtr((void*)entityPtr, 0x400))
+                    continue;
+                
+                method3Checked++;
+                
+                // Validate health (1-100)
+                int health = Memory::Read<int>(entityPtr + healthOffset);
+                if (health <= 0 || health > 100)
+                    continue;
+                
+                // Validate team (2=T, 3=CT)
+                int team = Memory::Read<int>(entityPtr + teamOffset);
+                if (team < 2 || team > 3)
+                    continue;
+                
+                method3Valid++;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                // Silent exception handling
+                continue;
+            }
+        }
+        
+        std::cout << "  Result: " << method3Valid << " valid players (checked " << method3Checked << " entities)\n\n";
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // METHOD 4: Direct Offset (Simple 8-byte stride)
+        // Formula: entitySystem + 0x8 * i
+        // Theory: EntityList is a simple pointer array with 8-byte pointers
+        // ═══════════════════════════════════════════════════════════════════════
+        std::cout << "[METHOD 4] Direct Offset (Simple 8-byte stride)\n";
+        std::cout << "  Formula: entitySystem + 0x8 * i\n";
+        
+        int method4Valid = 0;
+        int method4Checked = 0;
+        
+        for (int i = 1; i <= 64; i++)
+        {
+            __try
+            {
+                uintptr_t entityPtr = Memory::Read<uintptr_t>(entitySystemBase + 0x8 * i);
+                
+                // Basic pointer validation
+                if (!entityPtr || entityPtr < 0x10000 || entityPtr > 0x7FFFFFFFFFFF)
+                    continue;
+                
+                // Skip LocalPlayer
+                if (entityPtr == localPlayerPtr)
+                    continue;
+                
+                // Use IsBadReadPtr for crash prevention
+                if (IsBadReadPtr((void*)entityPtr, 0x400))
+                    continue;
+                
+                method4Checked++;
+                
+                // Validate health (1-100)
+                int health = Memory::Read<int>(entityPtr + healthOffset);
+                if (health <= 0 || health > 100)
+                    continue;
+                
+                // Validate team (2=T, 3=CT)
+                int team = Memory::Read<int>(entityPtr + teamOffset);
+                if (team < 2 || team > 3)
+                    continue;
+                
+                method4Valid++;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                // Silent exception handling
+                continue;
+            }
+        }
+        
+        std::cout << "  Result: " << method4Valid << " valid players (checked " << method4Checked << " entities)\n\n";
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // RESULTS SUMMARY
+        // ═══════════════════════════════════════════════════════════════════════
+        std::cout << "╔═══════════════════════════════════════════════════════════╗\n";
+        std::cout << "║                      TEST RESULTS                         ║\n";
+        std::cout << "╚═══════════════════════════════════════════════════════════╝\n\n";
+        
+        std::cout << "  Method 1 (Simple Direct):     " << method1Valid << " players\n";
+        std::cout << "  Method 2 (Chunk-based):       " << method2Valid << " players\n";
+        std::cout << "  Method 3 (Modified Current):  " << method3Valid << " players\n";
+        std::cout << "  Method 4 (Direct Offset):     " << method4Valid << " players\n\n";
+
+        // Determine best method
+        int maxValid = method1Valid;
+        if (method2Valid > maxValid) maxValid = method2Valid;
+        if (method3Valid > maxValid) maxValid = method3Valid;
+        if (method4Valid > maxValid) maxValid = method4Valid;
+        
+        if (maxValid == 0) {
+            std::cout << "[!] WARNING: NO VALID PLAYERS DETECTED BY ANY METHOD\n";
+            std::cout << "    Possible causes:\n";
+            std::cout << "    1. Not in an active match with other players/bots\n";
+            std::cout << "    2. Wrong offsets (m_iHealth, m_iTeamNum)\n";
+            std::cout << "    3. EntitySystem pointer is incorrect\n";
+            std::cout << "    4. CS2 build changed entity structure\n\n";
+            std::cout << "    Solutions:\n";
+            std::cout << "    - Join a bot training match (5v5)\n";
+            std::cout << "    - Run offset scanner (F9) to update offsets\n";
+            std::cout << "    - Verify EntitySystem is valid in F10 diagnostic\n\n";
+        } else {
+            std::cout << "[✓] SUCCESS: Found working method(s)!\n\n";
+            
+            if (method1Valid == maxValid)
+                std::cout << "  [RECOMMENDED] Use METHOD 1 (Simple Direct) in RenderESP()\n";
+            if (method2Valid == maxValid)
+                std::cout << "  [RECOMMENDED] Use METHOD 2 (Chunk-based) in RenderESP()\n";
+            if (method3Valid == maxValid)
+                std::cout << "  [RECOMMENDED] Use METHOD 3 (Modified Current) in RenderESP()\n";
+            if (method4Valid == maxValid)
+                std::cout << "  [RECOMMENDED] Use METHOD 4 (Direct Offset) in RenderESP()\n";
+            
+            std::cout << "\n  Next steps:\n";
+            std::cout << "  1. Note which method(s) detected " << maxValid << " players\n";
+            std::cout << "  2. Update RenderESP() in Features.cpp with working formula\n";
+            std::cout << "  3. Recompile and test ESP rendering\n\n";
+        }
+    }
 };

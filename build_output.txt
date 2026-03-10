@@ -1,66 +1,39 @@
 ﻿MSBuild version 17.14.40+3e7442088 for .NET Framework
 
-  cs2menu.vcxproj -> C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\Release\Release\cs2menu.dll
-  Copying offsets.json to output directory
-  cs2menu_launcher.vcxproj -> C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\Release\Release\cs2menu_launcher.exe
-  PremiumLauncherImGui.cpp
-  ManualMap.cpp
-C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18): warning C4244: '=': conversión de 'wchar_t' a 'char'; posible pérdida de datos [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\cs2menu_premium.vcxproj]
-  (compiling source file '../src/PremiumLauncherImGui.cpp')
-      C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18):
-      el contexto de creación de instancias de la plantilla (el más antiguo primero) es
-          C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\PremiumLauncherImGui.cpp(653,27):
-          Vea la referencia a la creación de una instancia de la función plantilla "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)" que se está compilando
-          with
-          [
-              _Elem=wchar_t,
-              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
-              _Alloc=std::allocator<char>
-          ]
-              C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\PremiumLauncherImGui.cpp(653,27):
-              vea la primera referencia a "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string" en "InjectionThread"
-          C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xstring(812,17):
-          Vea la referencia a la creación de una instancia de la función plantilla "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" que se está compilando
-          with
-          [
-              _Size_type=unsigned __int64,
-              _Iter=wchar_t *,
-              _Sent=wchar_t *,
-              _Size=unsigned __int64
-          ]
-          C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xstring(968,18):
-          Vea la referencia a la creación de una instancia de la función plantilla "_OutIt *std::_Copy_n_unchecked4<wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)" que se está compilando
-          with
-          [
-              _OutIt=char *,
-              _Size=unsigned __int64,
-              _InIt=wchar_t *,
-              _SizeTy=unsigned __int64
-          ]
+  Aimbot.cpp
+  AntiAim.cpp
+C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Aimbot.cpp(98,38): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\cs2menu.vcxproj]
+C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\Aimbot.cpp(99,41): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\cs2menu.vcxproj]
+  Backtrack.cpp
+  DllMain.cpp
+  EntityCache.cpp
+  EntityCachePro.cpp
+  Features.cpp
+C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\DiagnosticSystem.h(598,29): warning C4002: hay demasiados argumentos para la invocación de macro "max" de tipo función [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\cs2menu.vcxproj]
+  GlowTest.cpp
+  (compiling source file '../src/Features.cpp')
   
+C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\DiagnosticSystem.h(327,5): error C1075: "{": no se encontró ningún token coincidente [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\cs2menu.vcxproj]
+  (compiling source file '../src/Features.cpp')
+  
+  Hooks.cpp
+  ImGui_Renderer.cpp
+  LocalPlayer.cpp
+  Memory.cpp
+  OffsetManager.cpp
+  OffsetScanner.cpp
+C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\src\OffsetScanner.cpp(606,30): warning C4267: '=': conversión de 'size_t' a 'int'; posible pérdida de datos [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\cs2menu.vcxproj]
+  OffsetUpdater.cpp
+  Resolver.cpp
+  SkinChanger.cpp
+  main.cpp
   imgui.cpp
   imgui_draw.cpp
+  Generando código...
+  Compilando...
   imgui_widgets.cpp
   imgui_tables.cpp
+  imgui_demo.cpp
   imgui_impl_dx11.cpp
   imgui_impl_win32.cpp
   Generando código...
-  cs2menu_premium.vcxproj -> C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\Release\Release\cs2menu_premium.exe
-  Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt
-  Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt
-  MemorySafety.test.cpp
-  Memory.cpp
-  Generando código...
-MemorySafety.test.obj : error LNK2019: símbolo externo "public: static class OffsetManager & __cdecl OffsetManager::Instance(void)" (?Instance@OffsetManager@@SAAEAV1@XZ) sin resolver al que se hace referencia en la función "public: int __cdecl C_BaseEntity::GetHealth(void)" (?GetHealth@C_BaseEntity@@QEAAHXZ) [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\test_memorysafety.vcxproj]
-MemorySafety.test.obj : error LNK2019: símbolo externo "public: unsigned __int64 __cdecl OffsetManager::GetOffset(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &,unsigned __int64)const " (?GetOffset@OffsetManager@@QEBA_KAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_K@Z) sin resolver al que se hace referencia en la función "public: int __cdecl C_BaseEntity::GetHealth(void)" (?GetHealth@C_BaseEntity@@QEAAHXZ) [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\test_memorysafety.vcxproj]
-C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\Release\Release\test_memorysafety.exe : fatal error LNK1120: 2 externos sin resolver [C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\test_memorysafety.vcxproj]
-  Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt
-  OffsetUpdateNotification.test.cpp
-  OffsetManager.cpp
-  Generando código...
-  test_offset_notifications.vcxproj -> C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\Release\Release\test_offset_notifications.exe
-  Building Custom Rule C:/Users/abelm/Downloads/kiroCS2MenuProject/cs2menu/CMakeLists.txt
-  OffsetManager.test.cpp
-  OffsetManager.cpp
-  Generando código...
-  test_offsetmanager.vcxproj -> C:\Users\abelm\Downloads\kiroCS2MenuProject\cs2menu\build\Release\Release\test_offsetmanager.exe
